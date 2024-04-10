@@ -1,4 +1,4 @@
-# Pyoyecto TeamEval SGEU-2
+# Proyecto TeamEval SGEU-2
 
 Este es el repositorio del proyecto TeamEval, una aplicación web que facilita la evaluación por pares del desempeño individual dentro de equipos en contextos educativos.
 
