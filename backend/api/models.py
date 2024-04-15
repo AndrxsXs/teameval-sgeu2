@@ -9,43 +9,45 @@ from django.db import models
 
 'course, name, code, academic period'
 class Admin(models.Model):
-    code = models.TextField(max_length=20)
-    names = models.TextField(max_length=60)
-    last_name = models.TextField(max_length=60)
-    email = models.TextField(max_length=80)
-    password = models.TextField(max_length=8)
+    code = models.CharField(max_length=20)
+    names = models.CharField(max_length=60)
+    last_name = models.CharField(max_length=60)
+    email = models.CharField(max_length=80)
+    password = models.CharField(max_length=8)
 
 class Teacher(models.Model):
-    code = models.TextField(max_length=20)
-    identification = models.IntegerField()
-    names = models.TextField(max_length=60)
-    last_name = models.TextField(max_length=60)
-    email = models.TextField(max_length=80)
-    password = models.TextField(max_length=8)
-    phone_number = models.IntegerField(20)
+    code = models.CharField(max_length=20)
+    identification = models.CharField(max_length=20)
+    names = models.CharField(max_length=60)
+    last_name = models.CharField(max_length=60)
+    email = models.CharField(max_length=80)
+    password = models.CharField(max_length=8)
+    phone_number = models.IntegerField()
     active_status = models.BooleanField(default=True)
+    first_login = models.BooleanField(default=True)
 
 class Course(models.Model):
-    name = models.TextField(max_length=60)
-    code = models.TextField(max_length=45)
-    academic_period = models.TextField(max_length=8)
+    name = models.CharField(max_length=60)
+    code = models.CharField(max_length=45)
+    academic_period = models.CharField(max_length=8)
     teacher = models.ForeignKey(Teacher, null =True, on_delete=models.CASCADE, related_name='courses' )
 
 class Gruop(models.Model):
-    name = models.TextField(max_length=50)
+    name = models.CharField(max_length=50)
     project_assigned = models.TextField()
     course = models.ForeignKey(Course, null =True, on_delete=models.CASCADE, related_name='groups')
     teacher = models.ForeignKey(Teacher, null =True, on_delete=models.CASCADE, related_name='gropus')
 
 class Student(models.Model):
-    code = models.TextField(max_length=20)
-    names = models.TextField(max_length=60)
-    last_name = models.TextField(max_length=60)
-    email = models.TextField(max_length=80)
-    password = models.TextField(max_length=8)
+    code = models.CharField(max_length=20)
+    names = models.CharField(max_length=60)
+    last_name = models.CharField(max_length=60)
+    email = models.CharField(max_length=80)
+    password = models.CharField(max_length=8)
     courses = models.ManyToManyField(Course , related_name='students')
     group = models.ForeignKey(Gruop,null =True, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, null =True, on_delete=models.CASCADE, related_name='students')
+    first_login = models.BooleanField(default=True)
 
 class Scale(models.Model):
     limit = models.IntegerField()
