@@ -1,10 +1,8 @@
-
-
-export default function Home() {
+export default function AdminPage() {
     return(
         <>
         <header>
-            <h1>Home</h1>
+            <h1>Admin Page</h1>
         </header>
         <main>
 
