@@ -1,17 +1,42 @@
 import React from 'react';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
+import Login from './pages/Login';
+import CreatePassword from './pages/CreatePassword';
+import AdminPage from './pages/AdminPage';
 import NotFound from './pages/NotFound';
+import ModeToggle from './components/ModeToggle';
+
+function Logout() {
+  localStorage.clear();
+  return <Navigate to="/login" />
+}
+
+function CreatePasswordAndLogout() {
+  localStorage.clear();
+  return <Navigate to="/create-password" />
+}
 
 function App() {
 
   return (
-    <>
-    <Login></Login>
-    <Register></Register>
-    <Home></Home>
-    </>
+    <BrowserRouter>
+      <Routes>
+
+        <Route path="/" element={<Home />} />
+
+        <Route path='/home' element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/create-password" element={<CreatePassword />} />
+
+        <Route path="/logout" element={<Logout />} />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
