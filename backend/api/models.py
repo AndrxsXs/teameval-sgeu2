@@ -10,10 +10,21 @@ from django.db import models
 'course, name, code, academic period'
 class User(models.Model):
     rol = models.CharField(max_length=10)
+class User(models.Model):
+    rol = models.CharField(max_length=10)
     code = models.CharField(max_length=20)
+    name = models.CharField(max_length=60)
     name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     email = models.CharField(max_length=80)
+    password = models.CharField(max_length=35)
+
+class Admi(models.Model):
+
+    status = models.BooleanField(default=True)
+    phone = models.IntegerField(null=True)
+    user = models.ForeignKey(User,null= True, on_delete=models.CASCADE, related_name='Admin' )
+
     password = models.CharField(max_length=35)
 
 class Admi(models.Model):
