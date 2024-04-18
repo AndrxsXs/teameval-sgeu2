@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import Home from './pages/Home';
+import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import CreatePassword from './pages/CreatePassword';
 import AdminPage from './pages/AdminPage';
@@ -24,7 +24,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomePage />} />
 
         <Route path='/home' element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
 
