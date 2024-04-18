@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo</title>
+</head>
+<body>
+    <li> 
+        <a href="{% url 'home' %}">Home</a>
+    </li>
+    <br>
+    <li>
+        <a href="{% url 'cursos' %}">Cursos</a>
+    </li>
+    <br>
+    {% if user.is_authenticated %}
+    <li>
+        <a href="{% url 'logout' %}">Cerrar sesion</a>
+    </li>
+    {% else %}
+    <li>
+        <a href="{% url 'singup' %}">Registrarse</a>
+    </li>
+    <br>
+    <li>
+        <a href="{% url 'singin' %}">Inicar sesion</a>
+    </li>
+    {% endif %}
+    
+
+    {% block content %}
+    {% endblock %}
+    
+</body>
+</html>

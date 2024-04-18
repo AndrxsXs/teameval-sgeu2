@@ -1,0 +1,20 @@
+<h1>Estudiante</h1>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{message}}
+
+    <label for="password1">password:</label>
+    
+    <input type="text" id="password1" name="password1"/>
+    
+    <label for="password2">comfirm password:</label>
+    
+    <input type="text" id="password2" name="password2"/>
+
+<button>
+    Enviar
+</button>
+</form>
