@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api', # para conectar el back con el front
+    'api',# para conectar el back con el front
     'rest_framework', # para crear una API
     'corsheaders' # para permitir que el front se conecte al back
 ]
