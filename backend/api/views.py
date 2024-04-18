@@ -8,46 +8,56 @@ from . import models
 def singin (request):
     if request.method == 'GET':
         return render(request, 'singin.html')
-    else:
-        
+    else:        
         user= models.User.search(request.POST['code'])
         if user is None:
             return render(request, 'singin.html', {
                 'error': 'User or password incorrect'
             })
         else:
-            if user.first_login == False:
+            if user.rol == 'Admin':
                 if user.password == request.POST['password']:
-                    return redirect('home')
+                    return redirect('/admin')
+            else:                
+                if user.first_login == False:
+                    if user.password == request.POST['password']:                        
+                        request.session['user_id'] = user.id
+                        if user.rol == 'Estudiante':
+                            return redirect('home')
+                        else:
+                            return redirect('cursos')
+                            
+                    else:
+                        return render(request, 'singin.html', {
+                        'error': 'User or password incorrect'
+                    }) 
                 else:
-                    return render(request, 'singin.html', {
-                    'error': 'User or password incorrect'
-            }) 
-            else:
-                if user.password == request.POST['password']:
-                    return redirect('estudiante')
+                    if user.password == request.POST['password']:
+                        request.session['user_id'] = user.id
+                        return redirect('estudiante')
 
-                    
+
+
+       
 
 def estudiante(request):
     if request.method == 'GET':
-        return render(request, 'estudiante')
+        return render(request, 'estudiante.html')
     else:
         if request.POST['password1'] == request.POST['password2']:
-             
-            print("correto")
-            
-            code= request.session['code']
-            
-            models.User.update_password(request.POST['password1'],code)
-            
-            return render(request, 'home', {
+            user_id = request.session.get('user_id')
+            if user_id is not None: 
+                user = models.User.objects.get(id=user_id)     
+                models.User.update_password(request.POST['password1'],user.code)
+            print("correcto")            
+            return render(request, 'singin.html', {
                 'message' : 'Password created successfully'
             })
             
+
         else:
             print("incorrecto")
-            return render(request, 'singin.html', {
+            return render(request, 'home.html', {
                 'error' : 'Passwords incorret'
             })
 
@@ -56,5 +66,23 @@ def estudiante(request):
 def home(request):
     return render(request, 'home.html')
 
-def estudiante(request):
+def cursos(request):
+    return render(request, 'cursos.html')
+
+def estudiante3(request):
     return render(request, 'estudiante.html')
+
+def estudiante4(request):
+    if request.method == 'GET':
+        return render(request, 'estudiante.html')
+    else:
+        user= models.User.search(request.POST['code'])
+        if request.POST['password1'] == request['password2']:
+            print("correcto")
+
+            user.password = request.POST['password1']
+            user.first_login = False
+            user.save
+        return render(request, 'estudiante', {
+        'mesagge' : 'Password created successfully'
+        })    

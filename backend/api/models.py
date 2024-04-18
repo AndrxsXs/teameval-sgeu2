@@ -21,15 +21,20 @@ class User(models.Model):
     last_login= timezone.now()
     
     def search(code):
-        user = User.objects.get(code=code)
-        return user
+        try:
+            user = User.objects.get(code=code)
+            return user
+        except User.DoesNotExist:
+            return None
     
     def update_password(password, code):
         user= User.search(code)
-        user.password= password
-        user.first_login= False
-        user.save
-        
+        if user is not None:
+            user.password= password
+            user.first_login= False
+            user.save
+            print("La nueva contraseña es: ", password)
+            
 class Admi(models.Model):
     status = models.BooleanField(default=True)
     phone = models.BigIntegerField(default=1234567890)
