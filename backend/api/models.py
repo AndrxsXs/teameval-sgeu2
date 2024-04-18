@@ -8,23 +8,28 @@ from django.db import models
 'TINYINT models.IntegerField '
 
 'course, name, code, academic period'
-class Admin(models.Model):
+class User(models.Model):
+    rol = models.CharField(max_length=10)
     code = models.CharField(max_length=20)
-    names = models.CharField(max_length=60)
+    name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     email = models.CharField(max_length=80)
-    password = models.CharField(max_length=8)
+    password = models.CharField(max_length=35)
+
+class Admi(models.Model):
+
+    status = models.BooleanField(default=True)
+    phone = models.IntegerField(null=True)
+    user = models.ForeignKey(User,null= True, on_delete=models.CASCADE, related_name='Admin' )
+
 
 class Teacher(models.Model):
-    code = models.CharField(max_length=20)
-    identification = models.CharField(max_length=20)
-    names = models.CharField(max_length=60)
-    last_name = models.CharField(max_length=60)
-    email = models.CharField(max_length=80)
-    password = models.CharField(max_length=8)
-    phone_number = models.IntegerField()
-    active_status = models.BooleanField(default=True)
-    first_login = models.BooleanField(default=True)
+    
+    Status = models.BooleanField(default=True)
+    user = models.ForeignKey(User,null= True, on_delete=models.CASCADE, related_name='Teachers' )
+
+class Course(models.Model):
+    name = models.CharField(max_length=60)
 
 class Course(models.Model):
     name = models.CharField(max_length=60)
@@ -39,15 +44,9 @@ class Gruop(models.Model):
     teacher = models.ForeignKey(Teacher, null =True, on_delete=models.CASCADE, related_name='gropus')
 
 class Student(models.Model):
-    code = models.CharField(max_length=20)
-    names = models.CharField(max_length=60)
-    last_name = models.CharField(max_length=60)
-    email = models.CharField(max_length=80)
-    password = models.CharField(max_length=8)
-    courses = models.ManyToManyField(Course , related_name='students')
-    group = models.ForeignKey(Gruop,null =True, on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, null =True, on_delete=models.CASCADE, related_name='students')
-    first_login = models.BooleanField(default=True)
+    Evaluated_status = models.BooleanField(default=False)
+    user = models.ForeignKey(User,null= True, on_delete=models.CASCADE, related_name='Students' )
+
 
 class Scale(models.Model):
     limit = models.IntegerField()
