@@ -1,9 +1,11 @@
 import imagen_404 from '../images/404..png'
 import Button from '@mui/joy/Button';
+import TopNavbar from '../components/TopNavbar';
 
 function NotFound() {
     return (
         <>
+        <TopNavbar />
         <img style={{width:"100%", aspectRatio:"1500/511"}}
          src={imagen_404} alt="Error 404: pagina no encontrada"/>  
 
