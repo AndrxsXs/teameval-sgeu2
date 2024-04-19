@@ -1,0 +1,11 @@
+.top-navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 64px;
+    /*border-bottom: 1px solid #e0e1e3;*/
+}
