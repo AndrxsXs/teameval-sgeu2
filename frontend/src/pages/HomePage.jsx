@@ -20,9 +20,9 @@ export default function HomePage() {
                         <Typography level="body-md">
                             Con TeamEval puedes agilizar la forma en que evalúas a tus compañeros de equipo.
                         </Typography>
-                    <div>
-                        <Button component="a" href="/login">Entrar</Button>
-                    </div>
+                        <div>
+                            <Button component="a" href="/login">Entrar</Button>
+                        </div>
                     </section>
                     <section>
                         <img className="img-home" src={PhotoHomePage} alt="" />
