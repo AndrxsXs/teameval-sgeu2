@@ -10,7 +10,7 @@ export default function HomePage() {
             <TopNavbar />
             <main>
                 <article>
-                    <section className="presentacion">
+                    <section className="presentation">
                         <Typography level="title-lg" color="primary">
                             El poder de hacer más
                         </Typography>
