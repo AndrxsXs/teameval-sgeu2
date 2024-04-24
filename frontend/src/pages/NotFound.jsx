@@ -10,7 +10,7 @@ function NotFound() {
          src={imagen_404} alt="Error 404: pagina no encontrada"/>  
 
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Button variant="outlined">Volver a la página principal</Button>
+            <Button variant="outlined" component="a" href='/'>Volver a la página principal</Button>
         </div>
       </>
     );
