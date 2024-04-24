@@ -10,7 +10,7 @@ function App() {
       <TopNavbar />
       <main>
         <CssBaseline />
-        <Form route="api/token/"/>
+        <Form method="login"/>
       </main >
     </>
   )

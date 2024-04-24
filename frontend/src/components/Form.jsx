@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import LoadingIndicator from "./LoadingIndicator";
 import { CssVarsProvider } from '@mui/joy/styles';
 import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
@@ -13,44 +12,87 @@ import Button from '@mui/joy/Button';
 import PropTypes from "prop-types"
 import { jwtDecode } from "jwt-decode";
 
-export default function Form({ route }) {
+export default function Form({ method }) {
     const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const name = method === "login" ? "Inicie sesión" : "Cree una contraseña";
+    const input = method === "login" ? "Ingrese su código" : "Nueva contraseña";
+    const labelCode = input === "Ingrese su código" ? "Código" : "Contraseña";
+    const pass = input === "Ingrese su código" ? "Ingrese su contraseña" : "Confirme su contraseña";
+    const labelPassword = pass === "Ingrese su contraseña" ? "Contraseña" : "Confirmar contraseña";
+    const submit = method === "login" ? "Iniciar sesión" : "Crear contraseña";
+    const type = method === "login" ? "number" : "password";
+    const inputName = method === "login" ? "code" : "password";
+    const route = method === "login" ? "api/token/" : "api/change_password/";
+
     const handleSubmit = async (e) => {
         setLoading(true);
         e.preventDefault();
 
-        try {
-            const res = await api.post(route, { code, password })
+        if (route === "api/token/") {
+            try {
+                const res = await api.post(route, { code, password })
 
-            if (res.status === 200) {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access);
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-                
-                const decoded = jwtDecode(res.data.access);
-                const userRole = decoded.role;
 
-                // Navega a la ruta correspondiente basado en el rol del usuario
-                    if (userRole === 'admin') {
-                        navigate("/admin")
-                    } else if (userRole === 'student') {
-                        navigate("/estudiante")
-                    } else if (userRole === 'teacher') {
-                        navigate("/profesor")
+                if (res.status === 200) {
+                    localStorage.setItem(ACCESS_TOKEN, res.data.access);
+                    localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+
+                    const decoded = jwtDecode(res.data.access);
+                    const userRole = decoded.role;
+                    const firstLogin = decoded.first_login;
+                    // console.log("first login: ", firstLogin)
+
+                    // Si es el primer inicio de sesión y el usuario es un estudiante o profesor, redirige al usuario a la página de cambio de contraseña
+                    if (firstLogin && (userRole === 'student' || userRole === 'teacher')) {
+                        navigate("/crear-contraseña");
                     } else {
-                        navigate("/login")
+                        // Navega a la ruta correspondiente basado en el rol del usuario
+                        if (userRole === 'admin') {
+                            navigate("/admin")
+                        } else if (userRole === 'student') {
+                            navigate("/estudiante")
+                        } else if (userRole === 'teacher') {
+                            navigate("/profesor")
+                        } else {
+                            navigate("/login")
+                        }
                     }
                 } else {
                     navigate("/login")
+                }
+            } catch (error) {
+                alert(error)
+            } finally {
+                setLoading(false)
             }
-        } catch (error) {
-            alert(error)
-        } finally {
-            setLoading(false)
+        } else if (route === "api/change_password/") {
+            try {
+                const res = await api.post(route, { password },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+                        }
+                    }
+                )
+                // console.log("first login: ", res.data.first_login)
+
+                if (res.status === 200) {
+                    navigate("/login")
+                } else {
+                    navigate("/create-password")
+                }
+            } catch (error) {
+                alert(error)
+            } finally {
+                setLoading(false)
+            }
         }
+
+
     };
 
     return (
@@ -75,28 +117,28 @@ export default function Form({ route }) {
                             Le damos la bienvenida
                         </Typography>
                         <Typography level="body-sm">
-                            Inicie sesión para continuar
+                            {name} para continuar
                         </Typography>
                     </header>
                     <FormControl>
-                        <FormLabel>Código</FormLabel>
+                        <FormLabel>{labelCode}</FormLabel>
                         <Input
                             onChange={(e) => setCode(e.target.value)}
                             // html input attribute
-                            name="username"
-                            type="number"
-                            placeholder="Ingresa tu código"
+                            name={inputName}
+                            type={type}
+                            placeholder={input}
                             value={code}
                             required
                         />
                     </FormControl>
                     <FormControl>
-                        <FormLabel>Contraseña</FormLabel>
+                        <FormLabel>{labelPassword}</FormLabel>
                         <Input
                             onChange={(e) => setPassword(e.target.value)}
                             name="password"
                             type="password"
-                            placeholder="Ingrese su contraseña"
+                            placeholder={pass}
                             value={password}
                             required
                         />
@@ -106,9 +148,9 @@ export default function Form({ route }) {
                 Olvidé mi contraseña
                 </Link></Typography> */}
 
-                        {loading && <LoadingIndicator />}
-                        <Button type="submit" sx={{ my: 1 }}>
-                            Continuar
+                        {/* {loading && <LoadingIndicator />} */}
+                        <Button loading={loading} type="submit" sx={{ my: 1 }}>
+                            {submit}
                         </Button>
                     </FormControl>
                 </form>
@@ -118,5 +160,6 @@ export default function Form({ route }) {
 }
 
 Form.propTypes = {
-    route: PropTypes.string.isRequired
+    // route: PropTypes.string.isRequired,
+    method: PropTypes.string.isRequired
 }
