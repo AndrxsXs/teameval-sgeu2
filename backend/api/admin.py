@@ -1,9 +1,12 @@
 from django.contrib import admin
-from . import models
-from django.contrib.auth.models import User
+from api.models import User, Admi, Teacher, Student
 # Register your models here.
 
-admin.site.register(models.Student)
-#admin.site.register(models.Gruop)
-admin.site.register(models.Teacher)
-admin.site.register(models.User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'last_name')
+    
+class AdmiAdmin(admin.ModelAdmin):
+    list_display = ('user')
+
+admin.site.register(User, UserAdmin)
+admin.site.register(Admi)
