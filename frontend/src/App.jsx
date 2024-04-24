@@ -6,6 +6,7 @@ import AdminPage from './pages/AdminPage';
 import NotFound from './pages/NotFound';
 import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
+import CreatePassword from './pages/CreatePassword';
 
 function Logout() {
   localStorage.clear();
@@ -30,6 +31,7 @@ function App() {
         <Route path='/profesor' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
         <Route path="/estudiante" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
+        <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
