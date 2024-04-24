@@ -63,6 +63,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Añade el rol del usuario al payload del token
         token['role'] = user.role
+        token['first_login'] = user.first_login
 
         return token
 
@@ -76,9 +77,22 @@ def login_view(request):
     user = authenticate(request, code=code, password=password)
     if user:
         login(request, user)
-        return Response({'role': user.groups.first().name})
+        return Response({'role': user.groups.first().name, 'first_login': user.first_login})
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    password = request.data.get('password')
+    if password is None:
+        return Response({'error': 'Password not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+    user.set_password(password)
+    user.first_login = False
+    user.save()
+    return Response({'status': 'Password changed successfully', 'first_login': user.first_login})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
