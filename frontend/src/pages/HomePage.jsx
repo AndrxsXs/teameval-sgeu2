@@ -22,7 +22,6 @@ export default function HomePage() {
                         </Typography>
                         <div>
                             <Button component="a" href="/login/">Entrar</Button>
-                            <Button component="a" href="/create-password/" variant="outlined">Crear contraseña</Button>
                         </div>
                     </section>
                     <section>
