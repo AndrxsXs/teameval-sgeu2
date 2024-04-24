@@ -1,12 +1,12 @@
-export default function AdminPage() {
-    return(
-        <>
-        <header>
-            <h1>Admin Page</h1>
-        </header>
-        <main>
+import Sidebar from "../components/Sidebar"
 
-        </main>
-        </>
+export default function AdminPage() {
+    return (
+        <div className="container">
+            <Sidebar />
+            <main>
+                Contenido de la página de administrador
+            </main>
+        </div>
     )
 }

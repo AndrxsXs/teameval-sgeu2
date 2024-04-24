@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import HomePage from './pages/HomePage';
-import Login from './pages/Login';
+import Login from './pages/auth/Login';
 import AdminPage from './pages/AdminPage';
 import NotFound from './pages/NotFound';
 import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
-import CreatePassword from './pages/CreatePassword';
+import CreatePassword from './pages/auth/CreatePassword';
 
 function Logout() {
   localStorage.clear();

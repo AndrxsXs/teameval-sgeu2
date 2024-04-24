@@ -1,0 +1,16 @@
+.container {
+    height: 100%s;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+}
+
+.container main {
+    width: 100%;
+    height: 100%;
+    /* grid-area: main; */
+    background-color: aquamarine;
+}

@@ -1,6 +1,6 @@
 import { CssBaseline } from "@mui/material";
-import TopNavbar from "../components/TopNavbar";
-import Form from "../components/Form";
+import TopNavbar from "../../components/TopNavbar";
+import Form from "../../components/auth/Form";
 
 export default function CreatePassword() {
     return (
