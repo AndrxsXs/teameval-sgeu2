@@ -1,1 +1,0 @@
-export default function CreatePassword() { return( <div> Create new password </div>) }
