@@ -21,7 +21,8 @@ export default function HomePage() {
                             Con TeamEval puedes agilizar la forma en que evalúas a tus compañeros de equipo.
                         </Typography>
                         <div>
-                            <Button component="a" href="/login">Entrar</Button>
+                            <Button component="a" href="/login/">Entrar</Button>
+                            <Button component="a" href="/create-password/" variant="outlined">Crear contraseña</Button>
                         </div>
                     </section>
                     <section>
