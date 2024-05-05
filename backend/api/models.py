@@ -48,19 +48,13 @@ class User(AbstractUser):
          self.password = make_password(raw_password)
          self.save()
     
-    def update_password(password, code):
-        User.objects.filter(code=code).update(password=password)
-        User.objects.filter(code=code).update(first_login=False)
-        print("La nueva contraseña es: ", password)
-
     def _str_(self):
         return self.name + ' ' +  self.last_name
             
 class Admi(models.Model):
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
-    # status = models.BooleanField(default=True)
-    # phone = models.BigIntegerField(default=1234567890)
-    # user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='admin')
+    status = models.BooleanField(default=True)
+    phone = models.BigIntegerField() 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
@@ -85,7 +79,7 @@ class Student(models.Model):
 class Teacher(models.Model):
     Status = models.BooleanField(default=True)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
-    phone = models.BigIntegerField(default=1234567890)
+    phone = models.BigIntegerField()
     
     def _str_(self):
         return self.user.name + ' ' +  self.user.last_name

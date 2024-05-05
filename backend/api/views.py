@@ -18,44 +18,6 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-def singin (request):
-    if request.method == 'GET':
-        return render(request, 'singin.html')
-    else:        
-        user= models.User.search(request.POST['code'])
-        if user is None:
-            return render(request, 'singin.html', {
-                'error': 'User or password incorrect'
-            })
-        else:
-            if user.rol == 'Admin':
-                if user.password == request.POST['password']:
-                    return redirect('/admin')
-                else:
-                    return render(request, 'singin', {
-                'error': 'User or password incorrect'
-            })
-            else:                
-                if user.first_login == False:
-                    if user.password == request.POST['password']:                        
-                        if user.rol == 'Estudiante':
-                            return redirect('home')
-                        else:
-                            return redirect('cursos')
-                            
-                    else:
-                        return render(request, 'singin.html', {
-                        "error": 'User or password incorrect'
-                    }) 
-                else:
-                    if user.password == request.POST['password']:
-                        request.session['code'] = user.code
-                        return redirect('estudiante')
-                    else:
-                        return render(request, 'singin.html', {
-                    'error': 'User or password incorrect'
-                })
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -105,22 +67,6 @@ def user_data(request):
         'role': role
     }
     return Response(data)
-
-def estudiante(request):
-    if request.method == 'GET':
-        return render(request, 'estudiante.html')
-    else:
-        if request.POST['password1'] == request.POST['password2']:
-            user_id= request.session['code']
-            print(user_id)
-            models.User.update_password(request.POST['password1'],user_id)
-            print("correcto")            
-            return redirect('singin')
-        else:
-            print("incorrecto")
-            return render(request, 'estudiante', {
-                'error' : 'Passwords incorret'
-            })
 
 def home(request):
     return render(request, 'home.html')
