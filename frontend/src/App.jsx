@@ -32,7 +32,7 @@ function App() {
 
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
           {/* <Route path='/admin' element={<AdminPage />} /> */}
-          <Route path='/profesor' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
+          <Route path='/profesor//*' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
           <Route path="/estudiante" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/crear-contraseña" element={<CreatePassword />} />
