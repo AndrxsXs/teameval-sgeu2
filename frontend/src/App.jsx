@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CssVarsProvider } from '@mui/joy/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import Login from './pages/auth/Login';
@@ -21,21 +23,24 @@ function Logout() {
 function App() {
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <CssVarsProvider disableTransitionOnChange>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
 
-        <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
 
-        <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
-        {/* <Route path='/admin' element={<AdminPage />} /> */}
-        <Route path='/profesor' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
-        <Route path="/estudiante" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/crear-contraseña" element={<CreatePassword />} />
-        <Route path="/logout" element={<Logout />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
+          {/* <Route path='/admin' element={<AdminPage />} /> */}
+          <Route path='/profesor' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
+          <Route path="/estudiante" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/crear-contraseña" element={<CreatePassword />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </CssVarsProvider>
   )
 }
 
