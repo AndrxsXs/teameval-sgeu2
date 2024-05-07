@@ -53,8 +53,8 @@ class User(AbstractUser):
             
 class Admi(models.Model):
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
-    status = models.BooleanField(default=True)
-    phone = models.BigIntegerField() 
+    #status = models.BooleanField(default=True)
+    phone = models.BigIntegerField(null=False) 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
