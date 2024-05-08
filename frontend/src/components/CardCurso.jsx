@@ -1,4 +1,5 @@
 import fondo_card from '../images/FondoCardDefecto.png'
+import fondo from '../images/Fondo.png'
 import * as React from 'react';
 import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
@@ -12,7 +13,7 @@ export default function CardCurso(props) {
     <Card sx={{ minHeight: '280px', width: 320 }}>
       <CardCover>
         <img
-          src={fondo_card}
+          src={props.src}
           
           /*loading="lazy"*/
           alt="imagen en representación del curso"
