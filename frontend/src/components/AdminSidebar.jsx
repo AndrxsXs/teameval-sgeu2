@@ -1,11 +1,10 @@
 import TopNavbar from './TopNavbar';
 import '../styles/components/Sidebar.css';
 import * as React from 'react';
-// import GlobalStyles from '@mui/joy/GlobalStyles';
-import Avatar from '@mui/joy/Avatar';
+import { Link, useLocation } from 'react-router-dom';
+
 import Box from '@mui/joy/Box';
 import Divider from '@mui/joy/Divider';
-import IconButton from '@mui/joy/IconButton';
 import List from '@mui/joy/List';
 import ListItem from '@mui/joy/ListItem';
 import ListItemButton, { listItemButtonClasses } from '@mui/joy/ListItemButton';
@@ -13,16 +12,16 @@ import ListItemContent from '@mui/joy/ListItemContent';
 import Typography from '@mui/joy/Typography';
 import Sheet from '@mui/joy/Sheet';
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
-import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ListSubheader from '@mui/joy/ListSubheader';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
 import { PropTypes } from 'prop-types';
 
 import ColorSchemeToggle from './ColorSchemeToggle';
+import ProfileInfo from './ProfileInfo';
 // import { closeSidebar } from '../utils';
 
 function Toggler({
@@ -51,6 +50,14 @@ function Toggler({
 }
 
 export default function Sidebar() {
+
+    const adminUrl = "/admin/manage/admin";
+    const teacherUrl = "/admin/manage/teachers";
+    const courseUrl = "/admin/manage/courses";
+    const scaleUrl = "/admin/manage/scales";
+
+    const location = useLocation();
+
     return (
         <Sheet
             component="aside"
@@ -88,10 +95,7 @@ export default function Sidebar() {
                     borderBottom: '1px solid',
                     borderColor: 'divider',
                 }}>
-                {/* <IconButton variant="soft" color="primary" size="sm">
-                    <BrightnessAutoRoundedIcon />
-                </IconButton> */}
-                <TopNavbar />
+                <TopNavbar session/>
                 <ColorSchemeToggle sx={{ ml: 'auto' }} />
             </Box>
             {/* <Input size="sm" startDecorator={<SearchRoundedIcon />} placeholder="Search" /> */}
@@ -123,37 +127,47 @@ export default function Sidebar() {
                         Gestión
                     </ListSubheader>
                     <ListItem>
-                        <ListItemButton selected>
+                        <ListItemButton selected={location.pathname === adminUrl}>
                             <SupervisorAccountRoundedIcon />
                             <ListItemContent>
-                                <Typography level="title-sm">Administradores</Typography>
+                                <Link to={adminUrl}>
+                                    <Typography level="title-sm">Administradores</Typography>
+                                </Link>
                             </ListItemContent>
                         </ListItemButton>
+
                     </ListItem>
 
                     <ListItem>
-                        <ListItemButton>
-                            <SchoolRoundedIcon />
+                        <ListItemButton selected={location.pathname === teacherUrl}>
+                            {/* <SchoolRoundedIcon /> */}
+                            <PersonRoundedIcon />
                             <ListItemContent>
-                                <Typography level="title-sm">Docentes</Typography>
+                                <Link to={teacherUrl}>
+                                    <Typography level="title-sm">Docentes</Typography>
+                                </Link>
                             </ListItemContent>
                         </ListItemButton>
                     </ListItem>
 
                     <ListItem>
-                        <ListItemButton>
+                        <ListItemButton selected={location.pathname === courseUrl}>
                             <AutoStoriesRoundedIcon />
                             <ListItemContent>
-                                <Typography level="title-sm">Cursos</Typography>
+                                <Link to={courseUrl}>
+                                    <Typography level="title-sm">Cursos</Typography>
+                                </Link>
                             </ListItemContent>
                         </ListItemButton>
                     </ListItem>
 
                     <ListItem>
-                        <ListItemButton>
+                        <ListItemButton selected={location.pathname === scaleUrl}>
                             <EditNoteRoundedIcon />
                             <ListItemContent>
-                                <Typography level="title-sm">Escalas y criterios</Typography>
+                                <Link to={scaleUrl}>
+                                    <Typography level="title-sm">Escalas y criterios</Typography>
+                                </Link>
                             </ListItemContent>
                         </ListItemButton>
                     </ListItem>
@@ -175,7 +189,13 @@ export default function Sidebar() {
                     <ListItem>
                         <ListItemButton>
                             <SettingsRoundedIcon />
-                            Ajustes
+                            <ListItemContent>
+                                <Link to="/admin/settings">
+                                    <Typography level="title-sm">
+                                        Ajustes
+                                    </Typography>
+                                </Link>
+                            </ListItemContent>
                         </ListItemButton>
                     </ListItem>
                 </List>
@@ -185,20 +205,7 @@ export default function Sidebar() {
                     my: '-16px',
                 }}
             />
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', p: '16px' }}>
-                <Avatar
-                    variant="outlined"
-                    size="sm"
-                    src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
-                />
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography level="title-sm">David Márquez</Typography>
-                    <Typography level="body-xs">david@test.com</Typography>
-                </Box>
-                <IconButton size="sm" variant="plain" color="neutral" component="a" href="/logout">
-                    <LogoutRoundedIcon />
-                </IconButton>
-            </Box>
+            <ProfileInfo />
         </Sheet>
 
     )
