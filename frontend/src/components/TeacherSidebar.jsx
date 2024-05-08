@@ -205,7 +205,7 @@ export default function TeacherSidebar() {
     )
 }
 
-Sidebar.propTypes = {
+TeacherSidebar.propTypes = {
     prop1: PropTypes.string,
     prop2: PropTypes.number,
     prop3: PropTypes.bool,
