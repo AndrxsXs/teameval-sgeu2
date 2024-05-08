@@ -64,7 +64,9 @@ def user_data(request):
     data = {
         'username': user.username,
         'email': user.email,
-        'role': role
+        'role': role,
+        'name': user.name,
+        'last_name': user.last_name
     }
     return Response(data)
 
