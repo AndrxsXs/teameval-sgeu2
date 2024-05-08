@@ -25,7 +25,7 @@ export default function CardCurso(props) {
         }}
       />
       <CardContent sx={{ justifyContent: 'flex-end' }}>
-        <Typography level="title-lg" textColor="#fff">
+        <Typography level="title-lg" textColor="#fff" sx={{ textDecoration: 'none' }}>
           {props.name}
         </Typography>
       </CardContent>
