@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import CourseView from '../../pages/teacher/CourseView';
 import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
+import "../../styles/pages/teacher/MainTeacherView.css"
+import Typography from '@mui/joy/Typography'
 
 export default function MainTeacherView() {
 
@@ -18,7 +20,12 @@ justifyContent: 'center'
         }}
         >
         <TopNavbar />
-        <Box
+
+        <Typography level="h2" component="h1" sx={{ marginBottom: '30px', marginTop: '20px'}}>
+        Mis cursos
+        </Typography>
+
+        <Box className="contenedor-curso"
             sx={{
                 flex: 1,
                             display: 'flex',
@@ -28,10 +35,11 @@ justifyContent: 'center'
                             alignSelf: 'center',
                             gap: 2,
                             justifyContent: 'center',
+                            
             }}
         >
             <a href="/profesor/curso"><CardCurso name="Desarrollo de software"/></a>
-            <a href="/profesor/curso"><CardCurso name="Proyecto integrador I"/></a>
+            <a href="/profesor/curso"><CardCurso name="Base de datos"/></a>
             <a href="/profesor/curso"><CardCurso name="Ciberseguridad"/></a>
         </Box>
         </Box>

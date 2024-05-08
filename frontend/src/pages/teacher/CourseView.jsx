@@ -2,7 +2,7 @@ import { Box } from "@mui/joy"
 import CardCurso from "../../components/CardCurso"
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
-import AdminSidebar from "../../components/AdminSidebar"
+import TeacherSidebar from "../../components/TeacherSidebar"
 import "../../styles/pages/AdminPage.css"
 import Typography from '@mui/joy/Typography'
 import Button from '@mui/joy/Button'
@@ -16,7 +16,7 @@ function CourseView (){
         <CssVarsProvider disableTransitionOnChange>
                 <Box className="container" sx={{}}>
                     <CssBaseline />
-                    <AdminSidebar />
+                    <TeacherSidebar />
                     {/* <main className="main-container">
                 <Typography level="h1" color="initial">
                     Contenido de la página de administrador
@@ -64,18 +64,8 @@ function CourseView (){
                             }}
                         >
                             <Typography level="h2" component="h1">
-                                Configuración de docentes
+                                Añadir estudiante
                             </Typography>
-
-                            <Button
-                                color="primary"
-                                startDecorator={<PersonAddRounded />}
-                                size="sm"
-                            >
-                                Agregar docente
-                            </Button>
-
-
                         </Box>
                     </Box>
                 </Box>
