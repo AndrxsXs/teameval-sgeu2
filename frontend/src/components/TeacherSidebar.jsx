@@ -211,6 +211,7 @@ TeacherSidebar.propTypes = {
     prop3: PropTypes.bool,
 };
 
+
 Toggler.propTypes = {
     defaultExpanded: PropTypes.bool,
     renderToggle: PropTypes.func,
