@@ -2,6 +2,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import TopNavbar from './TopNavbar';
 import ProfileInfo from './ProfileInfo';
+import DropdownMenu from './DropdownMenu';
+
 import '../styles/components/Sidebar.css';
 
 import Box from '@mui/joy/Box';
@@ -31,7 +33,16 @@ const MenuItem = ({ icon, text, route, isSelected }) => (
 );
 
 export default function Sidebar(props) {
-    const { firstHeader, MenuItems, routes, MenuIcons, settingsRoute } = props;
+
+    const {
+        firstHeader,
+        menuItems,
+        settingsRoute,
+        showDropdownMenu,
+        dropdownMenuProps,
+        dropdownMenuPosition,
+    } = props;
+
     const location = useLocation();
 
     return (
@@ -91,15 +102,21 @@ export default function Sidebar(props) {
                     <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
                         {firstHeader}
                     </ListSubheader>
-                    {MenuItems.map((item, index) => (
-                        <MenuItem
-                            key={index}
-                            icon={MenuIcons[index]}
-                            text={item}
-                            route={routes[index]}
-                            isSelected={location.pathname === routes[index]}
-                        />
-                    ))}
+                    {menuItems && menuItems.map(({ text, route, icon }, index) => {
+                        if (index === dropdownMenuPosition && showDropdownMenu) {
+                            return <DropdownMenu {...dropdownMenuProps} />;
+                        }
+
+                        return (
+                            <MenuItem
+                                key={index}
+                                icon={icon}
+                                text={text}
+                                route={route}
+                                isSelected={location.pathname === route}
+                            />
+                        );
+                    })}
                 </List>
 
                 <List
