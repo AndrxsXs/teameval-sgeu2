@@ -1,7 +1,8 @@
-from .models import User
+from .models import User, Student
 from rest_framework import serializers
 # from .models import User
 # from .models import Note
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,6 +27,15 @@ class UserSerializer(serializers.ModelSerializer):
         
         # Devolver la instancia creada
         return instance
+    
+class StudentSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+    class Meta:        
+        model = Student
+        fields = ["name", "last_name", "code", "email"] 
 
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:

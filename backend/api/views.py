@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from .models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSerializer
+from .serializers import UserSerializer, StudentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login
@@ -32,6 +32,42 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+# creacion de un estudiante
+# student creation
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_student(request):
+    # creacion del usuario
+    # user creation
+    data = request.data
+    
+    user_data = {
+        'role': User.STUDENT,
+        'code': data.get('code'),
+        'name': data.get('name'),
+        'last_name': data.get('last_name'),
+        'email': data.get('email'),
+        'password': User.default_password(data.get('name'), data.get('code'), data.get('last_name')),
+    }
+    # creacion del estudiante
+    # student creation
+    user = User.objects.create_user(**user_data)
+    student_data = {
+        'user': user.id,
+        'group': None,
+    }
+    serializer_student = StudentSerializer(data=student_data)
+    if serializer_student.is_valid():
+        serializer_student.save()
+        return Response(serializer_student.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    
+
+
+
+
 @api_view(['POST'])
 def login_view(request):
     code = request.data.get('code')
@@ -55,6 +91,13 @@ def change_password(request):
     user.first_login = False
     user.save()
     return Response({'status': 'Password changed successfully', 'first_login': user.first_login})
+
+#@api_view(['POST'])
+#@permission_classes([IsAuthenticated])
+#def registerAdminOrTeacher(request):
+    
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
