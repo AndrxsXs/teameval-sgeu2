@@ -3,9 +3,9 @@ import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
 import "../../styles/pages/teacher/MainTeacherView.css"
 import Typography from '@mui/joy/Typography'
-import fondo from '../../images/Fondo.png'
-import fondoCard from '../../images/FondoCardDefecto.png'
-import fondoCiber from '../../images/FondoCiber.png'
+import fondo from '../../assets/Fondo.png'
+import fondoCard from '../../assets/FondoCardDefecto.png'
+import fondoCiber from '../../assets/FondoCiber.png'
 
 
 export default function MainTeacherView() {
