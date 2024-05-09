@@ -7,22 +7,34 @@ import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
 export default function AdminSidebar() {
 
-    const menuItems = ['Administradores', 'Profesores', 'Cursos', 'Escalas y criterios'];
-    const routes = ['/admin/manage/admin', '/admin/manage/teachers', '/admin/manage/courses', '/admin/manage/scales'];
-    const menuIcons = [
-        <SupervisorAccountRoundedIcon key="admin" />,
-        <PersonRoundedIcon key="teachers" />,
-        <AutoStoriesRoundedIcon key="courses" />,
-        <EditNoteRoundedIcon key="scales" />,
+    const menuItems = [
+        {
+            text: 'Administradores',
+            route: '/admin/manage/admin',
+            icon: <SupervisorAccountRoundedIcon key="admin" />,
+        },
+        {
+            text: 'Profesores',
+            route: '/admin/manage/teachers',
+            icon: <PersonRoundedIcon key="teachers" />,
+        },
+        {
+            text: 'Cursos',
+            route: '/admin/manage/courses',
+            icon: <AutoStoriesRoundedIcon key="courses" />,
+        },
+        {
+            text: 'Escalas y criterios',
+            route: '/admin/manage/scales',
+            icon: <EditNoteRoundedIcon key="scales" />,
+        },
     ];
     const settingsRoute = '/admin/settings';
 
     return (
         <Sidebar
             firstHeader="Gestión"
-            MenuItems={menuItems}
-            routes={routes}
-            MenuIcons={menuIcons}
+            menuItems={menuItems}
             settingsRoute={settingsRoute}
         />
     )
