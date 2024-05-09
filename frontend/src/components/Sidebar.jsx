@@ -1,53 +1,38 @@
+/* eslint-disable react/prop-types */
+import { Link, useLocation } from 'react-router-dom';
+import TopNavbar from './TopNavbar';
+import ProfileInfo from './ProfileInfo';
 import '../styles/components/Sidebar.css';
-import * as React from 'react';
-// import GlobalStyles from '@mui/joy/GlobalStyles';
+
 import Box from '@mui/joy/Box';
+import Divider from '@mui/joy/Divider';
 import List from '@mui/joy/List';
 import ListItem from '@mui/joy/ListItem';
 import ListItemButton, { listItemButtonClasses } from '@mui/joy/ListItemButton';
+import ListItemContent from '@mui/joy/ListItemContent';
+import Typography from '@mui/joy/Typography';
 import Sheet from '@mui/joy/Sheet';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import ListSubheader from '@mui/joy/ListSubheader';
 
-import { PropTypes } from 'prop-types';
+import ColorSchemeToggle from './ColorSchemeToggle';
 
-// import { closeSidebar } from '../utils';
-
-function Toggler({
-    defaultExpanded = false,
-    renderToggle,
-    children,
-}) {
-    const [open, setOpen] = React.useState(defaultExpanded);
-    return (
-        <React.Fragment>
-            {renderToggle({ open, setOpen })}
-            <Box
-                sx={{
-                    display: 'grid',
-                    gridTemplateRows: open ? '1fr' : '0fr',
-                    transition: '0.2s ease',
-                    '& > *': {
-                        overflow: 'hidden',
-                    },
-                }}
-            >
-                {children}
-            </Box>
-        </React.Fragment>
-    );
-}
+const MenuItem = ({ icon, text, route, isSelected }) => (
+    <ListItem>
+        <ListItemButton selected={isSelected}>
+            {icon}
+            <ListItemContent>
+                <Link to={route}>
+                    <Typography level="title-sm">{text}</Typography>
+                </Link>
+            </ListItemContent>
+        </ListItemButton>
+    </ListItem>
+);
 
 export default function Sidebar(props) {
-
-    function renderMenuItems(menuList) {
-        return menuList.split(',').map((menuItem, index) => (
-            <ListItem key={index}>
-                <ListItemButton>
-                    {menuItem}
-                </ListItemButton>
-            </ListItem>
-        ));
-    }
+    const { firstHeader, MenuItems, routes, MenuIcons, settingsRoute } = props;
+    const location = useLocation();
 
     return (
         <Sheet
@@ -66,7 +51,19 @@ export default function Sidebar(props) {
                 borderColor: 'divider'
             }}
         >
-            {/* Rest of the code */}
+            <Box
+                component="header"
+                className="logo-header" sx={{
+                    display: 'flex',
+                    gap: 1,
+                    p: '16px',
+                    alignItems: 'center',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                }}>
+                <TopNavbar session />
+                <ColorSchemeToggle sx={{ ml: 'auto' }} />
+            </Box>
             <Box
                 component="nav"
                 sx={{
@@ -92,24 +89,52 @@ export default function Sidebar(props) {
                     }}
                 >
                     <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
-                        {props.title}
+                        {firstHeader}
                     </ListSubheader>
-                    {renderMenuItems(props.menuList)}
+                    {MenuItems.map((item, index) => (
+                        <MenuItem
+                            key={index}
+                            icon={MenuIcons[index]}
+                            text={item}
+                            route={routes[index]}
+                            isSelected={location.pathname === routes[index]}
+                        />
+                    ))}
                 </List>
-                {/* Rest of the code */}
+
+                <List
+                    size="sm"
+                    sx={{
+                        mt: 'auto',
+                        flexGrow: 0,
+                        '--ListItem-radius': (theme) => theme.vars.radius.sm,
+                        '--List-gap': '8px',
+                        mb: 2,
+                    }}
+                >
+                    <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
+                        Sistema
+                    </ListSubheader>
+                    <ListItem>
+                        <ListItemButton selected={location.pathname === settingsRoute}>
+                            <SettingsRoundedIcon />
+                            <ListItemContent>
+                                <Link to={settingsRoute}>
+                                    <Typography level="title-sm">
+                                        Ajustes
+                                    </Typography>
+                                </Link>
+                            </ListItemContent>
+                        </ListItemButton>
+                    </ListItem>
+                </List>
             </Box>
-            {/* Rest of the code */}
+            <Divider
+                sx={{
+                    my: '-16px',
+                }}
+            />
+            <ProfileInfo />
         </Sheet>
-    );
+    )
 }
-
-Sidebar.propTypes = {
-    title: PropTypes.string,
-    menuList: PropTypes.string,
-};
-
-Toggler.propTypes = {
-    defaultExpanded: PropTypes.bool,
-    renderToggle: PropTypes.func,
-    children: PropTypes.node,
-};

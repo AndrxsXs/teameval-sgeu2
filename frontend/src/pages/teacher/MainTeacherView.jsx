@@ -1,7 +1,4 @@
-import CardCurso from "../../components/CardCurso"
-import React from "react"
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import CourseView from '../../pages/teacher/CourseView';
+import CardCurso from "../../components/teacher/CardCurso"
 import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
 import "../../styles/pages/teacher/MainTeacherView.css"
