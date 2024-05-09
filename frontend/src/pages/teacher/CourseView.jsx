@@ -1,12 +1,9 @@
 import { Box } from "@mui/joy"
-import CardCurso from "../../components/CardCurso"
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
-import TeacherSidebar from "../../components/TeacherSidebar"
+import TeacherSidebar from "../../components/teacher/TeacherSidebar"
 import "../../styles/pages/AdminPage.css"
 import Typography from '@mui/joy/Typography'
-import Button from '@mui/joy/Button'
-import PersonAddRounded from '@mui/icons-material/PersonAddRounded';
 
 
 
