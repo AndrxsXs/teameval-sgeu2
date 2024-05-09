@@ -1,5 +1,4 @@
 import Sidebar from '../Sidebar';
-
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
@@ -10,6 +9,8 @@ import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded';
 export default function AdminSidebar() {
 
     const menuItems = [
+        {  
+        },
         {
             text: 'Grupos',
             route: '/profesor/curso/grupos',
@@ -36,6 +37,7 @@ export default function AdminSidebar() {
         items: [
             { itemText: 'Añadir estudiantes', itemIcon: <PersonAddRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
             { itemText: 'Deshabilitar estudiantes', itemIcon: <PersonRemoveRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
+            { itemText: 'Importar estudiantes', itemIcon: <PersonAddRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
         ],
     };
 
