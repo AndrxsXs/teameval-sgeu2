@@ -24,7 +24,17 @@ from django.db.models.signals import post_save
 #     last_login= timezone.now()
     
 class User(AbstractUser):
-    role = models.CharField(max_length=12)
+    STUDENT = 1
+    TEACHER = 2
+    ADMIN = 3
+
+    STATUS_CHOICES = [
+        (STUDENT, 'Student'),
+        (TEACHER, 'Teacher'),
+        (ADMIN, 'Admin'),
+    ]
+
+    role = models.IntegerField(choices=STATUS_CHOICES)
     username = None
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
@@ -52,8 +62,9 @@ class User(AbstractUser):
         return self.name + ' ' +  self.last_name
             
 class Admi(models.Model):
+
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
-    #status = models.BooleanField(default=True)
+    status = models.BooleanField(default=False)
     phone = models.BigIntegerField(null=False) 
     
     def create_user_admin(sender, instance, created, **kwargs):
@@ -77,7 +88,8 @@ class Student(models.Model):
         return self.user.name + ' ' +  self.user.last_name
 
 class Teacher(models.Model):
-    Status = models.BooleanField(default=True)
+    
+    status = models.BooleanField(default=False)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
     phone = models.BigIntegerField()
     
@@ -90,19 +102,12 @@ class Scale(models.Model):
 
 
 class Course(models.Model):
-    HABILITADO = 1
-    DESHABILITADO = 2
-    
-    STATUS_CHOICES = [
-        (HABILITADO, 'Habilitado'),
-        (DESHABILITADO, 'Deshabilitado'),
-    ]
 
     name = models.CharField(max_length=60)
     code = models.CharField(max_length=40)
     academic_period = models.CharField(max_length=10)
-    student_status = models.IntegerField(choices=STATUS_CHOICES)
-    course_status = models.IntegerField(choices=STATUS_CHOICES)
+    student_status = models.BooleanField(default=False)
+    course_status = models.BooleanField(default=False)
     teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
     
     user_teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_user_teacher')
@@ -140,7 +145,6 @@ class Evaluation(models.Model):
     user_student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='evaluations_user')
     
     report = models.ForeignKey(Report, null=True,on_delete=models.PROTECT, related_name='evaluations') 
-
 
 class Rating(models.Model):
     average = models.DecimalField(max_digits=10, decimal_places=3)
