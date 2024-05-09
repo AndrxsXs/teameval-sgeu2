@@ -4,7 +4,8 @@ import CssBaseline from "@mui/joy/CssBaseline"
 import TeacherSidebar from "../../components/teacher/TeacherSidebar"
 import "../../styles/pages/AdminPage.css"
 import Typography from '@mui/joy/Typography'
-
+import SearchStudent from "../../components/teacher/SearchStudent"
+import SearchCode from "../../components/teacher/SearchCode"
 
 
 function CourseView (){
@@ -52,20 +53,28 @@ function CourseView (){
                         <Box component="header"
                             sx={{
                                 display: 'flex',
+                                mt: 2,
                                 mb: 1,
                                 gap: 1,
                                 flexDirection: { xs: 'column', sm: 'row' },
                                 alignItems: { xs: 'start', sm: 'center' },
                                 flexWrap: 'wrap',
                                 justifyContent: 'space-between',
+                                width: '100%',
                             }}
                         >
                             <Typography level="h2" component="h1">
                                 Añadir estudiante
                             </Typography>
+
+                            
                         </Box>
+                        <SearchStudent /> 
+                        
                     </Box>
+                    
                 </Box>
+                
             </CssVarsProvider >
         </>
     )

@@ -9,6 +9,7 @@ function TeacherPage() {
             <Routes>
                 <Route path='/' element={<MainTeacherView />} />
                 <Route path='/curso' element={<CourseView />} />
+                
             </Routes>
         </>
     )
