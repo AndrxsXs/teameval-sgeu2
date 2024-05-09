@@ -8,6 +8,7 @@ import SearchStudent from "../../components/teacher/SearchStudent"
 import SearchCode from "../../components/teacher/SearchCode"
 
 
+
 function CourseView (){
     return(
         <>
@@ -15,12 +16,7 @@ function CourseView (){
                 <Box className="container" sx={{}}>
                     <CssBaseline />
                     <TeacherSidebar />
-                    {/* <main className="main-container">
-                <Typography level="h1" color="initial">
-                    Contenido de la página de administrador
-                </Typography>
-
-            </main> */}
+                    
 
                     <Box component="main" className="main-container"
                         sx={{
@@ -37,20 +33,9 @@ function CourseView (){
                             minWidth: 0,
                             height: '100dvh',
                             gap: 1,
-
-                            // flex: 1,
-                            // display: 'flex',
-                            // m: 0,
-                            // p: 8,
-                            // py: 0,
-                            // flexDirection: 'column',
-                            // alignItems: 'center',
-                            // justifyContent: 'center',
-                            // height: '100dvh',
-                            // width: '100%',
-                            //bgcolor: '#cdbd21',
                         }}>
-                        <Box component="header"
+
+                    <Box component="header"
                             sx={{
                                 display: 'flex',
                                 mt: 2,
@@ -65,16 +50,11 @@ function CourseView (){
                         >
                             <Typography level="h2" component="h1">
                                 Añadir estudiante
-                            </Typography>
-
-                            
-                        </Box>
-                        <SearchStudent /> 
-                        
+                            </Typography>  
                     </Box>
-                    
+                        <SearchStudent /> 
+                    </Box>   
                 </Box>
-                
             </CssVarsProvider >
         </>
     )
