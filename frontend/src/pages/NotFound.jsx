@@ -1,4 +1,4 @@
-import imagen_404 from '../images/404..png'
+import imagen_404 from '../assets/404..png'
 import Button from '@mui/joy/Button';
 import TopNavbar from '../components/TopNavbar';
 

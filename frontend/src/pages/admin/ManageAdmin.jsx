@@ -1,8 +1,7 @@
 import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
-import { Button } from "@mui/joy"
-import { PersonAddRounded } from "@mui/icons-material"
 import SearchField from "../../components/admin/SearchField"
+import CreateAdmin from "../../components/admin/CreateAdmin"
 
 export default function ManageAdmin() {
 
@@ -25,13 +24,7 @@ export default function ManageAdmin() {
                     Configuración de administradores
                 </Typography>
 
-                <Button
-                    color="primary"
-                    startDecorator={<PersonAddRounded />}
-                    size="sm"
-                >
-                    Nuevo administrador
-                </Button>
+                <CreateAdmin />
             </Box>
             <SearchField />
         </>

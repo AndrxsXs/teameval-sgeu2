@@ -27,7 +27,6 @@ export default function ManageCourses() {
                 <Button
                     color="primary"
                     startDecorator={<AddRoundedIcon />}
-                    size="sm"
                 >
                     Nuevo curso
                 </Button>

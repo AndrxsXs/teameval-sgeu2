@@ -1,5 +1,5 @@
 import { Box, Typography, Button } from '@mui/joy';
-import { PersonAddRounded } from '@mui/icons-material';
+import Add from '@mui/icons-material/Add';
 
 export default function ManageTeachers() {
     return (
@@ -23,10 +23,9 @@ export default function ManageTeachers() {
 
                 <Button
                     color="primary"
-                    startDecorator={<PersonAddRounded />}
-                    size="sm"
+                    startDecorator={<Add />}
                 >
-                    Agregar docente
+                    Nuevo docente
                 </Button>
 
 

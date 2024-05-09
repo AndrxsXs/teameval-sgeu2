@@ -1,13 +1,12 @@
 import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
 import { Button } from "@mui/joy"
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import Add from '@mui/icons-material/Add';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 export default function ManageScales() {
 
     return (
-        <>
             <Box component="header"
                 sx={{
                     display: 'flex',
@@ -35,7 +34,7 @@ export default function ManageScales() {
                 >
                     <Button
                         color="primary"
-                        startDecorator={<AddRoundedIcon />}
+                        startDecorator={<Add />}
                         size="sm"
                     >
                         Agregar criterios
@@ -44,13 +43,11 @@ export default function ManageScales() {
                         color="neutral"
                         variant="outlined"
                         startDecorator={<EditRoundedIcon />}
-                        size="sm"
                         disabled
                     >
                         Editar criterios
                     </Button>
                 </Box>
             </Box>
-        </>
     )
 }

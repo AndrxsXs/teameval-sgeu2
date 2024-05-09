@@ -1,12 +1,11 @@
 import { Box } from "@mui/joy"
-import CardCurso from "../../components/CardCurso"
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
-import TeacherSidebar from "../../components/TeacherSidebar"
+import TeacherSidebar from "../../components/teacher/TeacherSidebar"
 import "../../styles/pages/AdminPage.css"
 import Typography from '@mui/joy/Typography'
-import Button from '@mui/joy/Button'
-import PersonAddRounded from '@mui/icons-material/PersonAddRounded';
+import SearchStudent from "../../components/teacher/SearchStudent"
+import SearchCode from "../../components/teacher/SearchCode"
 
 
 
@@ -17,12 +16,7 @@ function CourseView (){
                 <Box className="container" sx={{}}>
                     <CssBaseline />
                     <TeacherSidebar />
-                    {/* <main className="main-container">
-                <Typography level="h1" color="initial">
-                    Contenido de la página de administrador
-                </Typography>
-
-            </main> */}
+                    
 
                     <Box component="main" className="main-container"
                         sx={{
@@ -39,35 +33,27 @@ function CourseView (){
                             minWidth: 0,
                             height: '100dvh',
                             gap: 1,
-
-                            // flex: 1,
-                            // display: 'flex',
-                            // m: 0,
-                            // p: 8,
-                            // py: 0,
-                            // flexDirection: 'column',
-                            // alignItems: 'center',
-                            // justifyContent: 'center',
-                            // height: '100dvh',
-                            // width: '100%',
-                            //bgcolor: '#cdbd21',
                         }}>
-                        <Box component="header"
+
+                    <Box component="header"
                             sx={{
                                 display: 'flex',
+                                mt: 2,
                                 mb: 1,
                                 gap: 1,
                                 flexDirection: { xs: 'column', sm: 'row' },
                                 alignItems: { xs: 'start', sm: 'center' },
                                 flexWrap: 'wrap',
                                 justifyContent: 'space-between',
+                                width: '100%',
                             }}
                         >
                             <Typography level="h2" component="h1">
                                 Añadir estudiante
-                            </Typography>
-                        </Box>
+                            </Typography>  
                     </Box>
+                        <SearchStudent /> 
+                    </Box>   
                 </Box>
             </CssVarsProvider >
         </>
