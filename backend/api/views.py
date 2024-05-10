@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 # from django.contrib.auth.models import User
-from .models import User
+from .models import User, Teacher
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSerializer, StudentSerializer
+from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login
@@ -62,7 +62,65 @@ def register_student(request):
         return Response(serializer_student.data, status=status.HTTP_201_CREATED)
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+# creacion de un profesor
+# teacher creation
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_teacher(request):
+    # creacion del usuario
+    # user creation
+    data = request.data
+    user_data = {
+        'role': User.TEACHER,
+        'code': data.get('code'),
+        'name': data.get('name'),
+        'last_name': data.get('last_name'),
+        'email': data.get('email'),
+        'password': User.default_password(data.get('name'), data.get('code'), data.get('last_name')),
+    }
+    # creacion del profesor
+    # teacher creation
+    user = User.objects.create_user(**user_data)
+    teacher_data = {
+        'user': user.id,
+        'phone': data.get('phone'),        
+    }
+    serializer_teacher = TeacherSerializer(data=teacher_data)
+    if serializer_teacher.is_valid():
+        # cambia el estado del profesor a activo la logica fue implementada en serializers.py
+        serializer_teacher.save()
+        return Response(serializer_teacher.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# creacion de un admin
+# admin creation
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_admin(request):
+    # creacion del usuario
+    # user creation
+    data = request.data
+    user_data = {
+        'role': User.ADMIN,
+        'code': data.get('code'),
+        'name': data.get('name'),
+        'last_name': data.get('last_name'),
+        'email': data.get('email'),
+        'password': User.default_password(data.get('name'), data.get('code'), data.get('last_name')),
+    }
+    # creacion del admin
+    # admin creation
+    user = User.objects.create_user(**user_data)
+    admin_data = {
+        'user': user.id,
+        'phone': data.get('phone'),        
+    }
+    serializer_admin = AdminSerializer(data=admin_data)
+    if serializer_admin.is_valid():
+        # cambia el estado del admin a activo la logica fue implementada en serializers.py
+        serializer_admin.save()
+        return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_admin.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 
@@ -92,10 +150,6 @@ def change_password(request):
     user.save()
     return Response({'status': 'Password changed successfully', 'first_login': user.first_login})
 
-#@api_view(['POST'])
-#@permission_classes([IsAuthenticated])
-#def registerAdminOrTeacher(request):
-    
 
 
 
