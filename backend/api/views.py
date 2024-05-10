@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 # from django.contrib.auth.models import User
-from .models import User, Teacher
+from .models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer
@@ -150,8 +150,21 @@ def change_password(request):
     user.save()
     return Response({'status': 'Password changed successfully', 'first_login': user.first_login})
 
-
-
+# obtiene una lista de usuarios
+# gets a list of users
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_list(request):
+    users = User.objects.all()
+    # obtiene el name, codigo, apellido y email para que se muestren
+    user_data = [{    
+        'code': user.code,    
+        'name': user.name,
+        'last_name': user.last_name,
+        'email': user.email,
+        # recorre cada usuario de la lista    
+    } for user in users]
+    return Response(user_data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
