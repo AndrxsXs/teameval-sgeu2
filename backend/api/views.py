@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 # from django.contrib.auth.models import User
-from .models import User
+from .models import User, Course
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer
@@ -165,6 +165,21 @@ def user_list(request):
         # recorre cada usuario de la lista    
     } for user in users]
     return Response(user_data)
+
+# obtiene una lista de cursos
+# gets a list of course
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def course_list(request):
+    courses = Course.objects.all()
+    # obtiene el name, codigo, docente y cantidad de estudiantes para que se muestren
+    course_data = [{    
+        'code': course.code,    
+        'name': course.name,
+        'teacher': course.teacher_name,
+        'student_count': course.student_count,       
+    } for course in courses]
+    return Response(course_data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
