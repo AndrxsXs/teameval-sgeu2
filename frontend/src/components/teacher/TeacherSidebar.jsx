@@ -5,12 +5,12 @@ import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 
 export default function AdminSidebar() {
 
     const menuItems = [
-        {  
-        },
+        {},
         {
             text: 'Grupos',
             route: '/profesor/curso/grupos',
@@ -35,9 +35,8 @@ export default function AdminSidebar() {
         icon: <AutoStoriesRoundedIcon key="course" />,
         text: 'Curso',
         items: [
-            { itemText: 'Añadir estudiantes', itemIcon: <PersonAddRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
-            { itemText: 'Deshabilitar estudiantes', itemIcon: <PersonRemoveRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
-            { itemText: 'Importar estudiantes', itemIcon: <PersonAddRoundedIcon />, itemRoute: '/profesor/curso/estudiante/añadir' },
+            { itemText: 'Importar estudiantes', itemIcon: <FileUploadIcon />, itemRoute: '/profesor/curso/estudiante/importar' },
+            { itemText: 'Deshabilitar estudiantes', itemIcon: <PersonRemoveRoundedIcon />, itemRoute: '/profesor/curso/estudiante/deshabilitar' },
         ],
     };
 
