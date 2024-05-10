@@ -58,6 +58,12 @@ class User(AbstractUser):
          self.password = make_password(raw_password)
          self.save()
     
+    # crea la contraseña por defecto del estudiante
+    # creates the student's default password
+    @staticmethod
+    def default_password(name, code, last_name):
+        return name[0] + code + last_name[0]
+
     def _str_(self):
         return self.name + ' ' +  self.last_name
             
