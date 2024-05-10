@@ -66,7 +66,7 @@ class AdminSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     code = serializers.CharField(source='user.code')
     class Meta:        
-        model = Teacher
+        model = Admi
         fields = ["name", "last_name", "code", "email", "phone"] 
         
     def create(self, validated_data):
