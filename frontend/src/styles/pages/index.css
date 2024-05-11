@@ -1,5 +1,9 @@
 body {
-    background-image: url("../assets/gradient-bg.svg");
+    margin: 0;
+    padding: 0;
+    height: 100dvh;
+    /* background-image: url("../../assets/gradient-bg.svg"); */
     background-repeat: no-repeat;
     background-size: cover;
+    
 }
