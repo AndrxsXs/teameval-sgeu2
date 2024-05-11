@@ -1,24 +1,27 @@
+import { Link } from 'react-router-dom';
 import LogoTeamevalLight from '../assets/logo_teameval_light.svg';
 import LogoTeamevalDark from '../assets/logo_teameval_dark.svg';
 import PropTypes from 'prop-types';
 import '../styles/components/TopNavbar.css'
 import { useColorScheme } from '@mui/joy/styles';
 
-export default function TopNavbar(onSession = false) {
+export default function TopNavbar(props) {
 
     const { mode } = useColorScheme();
     const logo = mode === 'dark' ? LogoTeamevalDark : LogoTeamevalLight;
 
-    const session = onSession ? 'session' : 'top-navbar';
+    const session = props.session ? 'session' : 'top-navbar';
 
     return (
         <header id='teameval-logo-header' className={session}>
-            <a href="/"><img src={logo} alt="Logo de TeamEval" /></a>
+            <Link to="/">
+                <img src={logo} alt="Logo de TeamEval" />
+            </Link>
         </header>
     );
 }
 
 TopNavbar.propTypes = {
-    onSession: PropTypes.bool,
+    session: PropTypes.bool,
     dark: PropTypes.bool
 };

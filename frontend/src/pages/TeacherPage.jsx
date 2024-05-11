@@ -1,7 +1,17 @@
-export default function ProfesorPage() {
-  return (
-    <div>
-      <h1>ProfesorPage</h1>
-    </div>
-  );
+import { Routes, Route } from 'react-router-dom'
+import "../styles/pages/AdminPage.css"
+import MainTeacherView from "../pages/teacher/MainTeacherView";
+import CourseView from './teacher/course/CourseView';
+
+function TeacherPage() {
+    return (
+        <>
+            <Routes>
+                <Route path='/' element={<MainTeacherView />} />
+                <Route path='/curso//*' element={<CourseView />} />
+            </Routes>
+        </>
+    )
 }
+
+export default TeacherPage

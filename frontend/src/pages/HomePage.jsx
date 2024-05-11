@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import TopNavbar from "../components/TopNavbar"
 import Typography from "@mui/joy/Typography"
 import PhotoHomePage from '../assets/photoHomePage.png'
@@ -8,7 +9,7 @@ export default function HomePage() {
     return (
         <>
             <TopNavbar />
-            <main>
+            <main className="main-homepage">
                 <article>
                     <section className="presentation">
                         <Typography level="title-lg" color="primary">
@@ -21,7 +22,9 @@ export default function HomePage() {
                             Con TeamEval puedes agilizar la forma en que evalúas a tus compañeros de equipo.
                         </Typography>
                         <div>
-                            <Button component="a" href="/login/">Entrar</Button>
+                            <Link to="/login/">
+                                <Button>Entrar</Button>
+                            </Link>
                         </div>
                     </section>
                     <section>

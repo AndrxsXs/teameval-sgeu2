@@ -27,8 +27,23 @@ from django.db.models.signals import post_save
 
     
 class User(AbstractUser):
+<<<<<<< HEAD
     role = models.CharField(max_length=12)
     username = models.CharField(max_length=20, unique=True, null=True)
+=======
+    STUDENT = 1
+    TEACHER = 2
+    ADMIN = 3
+
+    STATUS_CHOICES = [
+        (STUDENT, 'Student'),
+        (TEACHER, 'Teacher'),
+        (ADMIN, 'Admin'),
+    ]
+
+    role = models.IntegerField(choices=STATUS_CHOICES)
+    username = None
+>>>>>>> e41933320bc8d892250803d74cfb28f555ddba38
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
@@ -51,13 +66,25 @@ class User(AbstractUser):
          self.password = make_password(raw_password)
          self.save()
     
+    # crea la contraseña por defecto del estudiante
+    # creates the student's default password
+    @staticmethod
+    def default_password(name, code, last_name):
+        return name[0] + code + last_name[0]
+
     def _str_(self):
         return self.name + ' ' +  self.last_name
             
 class Admi(models.Model):
+
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
+<<<<<<< HEAD
     status = models.BooleanField(default=True)
     phone = models.BigIntegerField(null=True) 
+=======
+    status = models.BooleanField(default=False)
+    phone = models.BigIntegerField() 
+>>>>>>> e41933320bc8d892250803d74cfb28f555ddba38
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
@@ -80,7 +107,8 @@ class Student(models.Model):
         return self.user.name + ' ' +  self.user.last_name
 
 class Teacher(models.Model):
-    Status = models.BooleanField(default=True)
+    
+    status = models.BooleanField(default=False)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
     phone = models.BigIntegerField(null=True)
     
@@ -93,26 +121,29 @@ class Scale(models.Model):
 
 
 class Course(models.Model):
-    HABILITADO = 1
-    DESHABILITADO = 2
-    
-    STATUS_CHOICES = [
-        (HABILITADO, 'Habilitado'),
-        (DESHABILITADO, 'Deshabilitado'),
-    ]
 
     name = models.CharField(max_length=60)
     code = models.CharField(max_length=40)
     academic_period = models.CharField(max_length=10)
-    student_status = models.IntegerField(choices=STATUS_CHOICES)
-    course_status = models.IntegerField(choices=STATUS_CHOICES)
-    teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
+    student_status = models.BooleanField(default=False)
+    course_status = models.BooleanField(default=False)
+ #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
     
     user_teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_user_teacher')
 
-    student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
+ #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
 
     user_student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_user_student')
+
+    # obtiene el nombre del profesor
+    @property
+    def teacher_name(self):
+        return self.user_teacher.user.name + ' ' + self.user_teacher.last_name
+    
+    # obtiene la cantidad de estudiantes
+    @property
+    def student_counr(self):
+        return Student.objects.filter(course_user_student=self).count()
 
 #option 2 for academic period
     #academic_year = models.DateTimeField(auto_now_add=True)
@@ -143,7 +174,6 @@ class Evaluation(models.Model):
     user_student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='evaluations_user')
     
     report = models.ForeignKey(Report, null=True,on_delete=models.PROTECT, related_name='evaluations') 
-
 
 class Rating(models.Model):
     average = models.DecimalField(max_digits=10, decimal_places=3)

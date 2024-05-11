@@ -10,3 +10,7 @@ aside {
     justify-content: space-between;
     /* background: aquamarine; */
 }
+
+.Sidebar a {
+        text-decoration: none;
+    }

@@ -9,10 +9,10 @@
     /*border-bottom: 1px solid #e0e1e3;*/
 }
 
-header .top-navbar {
-    justify-content: space-evenly;
+.top-navbar {
+    justify-content: center;
 }
 
-header .session {
+.session {
     justify-content: space-between;
 }
