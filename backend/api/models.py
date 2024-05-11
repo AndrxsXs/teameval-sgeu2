@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, AbstractBaseUser
 from django.db.models.signals import post_save
 
 # Create your models here.
@@ -22,10 +22,13 @@ from django.db.models.signals import post_save
 #     password = models.CharField(max_length=35)
 #     first_login= models.BooleanField(default=True)
 #     last_login= timezone.now()
+
+
+
     
 class User(AbstractUser):
     role = models.CharField(max_length=12)
-    username = None
+    username = models.CharField(max_length=20, unique=True, null=True)
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
@@ -35,7 +38,7 @@ class User(AbstractUser):
     last_login= timezone.now()
 
     USERNAME_FIELD = 'code'
-    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role']
+    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role', 'username']
     
     def search(code):
         try:
@@ -54,7 +57,7 @@ class User(AbstractUser):
 class Admi(models.Model):
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
     status = models.BooleanField(default=True)
-    phone = models.BigIntegerField() 
+    phone = models.BigIntegerField(null=True) 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
@@ -79,7 +82,7 @@ class Student(models.Model):
 class Teacher(models.Model):
     Status = models.BooleanField(default=True)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
-    phone = models.BigIntegerField()
+    phone = models.BigIntegerField(null=True)
     
     def _str_(self):
         return self.user.name + ' ' +  self.user.last_name

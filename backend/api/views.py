@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 # from django.contrib.auth.models import User
 from .models import User
+from . import models
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import UserSerializer
@@ -67,6 +68,45 @@ def user_data(request):
         'role': role
     }
     return Response(data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def main_teacher(request):
+    user= request.user
+    data= models.Course.objects.filter(teacher_id= user.id, course_status= 1).values_list('name')
+    if data is None:
+        return Response({'status': 'non-associated courses'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return data
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_teacher(request):
+    
+    name= request.data.get('seeker')
+        
+    data= models.User.objects.filter(name__icontains= name, last_name__icontains= name) 
+    
+    if data is None:
+        return Response({'error': 'no matches'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return data
+                       
+
+# Vista para hacer pruebas backend
+def singin(request):
+    if request.method == 'GET':
+        return render(request, 'singin.html')
+    else:
+        user= authenticate(request, code= request.POST['code'], password= request.POST['password'])
+        
+        if user is None:
+            return render(request, 'singin.html')
+        
+        else:
+            login(request,user)
+            return redirect(home)
+     
 
 def home(request):
     return render(request, 'home.html')
