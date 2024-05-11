@@ -10,7 +10,7 @@ export default function CardGrade(props) {
     <Card sx={{ minHeight: '280px', width: 320 }}>
       <CardCover>
         <img
-          src={fondo_card}
+          src={props.bg}
           
           /*loading="lazy"*/
           alt="imagen en representación del curso"
