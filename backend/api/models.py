@@ -27,10 +27,6 @@ from django.db.models.signals import post_save
 
     
 class User(AbstractUser):
-<<<<<<< HEAD
-    role = models.CharField(max_length=12)
-    username = models.CharField(max_length=20, unique=True, null=True)
-=======
     STUDENT = 1
     TEACHER = 2
     ADMIN = 3
@@ -43,7 +39,6 @@ class User(AbstractUser):
 
     role = models.IntegerField(choices=STATUS_CHOICES)
     username = None
->>>>>>> e41933320bc8d892250803d74cfb28f555ddba38
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
@@ -78,13 +73,8 @@ class User(AbstractUser):
 class Admi(models.Model):
 
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
-<<<<<<< HEAD
-    status = models.BooleanField(default=True)
-    phone = models.BigIntegerField(null=True) 
-=======
     status = models.BooleanField(default=False)
     phone = models.BigIntegerField() 
->>>>>>> e41933320bc8d892250803d74cfb28f555ddba38
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:

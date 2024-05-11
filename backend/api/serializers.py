@@ -1,4 +1,4 @@
-from .models import User, Student, Teacher, Admi
+from .models import User, Student, Teacher, Admi, Course
 from rest_framework import serializers
 # from .models import User
 # from .models import Note
@@ -82,6 +82,25 @@ class AdminSerializer(serializers.ModelSerializer):
         admin.save()
         
         return admin
+    
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Course
+        fields= ["name", "code", "academic_period", "teacher"]
+        
+    def create(self, validated_data):
+        
+        # Crear una nueva instancia del modelo con los datos validados 
+        instance = self.Meta.model(**validated_data)
+        
+        # Establecer el curso como activo
+        instance.course_status= True
+        
+        # Guardar la instancia en la base de datos
+        instance.save()
+        
+        # Devolver la instancia creada
+        return instance
 
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:

@@ -5,7 +5,7 @@ from .models import User
 from . import models
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer
+from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer, CourseSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login
@@ -225,9 +225,24 @@ def search_user(request):
         'name': user.name,
         'last_name': user.last_name,
         'email': user.email,
+        'role': user.role,
         # recorre cada usuario de la lista    
     } for user in data]
     return Response(user_data)
+
+def create_course(request):
+    data = {
+        'name': request.data.get('name'),
+        'code': request.data.get('code'),
+        'academic_period': request.data.get('academic_period'),
+        'teacher': request.data.get('teacher'),
+    }
+    serializer_course = CourseSerializer(data)
+    if serializer_course.is_valid():
+        serializer_course.save()
+        return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+
                        
 
 # Vista para hacer pruebas backend
