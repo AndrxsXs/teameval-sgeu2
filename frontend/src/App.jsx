@@ -10,6 +10,12 @@ import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
 import CreatePassword from './pages/auth/CreatePassword';
 
+
+import ManageAdmin from "./pages/admin/ManageAdmin";
+import ManageTeachers from "./pages/admin/ManageTeachers"
+import ManageCourses from "./pages/admin/ManageCourses";
+import ManageScales from "./pages/admin/ManageScales";
+
 function Logout() {
   localStorage.clear();
   return <Navigate to="/login" />
@@ -29,9 +35,23 @@ function App() {
 
         <Route path="/" element={<HomePage />} />
 
-        <Route path="/admin//*" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
-        {/* <Route path='/admin' element={<AdminPage />} /> */}
-        <Route path='/profesor//*' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>} />
+        <Route
+          path="/admin/*"
+          element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>}
+          errorElement={<NotFound />}
+        >
+          <Route index element={<ManageAdmin />} />
+          <Route path='manage/teachers' element={<ManageTeachers />} />
+          <Route path='manage/courses' element={<ManageCourses />} />
+          <Route path='manage/scales' element={<ManageScales />} />
+        </Route>
+
+        <Route path='/profesor/*' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>}>
+
+          {/* TODO COMPONENTE PARA AJUSTES DEL PROFESOR */}
+          <Route path='ajustes' />
+
+        </Route>
         <Route path="/estudiante//*" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />
