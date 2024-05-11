@@ -5,12 +5,12 @@ import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constants";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types"
 
-export default function ProtectedRoute({ children, allowedRoles}) {
+export default function ProtectedRoute({ children, allowedRoles }) {
     const [isAuthorized, setIsAuthorized] = useState(null);
 
     useEffect(() => {
-        
-        const allowedRoles = ["admin", "teacher", "student"];
+
+        const allowedRoles = ['admin', 'teacher', 'student'];
 
         const auth = async () => {
             const token = localStorage.getItem(ACCESS_TOKEN);
@@ -19,9 +19,13 @@ export default function ProtectedRoute({ children, allowedRoles}) {
                 return;
             }
             const decoded = jwtDecode(token);
-            // console.log(decoded);
+            
+            console.log(decoded.role);
+            
             const userRole = decoded.role;
             const isAllowed = allowedRoles.includes(userRole);
+
+            console.log(isAllowed)
 
             if (!isAllowed) {
                 setIsAuthorized(false);
