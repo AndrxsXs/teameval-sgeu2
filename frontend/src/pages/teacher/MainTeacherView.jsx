@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import CardCurso from "../../components/teacher/CardCurso"
 import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
@@ -46,8 +47,8 @@ export default function MainTeacherView() {
                     }}>
 
                     <Link to="/profesor/curso"> <CardCurso name="Desarrollo de software" src={fondoCard} /></Link>
-                    <Link to="/profesor/curso"> <CardCurso name="Curso 2" src={fondoCard} /></Link>
-                    <Link to="/profesor/curso"> <CardCurso name="Curso 3" src={fondoCard} /></Link>
+                    <Link to="/profesor/curso"> <CardCurso name="Base de datos" src={fondo} /></Link>
+                    <Link to="/profesor/curso"> <CardCurso name="Ciberseguridad" src={fondoCiber} /></Link>
 
                 </Box>
             </Box>
