@@ -3,7 +3,7 @@ import TopNavbar from "../../components/TopNavbar"
 import { CssBaseline } from "@mui/material"
 import Box from "@mui/joy/Box"
 import { CssVarsProvider } from "@mui/joy"
-import "../../styles/pages/Login.css"
+import "../../styles/components/auth/Login.css"
 
 function App() {
 
