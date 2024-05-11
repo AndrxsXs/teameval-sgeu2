@@ -28,6 +28,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Añade el rol del usuario al payload del token
         token['role'] = user.role
         token['first_login'] = user.first_login
+        
+        # Puse lo siguiente para recibir info del usuario temporalmente
+        # Esto debe ser otra api view, actualmente es la user_data()
+        # token['name'] = user.name
+        # token['last_name'] = user.last_name
+        # token['email'] = user.email
 
         return token
 
