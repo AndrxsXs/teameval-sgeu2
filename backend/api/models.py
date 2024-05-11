@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, AbstractBaseUser
 from django.db.models.signals import post_save
 
 # Create your models here.
@@ -22,6 +22,9 @@ from django.db.models.signals import post_save
 #     password = models.CharField(max_length=35)
 #     first_login= models.BooleanField(default=True)
 #     last_login= timezone.now()
+
+
+
     
 class User(AbstractUser):
     STUDENT = 1
@@ -45,7 +48,7 @@ class User(AbstractUser):
     last_login= timezone.now()
 
     USERNAME_FIELD = 'code'
-    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role']
+    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role', 'username']
     
     def search(code):
         try:
@@ -71,7 +74,7 @@ class Admi(models.Model):
 
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
     status = models.BooleanField(default=False)
-    phone = models.BigIntegerField(null=False) 
+    phone = models.BigIntegerField() 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
@@ -97,7 +100,7 @@ class Teacher(models.Model):
     
     status = models.BooleanField(default=False)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
-    phone = models.BigIntegerField()
+    phone = models.BigIntegerField(null=True)
     
     def _str_(self):
         return self.user.name + ' ' +  self.user.last_name
@@ -114,13 +117,23 @@ class Course(models.Model):
     academic_period = models.CharField(max_length=10)
     student_status = models.BooleanField(default=False)
     course_status = models.BooleanField(default=False)
-    teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
+ #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
     
     user_teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_user_teacher')
 
-    student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
+ #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
 
     user_student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_user_student')
+
+    # obtiene el nombre del profesor
+    @property
+    def teacher_name(self):
+        return self.user_teacher.user.name + ' ' + self.user_teacher.last_name
+    
+    # obtiene la cantidad de estudiantes
+    @property
+    def student_counr(self):
+        return Student.objects.filter(course_user_student=self).count()
 
 #option 2 for academic period
     #academic_year = models.DateTimeField(auto_now_add=True)
