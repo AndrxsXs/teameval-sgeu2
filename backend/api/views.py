@@ -124,10 +124,6 @@ def register_admin(request):
         return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
     return Response(serializer_admin.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
-
-
-
 @api_view(['POST'])
 def login_view(request):
     code = request.data.get('code')
@@ -205,11 +201,17 @@ def main_teacher(request):
     if data is None:
         return Response({'status': 'non-associated courses'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return data
+        course_data = [{    
+        'code': course.code,    
+        'name': course.name,
+        'teacher': course.teacher_name,
+        'student_count': course.student_count,       
+    } for course in data]
+    return Response(course_data)
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def search_teacher(request):
+def search_user(request):
     
     name= request.data.get('seeker')
         
@@ -218,7 +220,14 @@ def search_teacher(request):
     if data is None:
         return Response({'error': 'no matches'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return data
+        user_data = [{    
+        'code': user.code,    
+        'name': user.name,
+        'last_name': user.last_name,
+        'email': user.email,
+        # recorre cada usuario de la lista    
+    } for user in data]
+    return Response(user_data)
                        
 
 # Vista para hacer pruebas backend
