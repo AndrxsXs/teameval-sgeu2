@@ -1,7 +1,12 @@
+
 import { Routes, Route } from 'react-router-dom'
 import "../styles/pages/AdminPage.css"
 import MainTeacherView from "../pages/teacher/MainTeacherView";
 import CourseView from './teacher/course/CourseView';
+
+import "../styles/pages/StudentPage.css"
+
+
 
 function TeacherPage() {
     return (
@@ -15,3 +20,8 @@ function TeacherPage() {
 }
 
 export default TeacherPage
+
+
+
+
+
