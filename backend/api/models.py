@@ -32,9 +32,9 @@ class User(AbstractUser):
     ADMIN = 3
 
     STATUS_CHOICES = [
-        (STUDENT, 'Student'),
-        (TEACHER, 'Teacher'),
-        (ADMIN, 'Admin'),
+        (STUDENT, 'student'),
+        (TEACHER, 'teacher'),
+        (ADMIN, 'admin'),
     ]
 
     role = models.IntegerField(choices=STATUS_CHOICES)
@@ -74,7 +74,7 @@ class Admi(models.Model):
 
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
     status = models.BooleanField(default=False)
-    phone = models.BigIntegerField() 
+    phone = models.BigIntegerField(null=True) 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
