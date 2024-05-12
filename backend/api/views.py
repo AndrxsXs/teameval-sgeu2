@@ -189,7 +189,8 @@ def course_list(request):
 @permission_classes([IsAuthenticated])
 def user_data(request):
     user = request.user
-    role = user.groups.first().name
+    # role = user.groups.first().name
+    role = user.groups.first().name if user.groups.exists() else ''
     data = {
         'username': user.username,
         'email': user.email,
