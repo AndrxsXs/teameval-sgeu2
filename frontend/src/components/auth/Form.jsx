@@ -16,6 +16,25 @@ import Button from '@mui/joy/Button';
 // import Snackbar from '@mui/joy/Snackbar';
 import SimpleSnackbar from "../SimpleSnackbar";
 
+function interpretNumbers(nums) {
+    let element
+    switch (nums) {
+        case 1:
+            element = 'student';
+            break
+        case 2:
+            element = 'teacher';
+            break
+        case 3:
+            element = 'admin';
+            break
+        default:
+            return;
+    }
+
+    return element;
+}
+
 export default function Form({ method }) {
 
 
@@ -50,8 +69,16 @@ export default function Form({ method }) {
                     localStorage.setItem(ACCESS_TOKEN, res.data.access);
                     localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
 
+                    // const decoded = jwtDecode(res.data.access);
+
+                    // console.log(decoded)
+
                     const decoded = jwtDecode(res.data.access);
-                    const userRole = decoded.role;
+
+                    const userRole = interpretNumbers(decoded.role);
+
+                    console.log(userRole)
+
                     const firstLogin = decoded.first_login;
                     // console.log("first login: ", firstLogin)
 
@@ -75,7 +102,7 @@ export default function Form({ method }) {
                 }
             } catch (error) {
                 alert(error)
-                description = error;
+                // description = error;
                 setOpen(true)
             } finally {
                 setLoading(false)
