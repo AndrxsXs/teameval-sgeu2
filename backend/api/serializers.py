@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
+        print(validated_data)
         # Extraer la contraseña de los datos validados
         password = validated_data.pop('password', None)
         
