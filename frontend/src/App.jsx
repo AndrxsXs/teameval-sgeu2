@@ -15,6 +15,9 @@ import ManageAdmin from "./pages/admin/ManageAdmin";
 import ManageTeachers from "./pages/admin/ManageTeachers"
 import ManageCourses from "./pages/admin/ManageCourses";
 import ManageScales from "./pages/admin/ManageScales";
+import Grades from './pages/student/Grades';
+import Result from './pages/student/Result';
+import Feedback from './pages/student/Feedback';
 
 function Logout() {
   localStorage.clear();
@@ -57,6 +60,12 @@ function App() {
         <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
+
+        {/*esto está bien???*/}
+        <Route index element={<Grades/>}/>
+        <Route path='/manage/result' element={<Result />} />
+        <Route path='/manage/feedback' element={<Feedback />} />
+        
       </Routes>
     </CssVarsProvider>
   )

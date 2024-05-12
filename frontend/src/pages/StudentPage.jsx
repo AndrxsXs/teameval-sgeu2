@@ -3,8 +3,8 @@ import CssBaseline from "@mui/joy/CssBaseline"
 import { Routes, Route } from 'react-router-dom'
 import StudentSidebar from "../components/student/StudentSidebar"
 import Box from '@mui/material/Box'
-import "../styles/pages/StudentPage.css"
-import FeedBack from "../pages/student/Feedback";
+import "../styles/pages/student/StudentPage.css"
+import Feedback from "../pages/student/Feedback";
 import Grades from "../pages/student/Grades";
 import Result from "../pages/student/Result";
 
@@ -37,7 +37,7 @@ export default function StudentPage() {
                     <Routes>
                         <Route path='/manage/grades' element={<Grades />} />
                         <Route path='/manage/result' element={<Result />} />
-                        <Route path='/manage/feedback' element={<FeedBack />} />
+                        <Route path='/manage/feedback' element={<Feedback />} />
                         
                     </Routes>
 
