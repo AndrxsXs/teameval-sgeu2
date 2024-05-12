@@ -51,16 +51,18 @@ def register_student(request):
     }
     # creacion del estudiante
     # student creation
-    user = User.objects.create_user(**user_data)
-    student_data = {
-        'user': user.id,
-        'group': None,
-    }
-    serializer_student = StudentSerializer(data=student_data)
-    if serializer_student.is_valid():
-        serializer_student.save()
-        return Response(serializer_student.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer_user = UserSerializer(data=user_data)
+    if serializer_user.is_valid():
+        user = serializer_user.save()
+        student_data = {
+            'user': user.id,
+            'group': None,
+        }
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            serializer_student.save()
+            return Response(serializer_student.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # creacion de un profesor
 # teacher creation
