@@ -1,6 +1,5 @@
 
 import { Routes, Route } from 'react-router-dom'
-import MainTeacherView from "../pages/teacher/MainTeacherView";
 import CourseView from './teacher/course/CourseView';
 
 import AddStudent from './teacher/course/AddStudent'
@@ -13,7 +12,6 @@ function TeacherPage() {
     return (
         <>
             <Routes>
-                <Route path='/' element={<MainTeacherView />} />
                 <Route path='/curso/*' element={<CourseView />}>
                     <Route path='estudiante/importar' element={<AddStudent />} />
                     <Route path='estudiante/deshabilitar' element={<DisableStudent />} />
