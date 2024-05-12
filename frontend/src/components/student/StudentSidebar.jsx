@@ -1,7 +1,7 @@
 import Sidebar from '../Sidebar';
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
-import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
+// import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
 export default function StudentSidebar() {
@@ -9,21 +9,21 @@ export default function StudentSidebar() {
     const menuItems = [
         {
             text: 'Evaluaciones',
-            route: '/estudiante',
+            route: '',
             icon: <SupervisorAccountRoundedIcon key="student" />,
         },
         {
             text: 'Resultados',
-            route: '/estudiante/result',
+            route: 'resultados',
             icon: <PersonRoundedIcon key="result" />,
         },
         {
             text: 'Retroalimentaciones',
-            route: '/estudiante/feedback',
+            route: 'materiales',
             icon: <AutoStoriesRoundedIcon key="feedback" />,
         },
     ];
-    const settingsRoute = '/estudiante/settings';
+    const settingsRoute = 'settings';
 
     return (
         <Sidebar

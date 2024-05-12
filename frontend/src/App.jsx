@@ -55,17 +55,23 @@ function App() {
           <Route path='ajustes' />
 
         </Route>
-        <Route path="/estudiante//*" element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>} />
+        <Route path="/estudiante/*"
+        element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>}>
+          <Route index element={<Grades />} />
+          
+          <Route path='resultados' element={<Result />} />
+          <Route path='materiales' element={<Feedback />} />
+        </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
 
         {/*esto está bien???*/}
-        <Route index element={<Grades/>}/>
+        <Route index element={<Grades />} />
         <Route path='/manage/result' element={<Result />} />
         <Route path='/manage/feedback' element={<Feedback />} />
-        
+
       </Routes>
     </CssVarsProvider>
   )

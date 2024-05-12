@@ -1,17 +1,17 @@
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
-import { Routes, Route } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import StudentSidebar from "../components/student/StudentSidebar"
 import Box from '@mui/material/Box'
 import "../styles/pages/student/StudentPage.css"
-import Feedback from "../pages/student/Feedback";
-import Grades from "../pages/student/Grades";
-import Result from "../pages/student/Result";
+// import Feedback from "../pages/student/Feedback";
+// import Grades from "../pages/student/Grades";
+// import Result from "../pages/student/Result";
 
 
 export default function StudentPage() {
-  return (
-    <CssVarsProvider disableTransitionOnChange>
+    return (
+        <CssVarsProvider disableTransitionOnChange>
             <Box className="container" sx={{ width: '100%' }}>
                 <CssBaseline />
                 <StudentSidebar />
@@ -34,15 +34,15 @@ export default function StudentPage() {
                         margin: 'auto 0',
                     }}>
 
-                    <Routes>
-                        <Route path='/manage/grades' element={<Grades />} />
-                        <Route path='/manage/result' element={<Result />} />
-                        <Route path='/manage/feedback' element={<Feedback />} />
-                        
-                    </Routes>
+                    {/* <Routes>
+                        <Route path='evaluaciones' element={<Grades />} />
+                        <Route path='resultados' element={<Result />} />
+                        <Route path='materiales' element={<Feedback />} />
+                    </Routes> */}
 
+                    <Outlet />
                 </Box>
             </Box>
         </CssVarsProvider >
-  );
+    );
 }
