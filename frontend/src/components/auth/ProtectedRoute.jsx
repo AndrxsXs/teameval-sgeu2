@@ -5,12 +5,32 @@ import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constants";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types"
 
-export default function ProtectedRoute({ children, allowedRoles}) {
+function interpretNumbers(nums) {
+    let element
+    switch (nums) {
+        case 1:
+            element = 'student';
+            break
+        case 2:
+            element = 'teacher';
+            break
+        case 3:
+            element = 'admin';
+            break
+        default:
+            return;
+    }
+
+    return element;
+}
+
+export default function ProtectedRoute({ children, allowedRoles }) {
+
     const [isAuthorized, setIsAuthorized] = useState(null);
 
     useEffect(() => {
-        
-        const allowedRoles = ["admin", "teacher", "student"];
+
+        const allowedRoles = ['admin', 'teacher', 'student'];
 
         const auth = async () => {
             const token = localStorage.getItem(ACCESS_TOKEN);
@@ -19,9 +39,14 @@ export default function ProtectedRoute({ children, allowedRoles}) {
                 return;
             }
             const decoded = jwtDecode(token);
-            // console.log(decoded);
-            const userRole = decoded.role;
+
+            const userRole = interpretNumbers(decoded.role);
+
+            console.log(userRole)
+
             const isAllowed = allowedRoles.includes(userRole);
+
+            console.log(isAllowed)
 
             if (!isAllowed) {
                 setIsAuthorized(false);

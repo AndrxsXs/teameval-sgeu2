@@ -2,6 +2,7 @@ import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
 import SearchField from "../../components/admin/SearchField"
 import CreateAdmin from "../../components/admin/CreateAdmin"
+import OrderTable from "../../components/OrderTable"
 
 export default function ManageAdmin() {
 
@@ -27,6 +28,7 @@ export default function ManageAdmin() {
                 <CreateAdmin />
             </Box>
             <SearchField />
+            <OrderTable />
         </>
     )
 }

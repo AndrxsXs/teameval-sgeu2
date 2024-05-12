@@ -1,15 +1,20 @@
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
-import { Routes, Route } from 'react-router-dom';
+import {
+    // Routes,
+    // Route,
+    Outlet
+} from 'react-router-dom';
 import AdminSidebar from "../components/admin/AdminSidebar"
-import ManageTeachers from "../pages/admin/ManageTeachers"
-import "../styles/pages/AdminPage.css"
+import "../styles/pages/admin/AdminPage.css"
 import Box from '@mui/material/Box'
-import ManageAdmin from "./admin/ManageAdmin";
-import ManageCourses from "./admin/ManageCourses";
-import ManageScales from "./admin/ManageScales";
+// import ManageAdmin from "./admin/ManageAdmin";
+// import ManageTeachers from "../pages/admin/ManageTeachers"
+// import ManageCourses from "./admin/ManageCourses";
+// import ManageScales from "./admin/ManageScales";
 
 function AdminPage() {
+
     return (
         <CssVarsProvider disableTransitionOnChange>
             <Box className="container" sx={{ width: '100%' }}>
@@ -34,12 +39,13 @@ function AdminPage() {
                         margin: 'auto 0',
                     }}>
 
-                    <Routes>
-                        <Route path='/manage/admin' element={<ManageAdmin />} />
+                    <Outlet />
+                    {/* <Routes>
+                        <Route index path='/manage/admin' element={<ManageAdmin />} />
                         <Route path='/manage/teachers' element={<ManageTeachers />} />
                         <Route path='/manage/courses' element={<ManageCourses />} />
                         <Route path='/manage/scales' element={<ManageScales />} />
-                    </Routes>
+                    </Routes> */}
 
                 </Box>
             </Box>

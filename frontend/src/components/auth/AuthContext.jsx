@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem(ACCESS_TOKEN);
         if (token) {
             const decodedToken = jwtDecode(token);
+            console.log(decodedToken)
             setUser({
                 name: decodedToken.name,
                 lastName: decodedToken.last_name,

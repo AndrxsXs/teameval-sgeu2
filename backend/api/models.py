@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, AbstractBaseUser
 from django.db.models.signals import post_save
 
 # Create your models here.
@@ -22,6 +22,9 @@ from django.db.models.signals import post_save
 #     password = models.CharField(max_length=35)
 #     first_login= models.BooleanField(default=True)
 #     last_login= timezone.now()
+
+
+
     
 class User(AbstractUser):
     STUDENT = 1
@@ -29,9 +32,9 @@ class User(AbstractUser):
     ADMIN = 3
 
     STATUS_CHOICES = [
-        (STUDENT, 'Student'),
-        (TEACHER, 'Teacher'),
-        (ADMIN, 'Admin'),
+        (STUDENT, 'student'),
+        (TEACHER, 'teacher'),
+        (ADMIN, 'admin'),
     ]
 
     role = models.IntegerField(choices=STATUS_CHOICES)
@@ -45,7 +48,7 @@ class User(AbstractUser):
     last_login= timezone.now()
 
     USERNAME_FIELD = 'code'
-    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role']
+    REQUIRED_FIELDS = ['name', 'last_name', 'email', 'role', 'username']
     
     def search(code):
         try:
@@ -71,7 +74,7 @@ class Admi(models.Model):
 
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True) 
     status = models.BooleanField(default=False)
-    phone = models.BigIntegerField() 
+    phone = models.BigIntegerField(null=True) 
     
     def create_user_admin(sender, instance, created, **kwargs):
         if created:
@@ -97,7 +100,7 @@ class Teacher(models.Model):
     
     status = models.BooleanField(default=False)
     user = models.OneToOneField(User, null=False, on_delete=models.PROTECT , primary_key=True)
-    phone = models.BigIntegerField()
+    phone = models.BigIntegerField(null=True)
     
     def _str_(self):
         return self.user.name + ' ' +  self.user.last_name

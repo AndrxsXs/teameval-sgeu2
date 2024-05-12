@@ -1,9 +1,8 @@
-/* eslint-disable react/prop-types */
-import fondo_card from '../../assets/FondoCardDefecto.png'
 import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
+import fondoCard from '../../assets/FondoCardDefecto.png'
 
 export default function CardCurso(props) {
 
@@ -11,7 +10,7 @@ export default function CardCurso(props) {
     <Card sx={{ minHeight: '280px', width: 320 }}>
       <CardCover>
         <img
-          src={fondo_card}
+          src={props.src}
           
           /*loading="lazy"*/
           alt="imagen en representación del curso"

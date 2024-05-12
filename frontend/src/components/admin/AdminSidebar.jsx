@@ -10,7 +10,7 @@ export default function AdminSidebar() {
     const menuItems = [
         {
             text: 'Administradores',
-            route: '/admin/manage/admin',
+            route: '/admin',
             icon: <SupervisorAccountRoundedIcon key="admin" />,
         },
         {

@@ -1,7 +1,11 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { jwtDecode } from "jwt-decode";
 import api from "../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
+
 import { CssVarsProvider } from '@mui/joy/styles';
 import Sheet from '@mui/joy/Sheet';
 import Typography from '@mui/joy/Typography';
@@ -9,10 +13,34 @@ import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
-import PropTypes from "prop-types"
-import { jwtDecode } from "jwt-decode";
+// import Snackbar from '@mui/joy/Snackbar';
+import SimpleSnackbar from "../SimpleSnackbar";
+
+function interpretNumbers(nums) {
+    let element
+    switch (nums) {
+        case 1:
+            element = 'student';
+            break
+        case 2:
+            element = 'teacher';
+            break
+        case 3:
+            element = 'admin';
+            break
+        default:
+            return;
+    }
+
+    return element;
+}
 
 export default function Form({ method }) {
+
+
+    const [open, setOpen] = useState(false);
+    let description;
+
     const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -41,8 +69,16 @@ export default function Form({ method }) {
                     localStorage.setItem(ACCESS_TOKEN, res.data.access);
                     localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
 
+                    // const decoded = jwtDecode(res.data.access);
+
+                    // console.log(decoded)
+
                     const decoded = jwtDecode(res.data.access);
-                    const userRole = decoded.role;
+
+                    const userRole = interpretNumbers(decoded.role);
+
+                    console.log(userRole)
+
                     const firstLogin = decoded.first_login;
                     // console.log("first login: ", firstLogin)
 
@@ -66,6 +102,8 @@ export default function Form({ method }) {
                 }
             } catch (error) {
                 alert(error)
+                // description = error;
+                setOpen(true)
             } finally {
                 setLoading(false)
             }
@@ -147,19 +185,17 @@ export default function Form({ method }) {
                 fontSize="sm">
                 Olvidé mi contraseña
                 </Link></Typography> */}
-
-                        {/* {loading && <LoadingIndicator />} */}
                         <Button loading={loading} type="submit" sx={{ my: 1 }}>
                             {submit}
                         </Button>
                     </FormControl>
                 </form>
+                <SimpleSnackbar
+                    reason="Error"
+                    description={description}
+                    onOpen={open}
+                />
             </Sheet>
         </CssVarsProvider>
     );
-}
-
-Form.propTypes = {
-    // route: PropTypes.string.isRequired,
-    method: PropTypes.string.isRequired
 }

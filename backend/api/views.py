@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
 # from django.contrib.auth.models import User
 from .models import User, Course
+from .models import User
+from . import models
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer
+from .serializers import UserSerializer, StudentSerializer, TeacherSerializer, AdminSerializer, CourseSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate, login
@@ -26,6 +28,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Añade el rol del usuario al payload del token
         token['role'] = user.role
         token['first_login'] = user.first_login
+        
+        # Puse lo siguiente para recibir info del usuario temporalmente
+        # Esto debe ser otra api view, actualmente es la user_data()
+        # token['name'] = user.name
+        # token['last_name'] = user.last_name
+        # token['email'] = user.email
 
         return token
 
@@ -124,10 +132,6 @@ def register_admin(request):
         return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
     return Response(serializer_admin.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
-
-
-
 @api_view(['POST'])
 def login_view(request):
     code = request.data.get('code')
@@ -196,6 +200,73 @@ def user_data(request):
         'last_name': user.last_name
     }
     return Response(data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def main_teacher(request):
+    user= request.user
+    data= models.Course.objects.filter(teacher_id= user.id, course_status= 1).values_list('name')
+    if data is None:
+        return Response({'status': 'non-associated courses'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        course_data = [{    
+        'code': course.code,    
+        'name': course.name,
+        'teacher': course.teacher_name,
+        'student_count': course.student_count,       
+    } for course in data]
+    return Response(course_data)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_user(request):
+    
+    name= request.data.get('seeker')
+        
+    data= models.User.objects.filter(name__icontains= name, last_name__icontains= name) 
+    
+    if data is None:
+        return Response({'error': 'no matches'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        user_data = [{    
+        'code': user.code,    
+        'name': user.name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'role': user.role,
+        # recorre cada usuario de la lista    
+    } for user in data]
+    return Response(user_data)
+
+def create_course(request):
+    data = {
+        'name': request.data.get('name'),
+        'code': request.data.get('code'),
+        'academic_period': request.data.get('academic_period'),
+        'teacher': request.data.get('teacher'),
+    }
+    serializer_course = CourseSerializer(data)
+    if serializer_course.is_valid():
+        serializer_course.save()
+        return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                       
+
+# Vista para hacer pruebas backend
+def singin(request):
+    if request.method == 'GET':
+        return render(request, 'singin.html')
+    else:
+        user= authenticate(request, code= request.POST['code'], password= request.POST['password'])
+        
+        if user is None:
+            return render(request, 'singin.html')
+        
+        else:
+            login(request,user)
+            return redirect(home)
+     
 
 def home(request):
     return render(request, 'home.html')

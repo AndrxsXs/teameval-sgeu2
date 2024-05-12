@@ -1,15 +1,10 @@
-import { Routes, Route } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import { Box } from "@mui/joy"
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
 import TeacherSidebar from "../../../components/teacher/TeacherSidebar"
 
-import AddStudent from './AddStudent'
-import DisableStudent from "../course/DisableStudent"
-import Groups from '../Groups'
-import ScalesCriteria from '../ScalesCriteria'
-import Report from '../Report'
 
 function CourseView() {
     return (
@@ -35,13 +30,14 @@ function CourseView() {
                             height: '100dvh',
                             gap: 1,
                         }}>
-                        <Routes>
+                            <Outlet />
+                        {/* <Routes>
                             <Route path='/curso/estudiante/importar' element={<AddStudent />} />
                             <Route path='/curso/estudiante/deshabilitar' element={<DisableStudent />} />
                             <Route path='/curso/grupos' element={<Groups />} />
                             <Route path='/curso/escalas' element={<ScalesCriteria />} />
                             <Route path='/curso/informe' element={<Report />} />
-                        </Routes>
+                        </Routes> */}
                     </Box>
                 </Box>
             </CssVarsProvider >
