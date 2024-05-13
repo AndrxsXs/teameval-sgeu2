@@ -62,7 +62,7 @@ function App() {
           <Route index element={<Grades />} />
 
           <Route path='resultados' element={<Result />} />
-          <Route path='materiales' element={<Feedback />} />
+          <Route path='retroalimentacion' element={<Feedback />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />

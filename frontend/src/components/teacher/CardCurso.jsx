@@ -2,7 +2,7 @@ import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
-import fondoCard from '../../assets/FondoCardDefecto.png'
+
 
 export default function CardCurso(props) {
 
