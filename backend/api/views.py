@@ -47,8 +47,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 def register_student(request):
     # creacion del usuario
     # user creation
-    data = request.data
-    
+    data = request.data    
     user_data = {
         'role': User.STUDENT,
         'code': data.get('code'),
@@ -59,16 +58,23 @@ def register_student(request):
     }
     # creacion del estudiante
     # student creation
-    user = User.objects.create_user(**user_data)
-    student_data = {
-        'user': user.id,
-        'group': None,
-    }
-    serializer_student = StudentSerializer(data=student_data)
-    if serializer_student.is_valid():
-        serializer_student.save()
-        return Response(serializer_student.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer_user = UserSerializer(data=user_data)
+    if serializer_user.is_valid():
+        user = serializer_user.save()
+        student_data = {
+            'user': user,
+           # 'email': user.email,
+            'name': user.name,
+            'last_name': user.last_name,
+            'code': user.code,            
+            'group': None,
+        }
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            serializer_student.save()
+            return Response(serializer_student.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # creacion de un profesor
 # teacher creation
@@ -88,17 +94,24 @@ def register_teacher(request):
     }
     # creacion del profesor
     # teacher creation
-    user = User.objects.create_user(**user_data)
-    teacher_data = {
-        'user': user.id,
-        'phone': data.get('phone'),        
-    }
-    serializer_teacher = TeacherSerializer(data=teacher_data)
-    if serializer_teacher.is_valid():
-        # cambia el estado del profesor a activo la logica fue implementada en serializers.py
-        serializer_teacher.save()
-        return Response(serializer_teacher.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer_user = UserSerializer(data=user_data)
+    if serializer_user.is_valid():
+        user = serializer_user.save()
+        teacher_data = {
+            'user': user,
+           # 'email': user.email,
+            'name': user.name,
+            'last_name': user.last_name,
+            'code': user.code,
+            'phone': data.get('phone'),        
+        }
+        serializer_teacher = TeacherSerializer(data=teacher_data)
+        if serializer_teacher.is_valid():
+            # cambia el estado del profesor a activo la logica fue implementada en serializers.py
+            serializer_teacher.save()
+            return Response(serializer_teacher.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # creacion de un admin
 # admin creation
@@ -118,17 +131,24 @@ def register_admin(request):
     }
     # creacion del admin
     # admin creation
-    user = User.objects.create_user(**user_data)
-    admin_data = {
-        'user': user.id,
-        'phone': data.get('phone'),        
-    }
-    serializer_admin = AdminSerializer(data=admin_data)
-    if serializer_admin.is_valid():
-        # cambia el estado del admin a activo la logica fue implementada en serializers.py
-        serializer_admin.save()
-        return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_admin.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer_user = UserSerializer(data=user_data)
+    if serializer_user.is_valid():
+        user = serializer_user.save()
+        admin_data = {
+            'user': user,
+           # 'email': user.email,
+            'name': user.name,
+            'last_name': user.last_name,
+            'code': user.code,
+            'phone': data.get('phone'),        
+        }
+        serializer_admin = AdminSerializer(data=admin_data)
+        if serializer_admin.is_valid():
+            # cambia el estado del admin a activo la logica fue implementada en serializers.py
+            serializer_admin.save()
+            return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_admin.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer_user.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['POST'])
 def login_view(request):
