@@ -1,4 +1,4 @@
-import fondo_card from '../../assets/FondoCardDefecto.png'
+
 import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
@@ -7,10 +7,10 @@ import Typography from '@mui/joy/Typography';
 export default function CardGrade(props) {
 
   return (
-    <Card sx={{ minHeight: '280px', width: 320 }}>
+    <Card sx={{ minHeight: '200px', width: 280 }}>
       <CardCover>
         <img
-          src={props.bg}
+          src={props.src}
           
           /*loading="lazy"*/
           alt="imagen en representación del curso"

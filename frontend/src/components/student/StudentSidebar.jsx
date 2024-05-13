@@ -19,7 +19,7 @@ export default function StudentSidebar() {
         },
         {
             text: 'Retroalimentaciones',
-            route: 'materiales',
+            route: 'retroalimentacion',
             icon: <AutoStoriesRoundedIcon key="feedback" />,
         },
     ];
