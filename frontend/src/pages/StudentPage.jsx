@@ -4,6 +4,10 @@ import { Outlet } from 'react-router-dom'
 import StudentSidebar from "../components/student/StudentSidebar"
 import Box from '@mui/material/Box'
 import "../styles/pages/student/StudentPage.css"
+import Breadcrumbs from '@mui/joy/Breadcrumbs';
+import Link from '@mui/joy/Link';
+import Typography from '@mui/joy/Typography';
+import PublicIcon from '@mui/icons-material/Public';
 // import Feedback from "../pages/student/Feedback";
 // import Grades from "../pages/student/Grades";
 // import Result from "../pages/student/Result";
@@ -34,11 +38,19 @@ export default function StudentPage() {
                         margin: 'auto 0',
                     }}>
 
-                    {/* <Routes>
-                        <Route path='evaluaciones' element={<Grades />} />
-                        <Route path='resultados' element={<Result />} />
-                        <Route path='materiales' element={<Feedback />} />
-                    </Routes> */}
+                    <Breadcrumbs separator="›" aria-label="breadcrumbs">
+                        <Link color="primary" href="/">
+                            <PublicIcon sx={{ mr: 0.5 }} />
+                            United States
+                        </Link>
+                        {['Springfield', 'Simpson'].map((item) => (
+                            <Link key={item} color="success" href="#usage-with-link-and-typography">
+                                {item}
+                            </Link>
+                        ))}
+
+                        <Typography>Homer</Typography>
+                    </Breadcrumbs>
 
                     <Outlet />
                 </Box>

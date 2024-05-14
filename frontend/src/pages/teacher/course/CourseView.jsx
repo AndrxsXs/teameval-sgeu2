@@ -31,13 +31,7 @@ function CourseView() {
                             gap: 1,
                         }}>
                             <Outlet />
-                        {/* <Routes>
-                            <Route path='/curso/estudiante/importar' element={<AddStudent />} />
-                            <Route path='/curso/estudiante/deshabilitar' element={<DisableStudent />} />
-                            <Route path='/curso/grupos' element={<Groups />} />
-                            <Route path='/curso/escalas' element={<ScalesCriteria />} />
-                            <Route path='/curso/informe' element={<Report />} />
-                        </Routes> */}
+                       
                     </Box>
                 </Box>
             </CssVarsProvider >

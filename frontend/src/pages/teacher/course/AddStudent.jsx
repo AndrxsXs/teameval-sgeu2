@@ -1,11 +1,13 @@
 import { Box, Typography } from "@mui/joy"
-import SearchStudent from "../../../components/teacher/SearchStudent"
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Button } from "@mui/joy"
+import Add from '@mui/icons-material/Add';
 
 export default function AddStudent() {
 
     return (
         <>
-            <Box component="header"
+              <Box component="header"
                 sx={{
                     display: 'flex',
                     mt: 2,
@@ -19,10 +21,36 @@ export default function AddStudent() {
                 }}
             >
                 <Typography level="h2" component="h1">
-                    Añadir estudiante
+                    Nombre del curso
                 </Typography>
+
+                <Box
+                sx={{
+
+                   display: 'flex',
+                   gap: 1,
+                   flexDirection: { xs: 'column', sm: 'row' },                    
+                }}
+                >
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        startDecorator={<Add />}
+                        size="sm"
+                        
+                    >
+                        Añadir otro estudiante
+                    </Button>
+                    <Button
+                        
+                        color="primary"
+                        startDecorator= {<FileUploadIcon />}
+                        size="sm"
+                    >
+                        Importar estudiantes
+                    </Button>
+                </Box>
             </Box>
-            <SearchStudent />
         </>
     )
 }

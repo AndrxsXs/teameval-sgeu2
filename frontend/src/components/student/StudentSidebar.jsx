@@ -9,17 +9,17 @@ export default function StudentSidebar() {
     const menuItems = [
         {
             text: 'Evaluaciones',
-            route: '',
+            route: '/estudiante',
             icon: <SupervisorAccountRoundedIcon key="student" />,
         },
         {
             text: 'Resultados',
-            route: 'resultados',
+            route: '/estudiante/resultados',
             icon: <PersonRoundedIcon key="result" />,
         },
         {
             text: 'Retroalimentaciones',
-            route: 'retroalimentacion',
+            route: '/estudiante/retroalimentacion',
             icon: <AutoStoriesRoundedIcon key="feedback" />,
         },
     ];

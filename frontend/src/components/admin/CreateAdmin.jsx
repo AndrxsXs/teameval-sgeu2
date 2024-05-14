@@ -9,9 +9,7 @@ import IconButton from '@mui/joy/IconButton';
 import Box from '@mui/joy/Box';
 import Stack from '@mui/joy/Stack';
 import { AspectRatio } from '@mui/joy';
-
 import Add from '@mui/icons-material/Add';
-
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import Avatar from '@mui/joy/Avatar'

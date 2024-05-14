@@ -17,9 +17,13 @@ import ManageCourses from "./pages/admin/ManageCourses";
 import ManageScales from "./pages/admin/ManageScales";
 
 import MainTeacherView from "./pages/teacher/MainTeacherView";
+import CourseView from './pages/teacher/course/CourseView';
+
+
 import Grades from './pages/student/Grades';
 import Result from './pages/student/Result';
 import Feedback from './pages/student/Feedback';
+import ViewCursoStudent from './pages/student/evaluation/ViewCursoStudent';
 
 function Logout() {
   localStorage.clear();
@@ -51,29 +55,33 @@ function App() {
           <Route path='manage/scales' element={<ManageScales />} />
         </Route>
 
-        <Route path='/profesor/*' element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>}>
+        <Route path="/profesor/*" 
+          element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>}
+          errorElement={<NotFound />}
+        >
           <Route index element={<MainTeacherView />} />
-          {/* TODO COMPONENTE PARA AJUSTES DEL PROFESOR */}
-          <Route path='ajustes' />
+          
+         
+          <Route path='settings' />
 
         </Route>
-        <Route path="/estudiante/*"
-          element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>}>
-          <Route index element={<Grades />} />
 
+        <Route path="/estudiante/*"
+          element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>}
+          errorElement={<NotFound />}
+        >
+          <Route index element={<Grades />} />
+          <Route path='curso' element={<ViewCursoStudent/>}/>
           <Route path='resultados' element={<Result />} />
           <Route path='retroalimentacion' element={<Feedback />} />
+
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
 
-        {/*esto está bien???*/}
-        {/* no sé */}
-        {/* <Route index element={<Grades />} />
-        <Route path='/manage/result' element={<Result />} />
-        <Route path='/manage/feedback' element={<Feedback />} /> */}
+        
 
       </Routes>
     </CssVarsProvider>
