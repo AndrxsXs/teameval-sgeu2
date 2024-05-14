@@ -27,6 +27,8 @@ import ViewCursoStudent from './pages/student/evaluation/ViewCursoStudent';
 import ViewRubric from './pages/student/evaluation/ViewRubric';
 import RubricResult from './pages/student/RubricResult';
 import ViewFeedback from './pages/student/ViewFeedback';
+import ForgotPassword from './components/ForgotPassword';
+import CodePassword from './components/CodePassword';
 
 function Logout() {
   localStorage.clear();
@@ -85,6 +87,8 @@ function App() {
 
         </Route>
         <Route path="/login" element={<Login />} />
+        <Route path="login/recuperar" element={<ForgotPassword />} />
+        <Route path="login/recuperar/codigo" element={<CodePassword/>} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />

@@ -1,4 +1,7 @@
 /* eslint-disable react/prop-types */
+import Checkbox from '@mui/joy/Checkbox';
+import Link from '@mui/joy/Link';
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -185,6 +188,11 @@ export default function Form({ method }) {
                 fontSize="sm">
                 Olvidé mi contraseña
                 </Link></Typography> */}
+                        
+                        <Link level="title-sm" href="recuperar">
+                        ¿Olvidaste tu contraseña?
+                        </Link>
+
                         <Button loading={loading} type="submit" sx={{ my: 1 }}>
                             {submit}
                         </Button>
