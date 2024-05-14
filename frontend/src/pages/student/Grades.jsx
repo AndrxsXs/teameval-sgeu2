@@ -6,6 +6,8 @@ import fondoCard from '../../assets/FondoCardDefecto.png'
 import fondoCiber from '../../assets/FondoCiber.png'
 import { useEffect } from 'react';
 import CardGrade from "../../components/student/CardGrade";
+import Breadcrumbs from '@mui/joy/Breadcrumbs';
+import PublicIcon from '@mui/icons-material/Public';
 
 export default function Grades() {
   useEffect(() => {
@@ -23,7 +25,21 @@ export default function Grades() {
       <Box component="header" sx={{ display: 'flex', mt: 2, mb: 1, gap: 1, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'start', sm: 'center' }, flexWrap: 'wrap', justifyContent: 'space-between', width: '100%', overflow: 'hidden', }}>
         <Typography level="h2" component="h1">
           Evaluaciones disponibles
+          
         </Typography>
+        <Breadcrumbs separator="›" aria-label="breadcrumbs">
+                        <Link color="primary" href="/">
+                            
+                            Desarrollo de Software
+                        </Link>
+                        {['Springfield', 'Simpson'].map((item) => (
+                            <Link key={item} color="success" href="#usage-with-link-and-typography">
+                                {item}
+                            </Link>
+                        ))}
+
+                        <Typography>Homer</Typography>
+                    </Breadcrumbs>
       </Box>
       <Box className="contenedor-curso" sx={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', minWidth: 0, height: '100%', alignSelf: 'center', gap: 2, justifyContent: 'flex-start', overflow: 'hidden',rowGap: '0.5rem' }}>
         <Link to="curso">

@@ -24,6 +24,9 @@ import Grades from './pages/student/Grades';
 import Result from './pages/student/Result';
 import Feedback from './pages/student/Feedback';
 import ViewCursoStudent from './pages/student/evaluation/ViewCursoStudent';
+import ViewRubric from './pages/student/evaluation/ViewRubric';
+import RubricResult from './pages/student/RubricResult';
+import ViewFeedback from './pages/student/ViewFeedback';
 
 function Logout() {
   localStorage.clear();
@@ -72,8 +75,13 @@ function App() {
         >
           <Route index element={<Grades />} />
           <Route path='curso' element={<ViewCursoStudent/>}/>
+          <Route path='curso/rubrica' element={<ViewRubric/>}/>
+          
           <Route path='resultados' element={<Result />} />
+          <Route path='resultados/calificación' element={<RubricResult />} />
+
           <Route path='retroalimentacion' element={<Feedback />} />
+          <Route path='retroalimentacion/feedback' element={<ViewFeedback />} />
 
         </Route>
         <Route path="/login" element={<Login />} />
