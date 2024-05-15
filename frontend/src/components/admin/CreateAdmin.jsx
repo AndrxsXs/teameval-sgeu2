@@ -1,4 +1,5 @@
 import * as React from 'react';
+import api from '../../api';
 import { useState } from 'react';
 import ModalFrame from '../ModalFrame';
 import Button from '@mui/joy/Button';
@@ -15,6 +16,40 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import Avatar from '@mui/joy/Avatar'
 
 export default function CreateAdmin() {
+
+    const [loading, setLoading] = useState(false);
+
+    const route = "api/register_admin/"
+
+    const [formData, setFormData] = useState({
+        name: '',
+        last_name: '',
+        code: '',
+        email: '',
+        phone: ''
+    });
+
+    const handleSubmit = async (event) => {
+        setLoading(true);
+        event.preventDefault();
+
+        const token = localStorage.getItem('ACCESS_TOKEN'); // Asegúrate de reemplazar 'ACCESS_TOKEN' con la clave correcta que estás utilizando para almacenar el token en localStorage
+
+        const response = await api.post(route, formData, {
+            headers: {
+                'Authorization': `Bearer ${token}` // Aquí es donde se agrega el token a los headers
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            // Aquí puedes manejar la respuesta de la API
+        } else {
+            console.error('Error:', response.status, response.statusText);
+        }
+        setLoading(false);
+    };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,10 +80,7 @@ export default function CreateAdmin() {
                 ModalTitle="Nuevo administrador"
             >
                 <form
-                    onSubmit={(event) => {
-                        event.preventDefault();
-                        handleCloseModal;
-                    }}
+                    onSubmit={handleSubmit}
                 >
                     <Box component='article'
                         sx={{
@@ -141,10 +173,16 @@ export default function CreateAdmin() {
 
                                     >
                                         <FormLabel>Nombre</FormLabel>
-                                        <Input size="sm" placeholder="Nombres" type='text' required />
+                                        <Input size="sm" placeholder="Nombres" type='text'
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                            required />
                                     </FormControl>
                                     <FormControl>
-                                        <Input size="sm" placeholder="Apellidos" type='text' required />
+                                        <Input size="sm" placeholder="Apellidos"
+                                            value={formData.last_name}
+                                            onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                            type='text' required />
                                     </FormControl>
                                 </Stack>
                                 <FormControl>
@@ -154,6 +192,8 @@ export default function CreateAdmin() {
                                         type="email"
                                         startDecorator={<EmailRoundedIcon />}
                                         placeholder="su.correo@institución.com"
+                                        value={formData.email}
+                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
                                         required
                                     //defaultValue="siriwatk@test.com"
                                     //sx={{ flexGrow: 1 }}
@@ -164,11 +204,17 @@ export default function CreateAdmin() {
                                 >
                                     <FormControl>
                                         <FormLabel>Cédula</FormLabel>
-                                        <Input size="sm" placeholder="Ingrese el código" type='number' required />
+                                        <Input size="sm" placeholder="Ingrese el código"
+                                            value={formData.code}
+                                            onChange={e => setFormData({ ...formData, code: e.target.value })}
+                                            type='number' required />
                                     </FormControl>
                                     <FormControl>
                                         <FormLabel>Teléfono (Opcional)</FormLabel>
-                                        <Input size="sm" placeholder="Ingrese el teléfono" type="tel" />
+                                        <Input size="sm" placeholder="Ingrese el teléfono"
+                                            value={formData.phone}
+                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                            type="tel" />
                                     </FormControl>
                                 </Stack>
                             </Stack>
@@ -185,7 +231,9 @@ export default function CreateAdmin() {
                                 variant='outlined'
                                 color='neutral'
                             >Cancelar</Button>
-                            <Button type="submit">Crear</Button>
+                            <Button type="submit"
+                                loading={loading}
+                            >Crear</Button>
                         </Box>
                     </Box>
                 </form>

@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
-import Checkbox from '@mui/joy/Checkbox';
-import Link from '@mui/joy/Link';
+import { Link } from 'react-router-dom';
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +17,7 @@ import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 // import Snackbar from '@mui/joy/Snackbar';
 import SimpleSnackbar from "../SimpleSnackbar";
+import { Link as JoyLink } from '@mui/joy';
 
 function interpretNumbers(nums) {
     let element
@@ -144,6 +144,7 @@ export default function Form({ method }) {
                 my: 4, // margin top & bottom
                 py: 3, // padding top & bottom
                 px: 2, // padding left & right
+                pb: 2,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 2,
@@ -162,7 +163,12 @@ export default function Form({ method }) {
                         </Typography>
                     </header>
                     <FormControl>
-                        <FormLabel>{labelCode}</FormLabel>
+                        <FormLabel
+                            sx={{
+                                mt: 2,
+
+                            }}
+                        >{labelCode}</FormLabel>
                         <Input
                             onChange={(e) => setCode(e.target.value)}
                             // html input attribute
@@ -174,7 +180,12 @@ export default function Form({ method }) {
                         />
                     </FormControl>
                     <FormControl>
-                        <FormLabel>{labelPassword}</FormLabel>
+                        <FormLabel
+                            sx={{
+                                mt: 2,
+
+                            }}
+                        >{labelPassword}</FormLabel>
                         <Input
                             onChange={(e) => setPassword(e.target.value)}
                             name="password"
@@ -188,14 +199,28 @@ export default function Form({ method }) {
                 fontSize="sm">
                 Olvidé mi contraseña
                 </Link></Typography> */}
-                        
-                        <Link level="title-sm" href="recuperar">
-                        ¿Olvidaste tu contraseña?
-                        </Link>
 
-                        <Button loading={loading} type="submit" sx={{ my: 1 }}>
+
+
+                        <Button loading={loading} type="submit" sx={{ mt: 2, mb: 1 }}>
                             {submit}
                         </Button>
+                        <Link to="/login/recuperar"
+                            style={{ textDecoration: 'none', alignSelf: 'center' }}
+                        >
+                            <Typography
+                                level='body-sm'
+                                color='primary'
+                                sx={{
+                                    alignSelf: 'center',
+                                    //color: 'primary',
+                                    textDecoration: 'none',
+                                
+                                }}
+                            >
+                                ¿Olvidó su contraseña?
+                            </Typography>
+                        </Link>
                     </FormControl>
                 </form>
                 <SimpleSnackbar

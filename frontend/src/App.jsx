@@ -17,8 +17,6 @@ import ManageCourses from "./pages/admin/ManageCourses";
 import ManageScales from "./pages/admin/ManageScales";
 
 import MainTeacherView from "./pages/teacher/MainTeacherView";
-import CourseView from './pages/teacher/course/CourseView';
-
 
 import Grades from './pages/student/Grades';
 import Result from './pages/student/Result';
@@ -60,13 +58,13 @@ function App() {
           <Route path='manage/scales' element={<ManageScales />} />
         </Route>
 
-        <Route path="/profesor/*" 
+        <Route path="/profesor/*"
           element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>}
           errorElement={<NotFound />}
         >
           <Route index element={<MainTeacherView />} />
-          
-         
+
+
           <Route path='settings' />
 
         </Route>
@@ -76,9 +74,9 @@ function App() {
           errorElement={<NotFound />}
         >
           <Route index element={<Grades />} />
-          <Route path='curso' element={<ViewCursoStudent/>}/>
-          <Route path='curso/rubrica' element={<ViewRubric/>}/>
-          
+          <Route path='curso' element={<ViewCursoStudent />} />
+          <Route path='curso/rubrica' element={<ViewRubric />} />
+
           <Route path='resultados' element={<Result />} />
           <Route path='resultados/calificación' element={<RubricResult />} />
 
@@ -87,13 +85,13 @@ function App() {
 
         </Route>
         <Route path="/login" element={<Login />} />
-        <Route path="login/recuperar" element={<ForgotPassword />} />
-        <Route path="login/recuperar/codigo" element={<CodePassword/>} />
+        <Route path="/login/recuperar" element={<ForgotPassword />} />
+        <Route path="login/recuperar/codigo" element={<CodePassword />} />
         <Route path="/crear-contraseña" element={<CreatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
 
-        
+
 
       </Routes>
     </CssVarsProvider>
