@@ -56,38 +56,36 @@ class MyTokenObtainPairView(TokenObtainPairView):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_student(request):
-    # creacion del usuario
-    # user creation
     data = request.data
-    user_data = {
-        "role": User.STUDENT,
-        "code": data.get("code"),
+    student_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
+        "code": data.get("code"),
         "email": data.get("email"),
-        "password": User.default_password(
-            data.get("name"), data.get("code"), data.get("last_name")
-        ),
+        "group": None,
     }
-    # creacion del estudiante
-    # student creation
-    serializer_user = UserSerializer(data=user_data)
-    if serializer_user.is_valid():
-        user = serializer_user.save()
-        student_data = {
-            "user": user,
-            # 'email': user.email,
-            "name": user.name,
-            "last_name": user.last_name,
-            "code": user.code,
-            "group": None,
-        }
-        serializer_student = StudentSerializer(data=student_data)
-        if serializer_student.is_valid():
-            serializer_student.save()
-            return Response(serializer_student.data, status=status.HTTP_201_CREATED)
-        return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer_user.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer_student = StudentSerializer(data=student_data)
+    if serializer_student.is_valid():
+        serializer_student.save()
+        return Response(serializer_student.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_admin(request):
+    data = request.data
+    admin_data = {
+        "name": data.get("name"),
+        "last_name": data.get("last_name"),
+        "code": data.get("code"),
+        "email": data.get("email"),
+        "phone": data.get("phone")
+    }
+    serializer_admin = AdminSerializer(data=admin_data)
+    if serializer_admin.is_valid():
+        serializer_admin.save()
+        return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
+    return Response(serializer_admin.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 # creacion de un profesor
@@ -134,7 +132,7 @@ def register_teacher(request):
 # admin creation
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_admin(request):
+def register_admin1(request):
     # creacion del usuario
     # user creation
     data = request.data
@@ -155,7 +153,7 @@ def register_admin(request):
         user = serializer_user.save()
         admin_data = {
             "user": user,
-            "email": user.email,
+         #   "email": user.email,
             "name": user.name,
             "last_name": user.last_name,
             "code": user.code,
@@ -222,6 +220,7 @@ def user_list(request):
             "name": user.name,
             "last_name": user.last_name,
             "email": user.email,
+            "status": user.status,
             # recorre cada usuario de la lista
         }
         for user in users

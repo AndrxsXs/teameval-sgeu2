@@ -1,5 +1,6 @@
 from .models import User, Student, Teacher, Admi, Course
 from rest_framework import serializers
+from rest_framework.response import Response
 # from .models import User
 # from .models import Note
 
@@ -34,9 +35,18 @@ class StudentSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
     code = serializers.CharField(source='user.code')
-    class Meta:        
+
+    class Meta:
         model = Student
-        fields = ["name", "last_name", "code", "email"] 
+        fields = ['name', 'last_name', 'code', 'email']
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['role'] = User.STUDENT
+        user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
+        user = User.objects.create(**user_data)
+        student = Student.objects.create(user=user, **validated_data)
+        return student
         
 class TeacherSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
@@ -73,15 +83,15 @@ class AdminSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Extraer los datos del usuario del diccionario de datos validados
         user_data = validated_data.pop('user')
+        user_data['role'] = User.ADMIN
+        user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
         # Crear una nueva instancia del modelo User con los datos del usuario
         user = User.objects.create(**user_data)
+        # Cambiar el estado del usuario a activo
+        user.status = True
+        user.save()
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         admin = Admi.objects.create(user=user, **validated_data)
-        # Cambiar el estado del admin a activo
-        admin.status = True
-        # Guardar el cambio en la base de datos
-        admin.save()
-        
         return admin
     
 class CourseSerializer(serializers.ModelSerializer):
