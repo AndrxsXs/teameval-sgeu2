@@ -33,7 +33,7 @@ export default function CreateAdmin() {
         setLoading(true);
         event.preventDefault();
 
-        const token = localStorage.getItem('ACCESS_TOKEN'); // Asegúrate de reemplazar 'ACCESS_TOKEN' con la clave correcta que estás utilizando para almacenar el token en localStorage
+        const token = localStorage.getItem('ACCESS_TOKEN');
 
         const response = await api.post(route, formData, {
             headers: {
@@ -86,7 +86,7 @@ export default function CreateAdmin() {
                         sx={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 1,
+                            gap: 2,
                             alignItems: 'flex-end'
 
                         }}
@@ -120,27 +120,7 @@ export default function CreateAdmin() {
                                             height: ''
                                         }} />
 
-                                    {/* <img
-                                                    // src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
-                                                    // srcSet="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286&dpr=2 2x"
-                                                    //src={<PersonRoundedIcon />}
-                                                    loading="lazy"
-                                                    alt=""
-                                                    style={{
-                                                        border: 0,
-                                                    }}
-                                                />
-                                                <PersonRoundedIcon
-                                                    sx={{
-                                                        transform: 'scale(50%)',
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        position: 'absolute',
-                                                        zIndex: 2
-                                                    }}
-                                                /> */}
                                 </AspectRatio>
-                                {/* <PersonRoundedIcon sx={{ alignSelf: 'center', justifySelf: 'center', height: 'auto', width: '60%' }} /> */}
                                 <IconButton
                                     aria-label="Subir una nueva imagen"
                                     size="sm"
@@ -151,7 +131,7 @@ export default function CreateAdmin() {
                                         position: 'absolute',
                                         zIndex: 2,
                                         borderRadius: '50%',
-                                        left: 100,
+                                        left: 110,
                                         top: 150,
                                         boxShadow: 'sm',
                                     }}
