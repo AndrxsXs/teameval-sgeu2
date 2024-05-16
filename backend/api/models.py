@@ -43,6 +43,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=80)
     password = models.CharField(max_length=35)
     first_login = models.BooleanField(default=True)
+    status = models.BooleanField(default=False)
     last_login = timezone.now()
 
     USERNAME_FIELD = "code"
@@ -75,21 +76,21 @@ class Admi(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
-    status = models.BooleanField(default=False)
+    #status = models.BooleanField(default=False)
     phone = models.BigIntegerField(null=True)
 
-    def create_user_admin(sender, instance, created, **kwargs):
-        if created:
-            Admi.objects.create(user=instance)
+ #   def create_user_admin(sender, instance, created, **kwargs):
+  #      if created:
+   #         Admi.objects.create(user=instance)
 
-    def save_user_admin(sender, instance, **kwargs):
-        instance.admi.save()
+ #   def save_user_admin(sender, instance, **kwargs):
+  #      instance.admi.save()
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
 
 
-post_save.connect(Admi.create_user_admin, sender=User)
+#post_save.connect(Admi.create_user_admin, sender=User)
 
 
 class Student(models.Model):
@@ -107,7 +108,7 @@ class Student(models.Model):
 
 class Teacher(models.Model):
 
-    status = models.BooleanField(default=False)
+#    status = models.BooleanField(default=False)
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
