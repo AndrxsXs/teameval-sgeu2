@@ -15,7 +15,7 @@ export default function ProfileInfo() {
         // Simular un retraso de 2 segundos para obtener los datos del usuario
         const timeout = setTimeout(() => {
             setLoading(false); // Establecer loading a false después de obtener los datos del usuario
-        }, 2000);
+        }, 1000);
 
         return () => clearTimeout(timeout); // Limpiar el timeout en el desmontaje
     }, [user]); // El arreglo vacío asegura que el efecto se ejecute una sola vez

@@ -17,7 +17,6 @@ import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 // import Snackbar from '@mui/joy/Snackbar';
 import SimpleSnackbar from "../SimpleSnackbar";
-import { Link as JoyLink } from '@mui/joy';
 
 function interpretNumbers(nums) {
     let element
