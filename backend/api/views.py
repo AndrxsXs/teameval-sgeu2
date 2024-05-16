@@ -84,8 +84,8 @@ def register_admin(request):
     serializer_admin = AdminSerializer(data=admin_data)
     if serializer_admin.is_valid():
         serializer_admin.save()
-        return Response(serializer_admin.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_admin.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+    return Response({'message': 'error creating user'}, status=status.HTTP_409_CONFLICT)
 
 
 # creacion de un profesor

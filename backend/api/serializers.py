@@ -1,6 +1,6 @@
 from .models import User, Student, Teacher, Admi, Course
 from rest_framework import serializers
-from rest_framework.response import Response
+from django.db import IntegrityError
 # from .models import User
 # from .models import Note
 
@@ -85,8 +85,11 @@ class AdminSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         user_data['role'] = User.ADMIN
         user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
-        # Crear una nueva instancia del modelo User con los datos del usuario
-        user = User.objects.create(**user_data)
+        try:
+            # Crear una nueva instancia del modelo User con los datos del usuario
+            user = User.objects.create(**user_data)
+        except IntegrityError:
+            raise serializers.ValidationError("User with this code already exists")
         # Cambiar el estado del usuario a activo
         user.status = True
         user.save()
