@@ -5,6 +5,8 @@ import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constants";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types"
 
+import { CircularProgress, Box } from "@mui/joy";
+
 function interpretNumbers(nums) {
     let element
     switch (nums) {
@@ -42,11 +44,11 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
             const userRole = interpretNumbers(decoded.role);
 
-            console.log(userRole)
+            // console.log(userRole)
 
             const isAllowed = allowedRoles.includes(userRole);
 
-            console.log(isAllowed)
+            // console.log(isAllowed)
 
             if (!isAllowed) {
                 setIsAuthorized(false);
@@ -87,7 +89,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
 
     if (isAuthorized === null) {
-        return <div>Cargando...</div>;
+        return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}><CircularProgress size="lg" /></Box>;
     }
 
     return isAuthorized ? children : <Navigate to="/login" />;
