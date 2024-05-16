@@ -3,6 +3,7 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { Button } from "@mui/joy"
 import Add from '@mui/icons-material/Add';
 import CreateStudent from "../../../components/teacher/CreateStudent";
+import BodyAddStudent from "../../../components/teacher/BodyAddStudent";
 
 export default function AddStudent() {
 
@@ -43,7 +44,7 @@ export default function AddStudent() {
                         Importar estudiantes
                     </Button>
                 </Box>
-                
+                <BodyAddStudent/>
             </Box>
         </>
     )
