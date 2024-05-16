@@ -16,7 +16,7 @@ import ManageTeachers from "./pages/admin/ManageTeachers"
 import ManageCourses from "./pages/admin/ManageCourses";
 import ManageScales from "./pages/admin/ManageScales";
 
-import MainTeacherView from "./pages/teacher/MainTeacherView";
+import MainTeacherView from './pages/teacher/MainTeacherView';
 
 import Grades from './pages/student/Grades';
 import Result from './pages/student/Result';
@@ -63,7 +63,6 @@ function App() {
           errorElement={<NotFound />}
         >
           <Route index element={<MainTeacherView />} />
-
 
           <Route path='settings' />
 
