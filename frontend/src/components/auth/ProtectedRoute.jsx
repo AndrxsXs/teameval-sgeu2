@@ -8,6 +8,7 @@ import { CircularProgress, Box, Typography } from "@mui/joy";
 import AdminPage from "../../pages/AdminPage";
 import TeacherPage from "../../pages/TeacherPage";
 import StudentPage from "../../pages/StudentPage";
+import CreatePassword from "../../pages/auth/CreatePassword";
 
 const USER_ROLES = {
     ADMIN: 'admin',
@@ -30,6 +31,7 @@ const interpretNumbers = (nums) => {
 
 const ProtectedRoute = ({ allowedRoles }) => {
     const [isAuthorized, setIsAuthorized] = useState(null);
+    const [firstLogin, setFirstLogin] = useState(false);
     const [userData, setUserData] = useState(null);
     const location = useLocation();
     const token = localStorage.getItem(ACCESS_TOKEN);
@@ -60,6 +62,18 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
                 const userRole = interpretNumbers(decoded.role);
 
+                setFirstLogin(decoded.first_login);
+
+                // console.log("First login: ", firstLogin)
+
+                // if (firstLogin) {
+                //     setIsAuthorized
+                //     return <CreatePassword />
+                //         // <Navigate to="/crear-contrasena" state={{ from: location }} replace />
+
+                //         ;
+                // }
+
                 if (allowedRoles.includes(userRole)) {
                     setIsAuthorized(true);
                 } else {
@@ -72,7 +86,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
         };
 
         fetchUserData();
-    }, [allowedRoles, token]);
+    }, [allowedRoles, token, location, firstLogin]);
 
     const refreshToken = async () => {
         const refreshToken = localStorage.getItem(REFRESH_TOKEN);
@@ -94,7 +108,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
         }
     };
 
-    if (isAuthorized === null) {
+    if (isAuthorized === null && !firstLogin) {
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
                 <CircularProgress size="lg" />
@@ -103,6 +117,10 @@ const ProtectedRoute = ({ allowedRoles }) => {
                 </Typography>
             </Box>
         );
+    }
+
+    if (firstLogin) {
+        return <CreatePassword />
     }
 
     if (isAuthorized) {
@@ -118,7 +136,6 @@ const ProtectedRoute = ({ allowedRoles }) => {
                 return null;
         }
     }
-
     return <Navigate to="/login" state={{ from: location }} replace />;
 };
 
