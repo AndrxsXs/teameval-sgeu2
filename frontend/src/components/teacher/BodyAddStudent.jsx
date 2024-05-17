@@ -6,7 +6,7 @@ import Radio from '@mui/joy/Radio';
 import Sheet from '@mui/joy/Sheet';
 import { Box, Typography } from "@mui/joy"
 import OrderTable from './OrderTable';
-import AdminTable from '../AdminTable';
+import AdminTable from '../../components/admin/AdminTable';
 import Stack from '@mui/joy/Stack';
 
 export default function BodyAddStudent() {
