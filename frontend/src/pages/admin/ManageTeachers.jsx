@@ -1,5 +1,9 @@
 import { Box, Typography, Button } from '@mui/joy';
-import Add from '@mui/icons-material/Add';
+
+import TeacherTable from '../../components/admin/TeacherTable';
+import CreateTeacher from '../../components/admin/CreateTeacher';
+
+import FileUploadRoundedIcon from '@mui/icons-material/FileUploadRounded';
 
 export default function ManageTeachers() {
     return (
@@ -21,15 +25,23 @@ export default function ManageTeachers() {
                     Configuración de docentes
                 </Typography>
 
-                <Button
-                    color="primary"
-                    startDecorator={<Add />}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                    }}
                 >
-                    Nuevo docente
-                </Button>
-
-
+                    <Button
+                        variant="soft"
+                        startDecorator={<FileUploadRoundedIcon />}
+                    >
+                        Importar docentes
+                    </Button>
+                    <CreateTeacher />
+                </Box>
             </Box>
+            <TeacherTable />
         </>
     )
 }
