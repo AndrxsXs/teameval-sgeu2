@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
 import {
@@ -13,13 +14,13 @@ import Box from '@mui/material/Box'
 // import ManageCourses from "./admin/ManageCourses";
 // import ManageScales from "./admin/ManageScales";
 
-function AdminPage() {
+function AdminPage({userData}) {
 
     return (
         <CssVarsProvider disableTransitionOnChange>
             <Box className="container" sx={{ width: '100%' }}>
                 <CssBaseline />
-                <AdminSidebar />
+                <AdminSidebar userData={userData} />
 
                 <Box component="main" className="main-container"
                     sx={{
