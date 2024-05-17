@@ -22,33 +22,41 @@ export default function CreateAdmin() {
     const route = "api/register_admin/"
 
     const [formData, setFormData] = useState({
+        code: '',
         name: '',
         last_name: '',
-        code: '',
         email: '',
-        phone: ''
+        phone: undefined
     });
 
     const handleSubmit = async (event) => {
+        // console.log(formData);
         setLoading(true);
         event.preventDefault();
 
         const token = localStorage.getItem('ACCESS_TOKEN');
 
-        const response = await api.post(route, formData, {
-            headers: {
-                'Authorization': `Bearer ${token}` // Aquí es donde se agrega el token a los headers
-            }
-        });
+        try {
+            const response = await api.post(route, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log(data);
-            // Aquí puedes manejar la respuesta de la API
-        } else {
-            console.error('Error:', response.status, response.statusText);
+            if (response.status === 201) {
+                const data = await response.json();
+                console.log(data);
+                // Emitir el evento 'userCreated' después de crear un nuevo usuario
+                window.dispatchEvent(new Event('userCreated'));
+            } else {
+                console.error('Error:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
+
         setLoading(false);
+        handleCloseModal(false);
     };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,11 +101,15 @@ export default function CreateAdmin() {
                     >
                         <Stack direction="row"
                             spacing={3}
-                            sx={{ display: { xs: 'none', md: 'flex' }, my: 1 }}>
+                            sx={{ display: 'flex', my: 1 }}>
 
                             {/* profile picture */}
 
-                            <Stack direction="column" spacing={1}>
+                            <Stack direction="column" spacing={1}
+                                sx={{
+                                    display: { sm: 'none', md: 'none' },
+                                }}
+                            >
                                 <AspectRatio
                                     ratio="1"
                                     maxHeight={200}
@@ -152,13 +164,14 @@ export default function CreateAdmin() {
                                     //sx={{ display: { sm: 'flex-column', md: 'flex-row' }, gap: 2 }}
 
                                     >
-                                        <FormLabel>Nombre</FormLabel>
+                                        <FormLabel>Nombres</FormLabel>
                                         <Input size="sm" placeholder="Nombres" type='text'
                                             value={formData.name}
                                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                                             required />
                                     </FormControl>
                                     <FormControl>
+                                        <FormLabel>Apellidos</FormLabel>
                                         <Input size="sm" placeholder="Apellidos"
                                             value={formData.last_name}
                                             onChange={e => setFormData({ ...formData, last_name: e.target.value })}
@@ -218,7 +231,6 @@ export default function CreateAdmin() {
                     </Box>
                 </form>
             </ModalFrame>
-
         </React.Fragment>
     );
 }
