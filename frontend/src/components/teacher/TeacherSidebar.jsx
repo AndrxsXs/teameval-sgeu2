@@ -7,7 +7,7 @@ import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 
-export default function AdminSidebar() {
+export default function TeacherSidebar({ userData }) {
 
     const menuItems = [
         {},
@@ -35,13 +35,14 @@ export default function AdminSidebar() {
         icon: <AutoStoriesRoundedIcon key="course" />,
         text: 'Curso',
         items: [
-            { itemText: 'Importar estudiantes', itemIcon: <FileUploadIcon />, itemRoute: '/profesor/curso/estudiante/importar' },
-            { itemText: 'Deshabilitar estudiantes', itemIcon: <PersonRemoveRoundedIcon />, itemRoute: '/profesor/curso/estudiante/deshabilitar' },
+            { itemText: 'Importar estudiantes', itemIcon: <FileUploadIcon />, itemRoute: '/profesor/curso/importar-estudiante' },
+            { itemText: 'Deshabilitar estudiantes', itemIcon: <PersonRemoveRoundedIcon />, itemRoute: '/profesor/curso/deshabilitar-estudiante' },
         ],
     };
 
     return (
         <Sidebar
+            userData={userData}
             firstHeader="Gestión"
             menuItems={menuItems}
             settingsRoute={settingsRoute}

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 
 import { Routes, Route } from 'react-router-dom'
 import CourseView from './teacher/course/CourseView';
@@ -7,14 +8,16 @@ import DisableStudent from "./teacher/course/DisableStudent"
 import Groups from './teacher/Groups'
 import ScalesCriteria from './teacher/ScalesCriteria'
 import Report from './teacher/Report'
+import MainTeacherView from './teacher/MainTeacherView';
 
-function TeacherPage() {
+function TeacherPage({ userData }) {
     return (
         <>
             <Routes>
-                <Route path='/curso/*' element={<CourseView />}>
-                    <Route path='estudiante/importar' element={<AddStudent />} />
-                    <Route path='estudiante/deshabilitar' element={<DisableStudent />} />
+                <Route index element={<MainTeacherView />} />
+                <Route path='/curso/*' element={<CourseView userData={userData} />}>
+                    <Route path='importar-estudiante' element={<AddStudent />} />
+                    <Route path='deshabilitar-estudiante' element={<DisableStudent />} />
                     <Route path='grupos' element={<Groups />} />
                     <Route path='escalas' element={<ScalesCriteria />} />
                     <Route path='informes' element={<Report />} />

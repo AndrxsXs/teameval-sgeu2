@@ -22,7 +22,7 @@ export default function ManageTeachers() {
                 }}
             >
                 <Typography level="h2" component="h1">
-                    Configuración de docentes
+                    Docentes
                 </Typography>
 
                 <Box

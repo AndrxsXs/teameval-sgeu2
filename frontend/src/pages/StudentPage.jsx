@@ -1,24 +1,25 @@
+/* eslint-disable react/prop-types */
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
 import { Outlet } from 'react-router-dom'
 import StudentSidebar from "../components/student/StudentSidebar"
 import Box from '@mui/material/Box'
 import "../styles/pages/student/StudentPage.css"
-import Breadcrumbs from '@mui/joy/Breadcrumbs';
-import Link from '@mui/joy/Link';
-import Typography from '@mui/joy/Typography';
-import PublicIcon from '@mui/icons-material/Public';
+// import Breadcrumbs from '@mui/joy/Breadcrumbs';
+// import Link from '@mui/joy/Link';
+// import Typography from '@mui/joy/Typography';
+// import PublicIcon from '@mui/icons-material/Public';
 // import Feedback from "../pages/student/Feedback";
 // import Grades from "../pages/student/Grades";
 // import Result from "../pages/student/Result";
 
 
-export default function StudentPage() {
+export default function StudentPage({ userData }) {
     return (
         <CssVarsProvider disableTransitionOnChange>
             <Box className="container" sx={{ width: '100%' }}>
                 <CssBaseline />
-                <StudentSidebar />
+                <StudentSidebar userData={userData} />
 
                 <Box component="main" className="main-container"
                     sx={{
@@ -38,7 +39,7 @@ export default function StudentPage() {
                         margin: 'auto 0',
                     }}>
 
-                
+
 
                     <Outlet />
                 </Box>

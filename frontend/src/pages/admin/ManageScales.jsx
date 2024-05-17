@@ -21,7 +21,7 @@ export default function ManageScales() {
                 }}
             >
                 <Typography level="h2" component="h1">
-                    Configuración de escalas y criterios
+                    Escalas y criterios
                 </Typography>
 
                 <Box

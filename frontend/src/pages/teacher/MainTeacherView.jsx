@@ -46,9 +46,9 @@ export default function MainTeacherView() {
                         justifyContent: 'center',
                     }}>
 
-                    <Link to="profesor/curso"> <CardCurso name="Desarrollo de software" src={fondoCard} /></Link>
-                    <Link to="profesor/curso"> <CardCurso name="Base de datos" src={fondo} /></Link>
-                    <Link to="profesor/curso"> <CardCurso name="Ciberseguridad" src={fondoCiber} /></Link>
+                    <Link to="curso"> <CardCurso name="Desarrollo de software" src={fondoCard} /></Link>
+                    <Link to="curso"> <CardCurso name="Base de datos" src={fondo} /></Link>
+                    <Link to="curso"> <CardCurso name="Ciberseguridad" src={fondoCiber} /></Link>
 
                 </Box>
             </Box>
