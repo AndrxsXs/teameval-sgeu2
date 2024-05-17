@@ -1,8 +1,8 @@
 import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
-import SearchField from "../../components/admin/SearchField"
+// import SearchField from "../../components/admin/SearchField"
 import CreateAdmin from "../../components/admin/CreateAdmin"
-import OrderTable from "../../components/AdminTable"
+import AdminTable from "../../components/admin/AdminTable"
 
 export default function ManageAdmin() {
 
@@ -24,11 +24,10 @@ export default function ManageAdmin() {
                 <Typography level="h2" component="h1">
                     Configuración de administradores
                 </Typography>
-
                 <CreateAdmin />
             </Box>
-            <SearchField />
-            <OrderTable />
+            {/* <SearchField /> */}
+            <AdminTable />
         </>
     )
 }

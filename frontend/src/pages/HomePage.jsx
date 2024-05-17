@@ -3,13 +3,15 @@ import TopNavbar from "../components/TopNavbar"
 import Typography from "@mui/joy/Typography"
 import PhotoHomePage from '../assets/photoHomePage.png'
 import '../styles/pages/HomePage.css'
+
 import Button from "@mui/joy/Button"
+import { Box } from "@mui/joy"
 
 export default function HomePage() {
     return (
         <>
             <TopNavbar />
-            <main className="main-homepage">
+            <Box component="main" className="main-homepage">
                 <article>
                     <section className="presentation">
                         <Typography level="title-lg" color="primary">
@@ -31,7 +33,7 @@ export default function HomePage() {
                         <img className="img-home" src={PhotoHomePage} alt="" />
                     </section>
                 </article>
-            </main>
+            </Box>
         </>
     )
 }
