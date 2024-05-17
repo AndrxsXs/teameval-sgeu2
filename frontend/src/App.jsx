@@ -1,4 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { ACCESS_TOKEN } from './constants';
+import { interpretNumbers } from './utils/interpretNumbers';
+
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -9,7 +14,6 @@ import NotFound from './pages/NotFound';
 import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
 import CreatePassword from './pages/auth/CreatePassword';
-
 
 import ManageAdmin from "./pages/admin/ManageAdmin";
 import ManageTeachers from "./pages/admin/ManageTeachers"
@@ -33,10 +37,24 @@ function Logout() {
   return <Navigate to="/login" />
 }
 
-// function CreatePasswordAndLogout() {
-//   localStorage.clear();
-//   return <Navigate to="/create-password" />
-// }
+function AuthRedirect({ children }) {
+  const location = useLocation();
+  const token = localStorage.getItem(ACCESS_TOKEN);
+
+  if (token) {
+    const decoded = jwtDecode(token);
+    const userRole = interpretNumbers(decoded.role);
+    return <Navigate to={`/${userRole}`} state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+const USER_ROLES = {
+  ADMIN: 'admin',
+  TEACHER: 'teacher',
+  STUDENT: 'student'
+}
 
 function App() {
 
@@ -45,11 +63,11 @@ function App() {
       <CssBaseline />
       <Routes>
 
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<AuthRedirect><HomePage /></AuthRedirect>} />
 
         <Route
           path="/admin/*"
-          element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}><AdminPage /></ProtectedRoute>}
           errorElement={<NotFound />}
         >
           <Route index element={<ManageAdmin />} />
@@ -59,7 +77,7 @@ function App() {
         </Route>
 
         <Route path="/profesor/*"
-          element={<ProtectedRoute allowedRoles={['teacher']}><TeacherPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={[USER_ROLES.TEACHER]}><TeacherPage /></ProtectedRoute>}
           errorElement={<NotFound />}
         >
           <Route index element={<MainTeacherView />} />
@@ -69,7 +87,7 @@ function App() {
         </Route>
 
         <Route path="/estudiante/*"
-          element={<ProtectedRoute allowedRoles={['student']}><StudentPage /></ProtectedRoute>}
+          element={<ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}><StudentPage /></ProtectedRoute>}
           errorElement={<NotFound />}
         >
           <Route index element={<Grades />} />
@@ -83,10 +101,12 @@ function App() {
           <Route path='retroalimentacion/feedback' element={<ViewFeedback />} />
 
         </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/login/recuperar" element={<ForgotPassword />} />
-        <Route path="login/recuperar/codigo" element={<CodePassword />} />
-        <Route path="/crear-contraseña" element={<CreatePassword />} />
+
+        <Route path="/login" element={<AuthRedirect><Login /></AuthRedirect>} />
+        <Route path="/login/recuperar" element={<AuthRedirect><ForgotPassword /></AuthRedirect>} />
+        <Route path="login/recuperar/codigo" element={<AuthRedirect><CodePassword /></AuthRedirect>} />
+        <Route path="/crear-contraseña" element={<AuthRedirect><CreatePassword /></AuthRedirect>} />
+
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
 

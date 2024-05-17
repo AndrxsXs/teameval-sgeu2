@@ -1,101 +1,125 @@
-import { Navigate } from "react-router-dom";
+/* eslint-disable react/prop-types */
+import { Navigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../api";
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constants";
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types"
+import { CircularProgress, Box, Typography } from "@mui/joy";
+import AdminPage from "../../pages/AdminPage";
+import TeacherPage from "../../pages/TeacherPage";
+import StudentPage from "../../pages/StudentPage";
 
-import { CircularProgress, Box } from "@mui/joy";
+const USER_ROLES = {
+    ADMIN: 'admin',
+    TEACHER: 'teacher',
+    STUDENT: 'student',
+};
 
-function interpretNumbers(nums) {
-    let element
+const interpretNumbers = (nums) => {
     switch (nums) {
         case 1:
-            element = 'student';
-            break
+            return USER_ROLES.STUDENT;
         case 2:
-            element = 'teacher';
-            break
+            return USER_ROLES.TEACHER;
         case 3:
-            element = 'admin';
-            break
+            return USER_ROLES.ADMIN;
         default:
-            return;
+            return null;
     }
+};
 
-    return element;
-}
-
-export default function ProtectedRoute({ children, allowedRoles }) {
-
+const ProtectedRoute = ({ allowedRoles }) => {
     const [isAuthorized, setIsAuthorized] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const location = useLocation();
+    const token = localStorage.getItem(ACCESS_TOKEN);
 
     useEffect(() => {
-
-        const allowedRoles = ['admin', 'teacher', 'student'];
-
-        const auth = async () => {
-            const token = localStorage.getItem(ACCESS_TOKEN);
+        const fetchUserData = async () => {
             if (!token) {
                 setIsAuthorized(false);
                 return;
             }
+
             const decoded = jwtDecode(token);
-
-            const userRole = interpretNumbers(decoded.role);
-
-            // console.log(userRole)
-
-            const isAllowed = allowedRoles.includes(userRole);
-
-            // console.log(isAllowed)
-
-            if (!isAllowed) {
-                setIsAuthorized(false);
-                return;
-            }
-
             const tokenExpiration = decoded.exp;
             const now = Date.now() / 1000;
 
             if (tokenExpiration < now) {
                 await refreshToken();
-            } else {
-                setIsAuthorized(true);
+            }
+
+            try {
+                const res = await api.get('api/user_data/', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setUserData(res.data);
+
+                const userRole = interpretNumbers(decoded.role);
+
+                if (allowedRoles.includes(userRole)) {
+                    setIsAuthorized(true);
+                } else {
+                    setIsAuthorized(false);
+                }
+            } catch (error) {
+                console.log(error);
+                setIsAuthorized(false);
             }
         };
 
-        auth().catch(() => setIsAuthorized(false))
-    }, [allowedRoles])
+        fetchUserData();
+    }, [allowedRoles, token]);
 
     const refreshToken = async () => {
         const refreshToken = localStorage.getItem(REFRESH_TOKEN);
         try {
-            const res = await api.post("/api/token/refresh/", {
+            const res = await api.post('/api/token/refresh/', {
                 refresh: refreshToken,
             });
             if (res.status === 200) {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access)
-                setIsAuthorized(true)
+                localStorage.setItem(ACCESS_TOKEN, res.data.access);
             } else {
-                setIsAuthorized(false)
+                // Manejar el caso en que el refresh token no sea válido
+                localStorage.clear();
+                window.location.href = '/login'; // Redirigir al usuario a la página de inicio de sesión
             }
         } catch (error) {
             console.log(error);
-            setIsAuthorized(false);
+            localStorage.clear();
+            window.location.href = '/login'; // Redirigir al usuario a la página de inicio de sesión
         }
     };
 
-
-
     if (isAuthorized === null) {
-        return <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}><CircularProgress size="lg" /></Box>;
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
+                <CircularProgress size="lg" />
+                <Typography level="body-sm">
+                    Cargando...
+                </Typography>
+            </Box>
+        );
     }
 
-    return isAuthorized ? children : <Navigate to="/login" />;
-}
+    if (isAuthorized) {
+        const userRole = interpretNumbers(userData.role);
+        switch (userRole) {
+            case USER_ROLES.ADMIN:
+                return <AdminPage userData={userData} />;
+            case USER_ROLES.TEACHER:
+                return <TeacherPage userData={userData} />;
+            case USER_ROLES.STUDENT:
+                return <StudentPage userData={userData} />;
+            default:
+                return null;
+        }
+    }
 
-ProtectedRoute.propTypes = {
-    children: PropTypes.node.isRequired,
-    allowedRoles: PropTypes.arrayOf(PropTypes.string).isRequired,
-}
+    return <Navigate to="/login" state={{ from: location }} replace />;
+};
+
+export default ProtectedRoute;
