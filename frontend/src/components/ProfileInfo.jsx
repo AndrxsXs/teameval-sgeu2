@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../components/auth/AuthContext';
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from 'react';
 
 import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
@@ -7,18 +7,34 @@ import Typography from '@mui/joy/Typography';
 import LogoutButton from './auth/LogoutButton';
 import Skeleton from '@mui/joy/Skeleton';
 
-export default function ProfileInfo() {
-    const { user } = useContext(AuthContext);
-    const [loading, setLoading] = useState(!user); // Establecer loading a true inicialmente
+const USER_ROLES = {
+    ADMIN: 'Administrador',
+    TEACHER: 'Profesor',
+    STUDENT: 'Estudiante',
+};
+
+const interpretNumbers = (nums) => {
+    switch (nums) {
+        case 1:
+            return USER_ROLES.STUDENT;
+        case 2:
+            return USER_ROLES.TEACHER;
+        case 3:
+            return USER_ROLES.ADMIN;
+        default:
+            return null;
+    }
+};
+
+export default function ProfileInfo(props) {
+    const { userData } = props;
+    const [role, setRole] = useState(!userData)
+    const [loading, setLoading] = useState(!userData); // Establecer loading a true inicialmente
 
     useEffect(() => {
-        // Simular un retraso de 2 segundos para obtener los datos del usuario
-        const timeout = setTimeout(() => {
-            setLoading(false); // Establecer loading a false después de obtener los datos del usuario
-        }, 1000);
-
-        return () => clearTimeout(timeout); // Limpiar el timeout en el desmontaje
-    }, [user]); // El arreglo vacío asegura que el efecto se ejecute una sola vez
+        setRole(userData && interpretNumbers(userData.role));
+        setLoading(false)
+    }, [userData]); // El arreglo vacío asegura que el efecto se ejecute una sola vez
 
     return (
         <Box component="section" sx={{
@@ -47,12 +63,12 @@ export default function ProfileInfo() {
             }}>
                 <Typography level="title-sm">
                     <Skeleton loading={loading} animation="wave">
-                        {user && `${user.name} ${user.lastName}`}
+                        {userData && `${userData.name} ${userData.last_name}`}
                     </Skeleton>
                 </Typography>
                 <Typography level="body-xs">
                     <Skeleton loading={loading} animation="wave">
-                        {user && user.email}
+                        {userData && role}
                     </Skeleton>
                 </Typography>
             </Box>
