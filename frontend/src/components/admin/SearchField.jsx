@@ -1,28 +1,42 @@
-import React from "react";
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import { Box } from "@mui/joy";
 import { FormControl, FormLabel } from "@mui/joy";
 import { Input } from "@mui/joy";
-import { Select, Option } from "@mui/joy";
+// import { Select, Option } from "@mui/joy";
 import SearchIcon from "@mui/icons-material/Search";
 
-export default function SerachField() {
+export default function SearchField({ onSearchChange,
+    // onStatusFilterChange
+}) {
+    const [searchQuery, setSearchQuery] = useState('');
+    // const [statusFilter, setStatusFilter] = useState('');
+    const [debounceTimer, setDebounceTimer] = useState(null);
 
+    useEffect(() => {
+        return () => clearTimeout(debounceTimer); // Limpiar el temporizador cuando el componente se desmonte
+    }, [debounceTimer]);
 
-    const renderFilters = () => (
-        <React.Fragment>
-            <FormControl size="sm">
-                <FormLabel>Estado</FormLabel>
-                <Select
-                    size="sm"
-                    placeholder="Filtrar por estado"
-                    slotProps={{ button: { sx: { whiteSpace: 'nowrap' } } }}
-                >
-                    <Option value="enabled">Habilitado</Option>
-                    <Option value="disabled">Deshabilitado</Option>
-                </Select>
-            </FormControl>
-        </React.Fragment>
-    );
+    const handleSearchChange = (event) => {
+        const newSearchQuery = event.target.value;
+        setSearchQuery(newSearchQuery);
+
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+
+        const timer = setTimeout(() => {
+            onSearchChange(newSearchQuery);
+        }, 500); // Delay de 1 segundo
+
+        setDebounceTimer(timer);
+    };
+
+    // const handleStatusFilterChange = (event) => {
+    //     const newStatusFilter = event.target.value;
+    //     setStatusFilter(newStatusFilter);
+    //     onStatusFilterChange(newStatusFilter);
+    // };
 
     return (
         <Box component="section" className="search-field"
@@ -41,10 +55,31 @@ export default function SerachField() {
             }}
         >
             <FormControl sx={{ flex: 1 }} size="sm">
-                <FormLabel>Buscar administrador</FormLabel>
-                <Input size="sm" placeholder="Buscar" startDecorator={<SearchIcon />} />
+                <FormLabel>Buscar usuario</FormLabel>
+                <Input
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    size="sm"
+                    placeholder="Código, nombre o correo electrónico"
+                    startDecorator={<SearchIcon />} />
             </FormControl>
-            {renderFilters()}
+
+            {/* TODO: FILTRAR POR ESTADO */}
+
+            {/* <FormControl size="sm">
+                <FormLabel>Estado</FormLabel>
+                <Select
+                    size="sm"
+                    placeholder="Filtrar por estado"
+                    value={statusFilter}
+                    onChange={handleStatusFilterChange}
+                    slotProps={{ button: { sx: { whiteSpace: 'nowrap' } } }}
+                >
+                    <Option value="">Todos</Option>
+                    <Option value="true">Habilitado</Option>
+                    <Option value="false">Deshabilitado</Option>
+                </Select>
+            </FormControl> */}
         </Box>
     )
 }
