@@ -33,6 +33,7 @@ const MenuItem = ({ icon, text, route, isSelected }) => (
 );
 
 export default function Sidebar(props) {
+    const { userData } = props;
 
     const {
         firstHeader,
@@ -52,7 +53,10 @@ export default function Sidebar(props) {
             sx={{
                 position: 'sticky',
                 height: '100dvh',
-                width: 'var(--Sidebar-width)',
+                // width: 'var(--Sidebar-width)',
+                // width: 'max-content',
+                width: '100%',
+                maxWidth: '300px',
                 top: 0,
                 flexShrink: 0,
                 display: 'flex',
@@ -104,7 +108,7 @@ export default function Sidebar(props) {
                     </ListSubheader>
                     {menuItems && menuItems.map(({ text, route, icon }, index) => {
                         if (index === dropdownMenuPosition && showDropdownMenu) {
-                            return <DropdownMenu {...dropdownMenuProps} />;
+                            return <DropdownMenu key={index} {...dropdownMenuProps} />;
                         }
 
                         return (
@@ -151,7 +155,7 @@ export default function Sidebar(props) {
                     my: '-16px',
                 }}
             />
-            <ProfileInfo />
+            <ProfileInfo userData={userData} />
         </Sheet>
     )
 }
