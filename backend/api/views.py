@@ -66,8 +66,11 @@ def register_student(request):
     }
     serializer_student = StudentSerializer(data=student_data)
     if serializer_student.is_valid():
-        serializer_student.save()
-        return Response(serializer_student.data, status=status.HTTP_201_CREATED)
+        try:
+            serializer_student.save()
+            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        except:
+            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -83,16 +86,39 @@ def register_admin(request):
     }
     serializer_admin = AdminSerializer(data=admin_data)
     if serializer_admin.is_valid():
-        serializer_admin.save()
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
-    return Response({'message': 'error creating user'}, status=status.HTTP_409_CONFLICT)
+        try:
+            serializer_admin.save()
+            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        except:
+            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
+    return Response({'message': 'error creating user'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_teacher(request):
+    data = request.data
+    teacher_data = {
+        "name": data.get("name"),
+        "last_name": data.get("last_name"),
+        "code": data.get("code"),
+        "email": data.get("email"),
+        "phone": data.get("phone")
+    }
+    serializer_teacher = TeacherSerializer(data=teacher_data)
+    if serializer_teacher.is_valid():
+        try:
+            serializer_teacher.save()
+            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        except:
+            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
+    return Response({'message': 'error creating user'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # creacion de un profesor
 # teacher creation
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_teacher(request):
+def register_teacher1(request):
     # creacion del usuario
     # user creation
     data = request.data

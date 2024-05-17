@@ -48,7 +48,7 @@ class StudentSerializer(serializers.ModelSerializer):
         student = Student.objects.create(user=user, **validated_data)
         return student
         
-class TeacherSerializer(serializers.ModelSerializer):
+class TeacherSerializer1(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
@@ -62,13 +62,35 @@ class TeacherSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         # Crear una nueva instancia del modelo User con los datos del usuario
         user = User.objects.create(**user_data)
+        # Cambiar el estado del profesor a activo
+        user.status = True
+        user.save()
+        # Crear una nueva instancia del modelo Teacher con los datos validados restantes
+        teacher = Teacher.objects.create(user=user, **validated_data)        
+        return teacher
+
+class TeacherSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+
+    class Meta:        
+        model = Teacher
+        fields = ["name", "last_name", "code", "email", "phone"] 
+        
+    def create(self, validated_data):
+        # Extraer los datos del usuario del diccionario de datos validados
+        user_data = validated_data.pop('user')
+        user_data['role'] = User.TEACHER
+        user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
+        # Crear una nueva instancia del modelo User con los datos del usuario
+        user = User.objects.create(**user_data)
+        # Cambiar el estado del usuario a activo
+        user.status = True
+        user.save()
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         teacher = Teacher.objects.create(user=user, **validated_data)
-        # Cambiar el estado del profesor a activo
-        teacher.status = True
-        # Guardar el cambio en la base de datos
-        teacher.save()
-        
         return teacher
 
 class AdminSerializer(serializers.ModelSerializer):
@@ -85,11 +107,8 @@ class AdminSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         user_data['role'] = User.ADMIN
         user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
-        try:
-            # Crear una nueva instancia del modelo User con los datos del usuario
-            user = User.objects.create(**user_data)
-        except IntegrityError:
-            raise serializers.ValidationError("User with this code already exists")
+        # Crear una nueva instancia del modelo User con los datos del usuario
+        user = User.objects.create(**user_data)
         # Cambiar el estado del usuario a activo
         user.status = True
         user.save()
