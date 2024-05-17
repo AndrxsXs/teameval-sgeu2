@@ -27,6 +27,7 @@ export default function DisableUser(props) {
     return (
         <Fragment>
             <Button
+                disabled
                 size="sm"
                 variant="soft"
                 color="danger"

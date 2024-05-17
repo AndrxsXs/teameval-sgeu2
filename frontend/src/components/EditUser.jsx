@@ -76,6 +76,7 @@ export default function EditUser(props) {
     return (
         <React.Fragment>
             <Button
+                disabled
                 size="sm"
                 variant="plain"
                 color="neutral"
