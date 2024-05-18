@@ -57,12 +57,14 @@ class MyTokenObtainPairView(TokenObtainPairView):
 @permission_classes([IsAuthenticated])
 def register_student(request):
     data = request.data
+    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name'))
     student_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
         "group": None,
+        "password": password 
     }
     serializer_student = StudentSerializer(data=student_data)
     if serializer_student.is_valid():
@@ -77,12 +79,14 @@ def register_student(request):
 @permission_classes([IsAuthenticated])
 def register_admin(request):
     data = request.data
+    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name'))
     admin_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
-        "phone": data.get("phone")
+        "phone": data.get("phone"),
+        "password": password 
     }
     serializer_admin = AdminSerializer(data=admin_data)
     if serializer_admin.is_valid():
@@ -97,12 +101,14 @@ def register_admin(request):
 @permission_classes([IsAuthenticated])
 def register_teacher(request):
     data = request.data
+    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name')) 
     teacher_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
-        "phone": data.get("phone")
+        "phone": data.get("phone"),
+        "password": password 
     }
     serializer_teacher = TeacherSerializer(data=teacher_data)
     if serializer_teacher.is_valid():

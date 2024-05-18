@@ -43,8 +43,10 @@ class StudentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user_data['role'] = User.STUDENT
+        password = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
         user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
         user = User.objects.create(**user_data)
+        user.set_password(password) 
         student = Student.objects.create(user=user, **validated_data)
         return student
         
@@ -83,11 +85,12 @@ class TeacherSerializer(serializers.ModelSerializer):
         # Extraer los datos del usuario del diccionario de datos validados
         user_data = validated_data.pop('user')
         user_data['role'] = User.TEACHER
-        user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
+        password = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
         # Crear una nueva instancia del modelo User con los datos del usuario
         user = User.objects.create(**user_data)
         # Cambiar el estado del usuario a activo
         user.status = True
+        user.set_password(password) 
         user.save()
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         teacher = Teacher.objects.create(user=user, **validated_data)
@@ -106,11 +109,12 @@ class AdminSerializer(serializers.ModelSerializer):
         # Extraer los datos del usuario del diccionario de datos validados
         user_data = validated_data.pop('user')
         user_data['role'] = User.ADMIN
-        user_data['password'] = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
+        password = User.default_password(user_data['name'], user_data['code'], user_data['last_name'])
         # Crear una nueva instancia del modelo User con los datos del usuario
-        user = User.objects.create(**user_data)
+        user = User(**user_data)
         # Cambiar el estado del usuario a activo
         user.status = True
+        user.set_password(password) 
         user.save()
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         admin = Admi.objects.create(user=user, **validated_data)
