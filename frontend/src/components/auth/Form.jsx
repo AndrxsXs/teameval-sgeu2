@@ -83,10 +83,11 @@ export default function Form({ method }) {
 
                     const firstLogin = decoded.first_login;
                     // console.log("first login: ", firstLogin)
+                    // console.log("user role: ", userRole)
 
                     // Si es el primer inicio de sesión y el usuario es un estudiante o profesor, redirige al usuario a la página de cambio de contraseña
                     if (firstLogin && (userRole === 'student' || userRole === 'teacher')) {
-                        navigate("/crear-contraseña");
+                        navigate("/crear-contrasena");
                     } else {
                         // Navega a la ruta correspondiente basado en el rol del usuario
                         if (userRole === 'admin') {
@@ -123,7 +124,7 @@ export default function Form({ method }) {
                 if (res.status === 200) {
                     navigate("/login")
                 } else {
-                    navigate("/create-password")
+                    navigate("/crear-contrasena")
                 }
             } catch (error) {
                 alert(error)
@@ -214,7 +215,7 @@ export default function Form({ method }) {
                                     alignSelf: 'center',
                                     //color: 'primary',
                                     textDecoration: 'none',
-                                
+
                                 }}
                             >
                                 ¿Olvidó su contraseña?

@@ -1,8 +1,6 @@
 /* eslint-disable react/prop-types */
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import { ACCESS_TOKEN } from './constants';
-import { interpretNumbers } from './utils/interpretNumbers';
+import { Routes, Route, Navigate } from 'react-router-dom';
+// import { interpretNumbers } from './utils/interpretNumbers';
 
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -34,20 +32,7 @@ import CodePassword from './components/CodePassword';
 
 function Logout() {
   localStorage.clear();
-  return <Navigate to="/login" />
-}
-
-function AuthRedirect({ children }) {
-  const location = useLocation();
-  const token = localStorage.getItem(ACCESS_TOKEN);
-
-  if (token) {
-    const decoded = jwtDecode(token);
-    const userRole = interpretNumbers(decoded.role);
-    return <Navigate to={`/${userRole}`} state={{ from: location }} replace />;
-  }
-
-  return children;
+  return <Navigate to="/login" replace />
 }
 
 const USER_ROLES = {
@@ -63,7 +48,15 @@ function App() {
       <CssBaseline />
       <Routes>
 
-        <Route path="/" element={<AuthRedirect><HomePage /></AuthRedirect>} />
+        <Route path="/" element={
+
+          <HomePage />
+
+        } />
+        <Route path="/login" element={<Login />} />
+        <Route path="/login/recuperar" element={<ForgotPassword />} />
+        <Route path="login/recuperar/codigo" element={<CodePassword />} />
+        <Route path="/crear-contrasena" element={<CreatePassword />} />
 
         <Route
           path="/admin/*"
@@ -74,6 +67,7 @@ function App() {
           <Route path='manage/teachers' element={<ManageTeachers />} />
           <Route path='manage/courses' element={<ManageCourses />} />
           <Route path='manage/scales' element={<ManageScales />} />
+          <Route path='settings' />
         </Route>
 
         <Route path="/profesor/*"
@@ -102,15 +96,10 @@ function App() {
 
         </Route>
 
-        <Route path="/login" element={<AuthRedirect><Login /></AuthRedirect>} />
-        <Route path="/login/recuperar" element={<AuthRedirect><ForgotPassword /></AuthRedirect>} />
-        <Route path="login/recuperar/codigo" element={<AuthRedirect><CodePassword /></AuthRedirect>} />
-        <Route path="/crear-contraseña" element={<AuthRedirect><CreatePassword /></AuthRedirect>} />
+
 
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
-
-
 
       </Routes>
     </CssVarsProvider>

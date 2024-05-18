@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Outlet } from 'react-router-dom'
 
 import { Box } from "@mui/joy"
@@ -6,13 +7,13 @@ import CssBaseline from "@mui/joy/CssBaseline"
 import TeacherSidebar from "../../../components/teacher/TeacherSidebar"
 
 
-function CourseView() {
+function CourseView({ userData }) {
     return (
         <>
             <CssVarsProvider disableTransitionOnChange>
                 <Box className="container" sx={{}}>
                     <CssBaseline />
-                    <TeacherSidebar />
+                    <TeacherSidebar userData={userData} />
 
                     <Box component="main" className="main-container"
                         sx={{
@@ -30,8 +31,8 @@ function CourseView() {
                             height: '100dvh',
                             gap: 1,
                         }}>
-                            <Outlet />
-                       
+                        <Outlet />
+
                     </Box>
                 </Box>
             </CssVarsProvider >

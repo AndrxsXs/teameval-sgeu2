@@ -21,7 +21,7 @@ export default function ManageCourses() {
                 }}
             >
                 <Typography level="h2" component="h1">
-                    Configuración de Cursos
+                    Cursos
                 </Typography>
 
                 <Button

@@ -22,7 +22,7 @@ export default function ManageAdmin() {
                 }}
             >
                 <Typography level="h2" component="h1">
-                    Configuración de administradores
+                    Administradores
                 </Typography>
                 <CreateAdmin />
             </Box>
