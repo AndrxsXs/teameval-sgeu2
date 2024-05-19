@@ -1,15 +1,14 @@
-import { Box, Typography } from "@mui/joy"
-import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Box, Sheet, Typography } from "@mui/joy"
+import { Link } from 'react-router-dom';
 import { Button } from "@mui/joy"
-import Add from '@mui/icons-material/Add';
 import CreateStudent from "../../../components/teacher/CreateStudent";
 import BodyAddStudent from "../../../components/teacher/BodyAddStudent";
-
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 export default function AddStudent() {
 
     return (
         <>
-              <Box component="header"
+            <Box component="header"
                 sx={{
                     display: 'flex',
                     mt: 2,
@@ -27,25 +26,27 @@ export default function AddStudent() {
                 </Typography>
 
                 <Box
-                sx={{
+                    sx={{
 
-                   display: 'flex',
-                   gap: 1,
-                   flexDirection: { xs: 'column', sm: 'row' },                    
-                }}
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                    }}
                 >
-                   <CreateStudent /> 
-                    <Button
-                        
-                        color="primary"
-                        startDecorator= {<FileUploadIcon />}
-                        size="sm"
-                    >
-                        Importar estudiantes
-                    </Button>
+
+                    <CreateStudent />
+
+                    <Link to="subir">
+                        <Button color="primary" startDecorator={<FileUploadIcon />}>
+                            Subir estudiantes
+                        </Button>
+                    </Link>
+
                 </Box>
-                <BodyAddStudent/>
+                <BodyAddStudent />
             </Box>
+
+
         </>
     )
 }
