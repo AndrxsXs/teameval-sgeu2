@@ -123,7 +123,7 @@ class AdminSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
-        fields= ["name", "code", "academic_period", "teacher"]
+        fields= ["name", "code", "academic_period", "user_teacher"]
         
     def create(self, validated_data):
         
