@@ -8,10 +8,18 @@ import {
     Sheet,
     Typography,
     Box,
-    Button,
+    // Button,
+    Chip,
     CircularProgress,
     // ButtonGroup
 } from '@mui/joy';
+
+import {
+    Cloud,
+    Check,
+    Cancel,
+
+} from '@mui/icons-material'
 
 import { ACCESS_TOKEN } from '../constants';
 
@@ -44,7 +52,6 @@ export default function UserTable(props) {
     const [loading, setLoading] = useState(true);
     const [sortOrder, setSortOrder] = useState('asc');
     const [filters, setFilters] = useState({
-        role: null,
         name: null,
         last_name: null,
         email: null,
@@ -62,7 +69,7 @@ export default function UserTable(props) {
                     Authorization: `Bearer ${token}`,
                 },
                 params: {
-                    role: filters.role || role,
+                    role: role,
                     name: filters.name,
                     last_name: filters.last_name,
                     email: filters.email,
@@ -240,7 +247,19 @@ export default function UserTable(props) {
                                     <Typography level="body-xs">{row.email}</Typography>
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
-                                    <Typography level="body-xs">{row.status}</Typography>
+                                    {/* <Typography level="body-xs">{row.status}</Typography> */}
+                                    {row.status === 'Habilitado' ?
+                                        <Chip
+                                            color='success'
+                                            size="sm"
+                                        // startDecorator={<Check />}
+                                        >{row.status}</Chip>
+                                        :
+                                        <Chip
+                                            color='danger'
+                                            size="sm"
+                                        // startDecorator={<Cancel />}
+                                        >{row.status}</Chip>}
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
                                     <RowMenu user={row} />
