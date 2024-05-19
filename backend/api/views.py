@@ -1,3 +1,5 @@
+import csv
+import io
 from django.shortcuts import render, redirect
 
 # from django.contrib.auth.models import User
@@ -28,6 +30,62 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_student(request):
+    csv_file = request.FILES["csv_file"] #Asi se debe llamar el nombre del campo en front
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.reader(io_string, delimiter=';', quotechar="|")
+    next(reader)
+    for row in reader:
+        try:
+            student_data = {
+                "name": row[0],
+                "last_name": row[1],
+                "code": row[2],
+                "email": row[3],
+            }
+        except IndexError:
+            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            try:
+                serializer_student.save()
+            except:
+                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+        else:
+            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Estudiantes importados exitosamente'}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_teacher(request):
+    csv_file = request.FILES["csv_file"]
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.reader(io_string, delimiter=';', quotechar='|')
+    next(reader)
+    for row in reader:
+        try:
+            teacher_data = {
+            "name": row[0],
+            "last_name": row[1],
+            "code": row[2],
+            "email": row[3],
+            "phone": row[4]
+        }
+        except IndexError:
+            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer_teacher = TeacherSerializer(data=teacher_data)
+        if serializer_teacher.is_valid():
+            try:
+                serializer_teacher.save()
+            except:
+                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+        else:
+            return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Profesores importados exitosamente'}, status=status.HTTP_201_CREATED)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
