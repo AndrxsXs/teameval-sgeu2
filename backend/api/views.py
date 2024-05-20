@@ -453,33 +453,24 @@ def search_user(request):
 #@permission_classes([IsAuthenticated])
 
 def create_course(request):
-    if request.method == 'GET':
-        return render(request, "cursos.html")
-    else:
-        #data = request.data  # Obtener los datos de la solicitud
-        user = models.User.objects.get(code= request.POST.get("teacher"))
-    
-        print(user.name + ' ' + user.last_name)
-        print(request.POST.get("name"))
-        print(request.POST.get("code"))
-        print(request.POST.get("academic_period"))
+    data = request.data  # Obtener los datos de la solicitud
+    user = models.User.objects.get(code= request.POST.get("teacher"))
+    course_data = {
         
-        course_data = {
-        
-            "name": request.POST.get("name"),
-            "code": request.POST.get("code"),
-            "academic_period": request.POST.get("academic_period"),
-            "user_teacher": user.id,
-        }    
+        "name": data.get("name"),
+        "code": data.get("code"),
+        "academic_period": data.get("academic_period"),
+        "user_teacher": user.id,
+    }    
 
-        serializer_course = CourseSerializer(
-          data=course_data
-        ) # Pasar los datos con la clave 'data='
-        if serializer_course.is_valid():
-           serializer_course.save()
-           return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+    serializer_course = CourseSerializer(
+        data=course_data
+    ) # Pasar los datos con la clave 'data='
+    if serializer_course.is_valid():
+        serializer_course.save()
+        return Response(serializer_course.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -532,5 +523,10 @@ def home(request):
     return render(request, "home.html")
 
 
-def cursos(request):
-    return render(request, "cursos.html")
+def prueba(request):
+    curso= models.Course.objects.get(id=2)
+    return render(request, "prueba.html", {
+        'name': curso.name,
+        'code': curso.code,
+        'teacher': curso.user_teacher.name + " " + curso.user_teacher.last_name
+    })
