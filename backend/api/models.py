@@ -1,8 +1,16 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser, Group, Permission, AbstractBaseUser
+from django.contrib.auth.models import (
+    AbstractUser,
+    Group,
+    Permission,
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db.models.signals import post_save
+from django.contrib.auth.base_user import BaseUserManager
 
 # Create your models here.
 #'- VARCHAR   models.TextField'
@@ -24,7 +32,23 @@ from django.db.models.signals import post_save
 #     last_login= timezone.now()
 
 
-class User(AbstractUser):
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password, **extra_fields):
+        email = self.normalize_email(email)
+        extra_fields.setdefault("is_superuser", False)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, password, **extra_fields):
+        # extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
     STUDENT = 1
     TEACHER = 2
     ADMIN = 3
@@ -35,8 +59,8 @@ class User(AbstractUser):
         (ADMIN, "admin"),
     ]
 
+    is_superuser = models.BooleanField(default=False)
     role = models.IntegerField(choices=STATUS_CHOICES)
-    username = None
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
@@ -44,10 +68,34 @@ class User(AbstractUser):
     password = models.CharField(max_length=35)
     first_login = models.BooleanField(default=True)
     status = models.BooleanField(default=False)
-    last_login = timezone.now()
+    last_login = models.DateTimeField(default=timezone.now)
+
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name="groups",
+        blank=True,
+        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+        related_name="users",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name="user permissions",
+        blank=True,
+        help_text="Specific permissions for this user.",
+        related_name="users",
+    )
 
     USERNAME_FIELD = "code"
-    REQUIRED_FIELDS = ["name", "last_name", "email", "role", "username"]
+    REQUIRED_FIELDS = ["name", "last_name", "email", "role"]
+
+    objects = CustomUserManager()
+
+    def save(self, *args, **kwargs):
+        if self.role == self.ADMIN:
+            self.is_superuser = True
+        else:
+            self.is_superuser = False
+        super().save(*args, **kwargs)
 
     def search(code):
         try:
@@ -76,21 +124,21 @@ class Admi(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
-    #status = models.BooleanField(default=False)
+    # status = models.BooleanField(default=False)
     phone = models.BigIntegerField(null=True)
 
- #   def create_user_admin(sender, instance, created, **kwargs):
-  #      if created:
-   #         Admi.objects.create(user=instance)
+    #   def create_user_admin(sender, instance, created, **kwargs):
+    #      if created:
+    #         Admi.objects.create(user=instance)
 
- #   def save_user_admin(sender, instance, **kwargs):
-  #      instance.admi.save()
+    #   def save_user_admin(sender, instance, **kwargs):
+    #      instance.admi.save()
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
 
 
-#post_save.connect(Admi.create_user_admin, sender=User)
+# post_save.connect(Admi.create_user_admin, sender=User)
 
 
 class Student(models.Model):
@@ -105,7 +153,7 @@ class Student(models.Model):
 
 class Teacher(models.Model):
 
-#    status = models.BooleanField(default=False)
+    #    status = models.BooleanField(default=False)
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
@@ -224,9 +272,7 @@ class Group(models.Model):
     course = models.ForeignKey(
         Course, null=True, on_delete=models.PROTECT, related_name="groups"
     )
-    students = models.ManyToManyField(
-        Group, related_name="students"
-    )
+    students = models.ManyToManyField(Group, related_name="students")
 
 
 class Resourse(models.Model):

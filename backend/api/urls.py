@@ -11,11 +11,7 @@ urlpatterns = [
     path('register_admin/', views.register_admin, name='register_admin'),
     path('user_list/', views.user_list, name='user_list'),
     path('course_list/', views.course_list, name='course_list'),
-<<<<<<< HEAD
-    path('create_group/', views.create_course, name='create_group'),
-=======
     path('create_course/', views.create_course, name='create_course'),
     path('import_student/', views.import_student, name='import_student'),
     path('import_teacher/', views.import_teacher, name='import_teacher'),
->>>>>>> 4402bff6ad7dceba0e004a2bf5b01c84aa308bd1
 ]
