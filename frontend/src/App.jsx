@@ -29,6 +29,7 @@ import RubricResult from './pages/student/RubricResult';
 import ViewFeedback from './pages/student/ViewFeedback';
 import ForgotPassword from './components/ForgotPassword';
 import CodePassword from './components/CodePassword';
+import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {
   localStorage.clear();
@@ -70,14 +71,10 @@ function App() {
           <Route path='settings' />
         </Route>
 
-        <Route path="/profesor/*"
-          element={<ProtectedRoute allowedRoles={[USER_ROLES.TEACHER]}><TeacherPage /></ProtectedRoute>}
-          errorElement={<NotFound />}
-        >
+
+        <Route path="/profesor/*" element={<ProtectedRoute allowedRoles={[USER_ROLES.TEACHER]}><TeacherPage /></ProtectedRoute>}>
           <Route index element={<MainTeacherView />} />
-
           <Route path='settings' />
-
         </Route>
 
         <Route path="/estudiante/*"

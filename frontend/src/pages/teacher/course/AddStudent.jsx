@@ -1,15 +1,21 @@
-import { Box, Typography } from "@mui/joy"
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { Button } from "@mui/joy"
-import Add from '@mui/icons-material/Add';
+import { Box, Typography } from "@mui/joy";
 import CreateStudent from "../../../components/teacher/CreateStudent";
 import BodyAddStudent from "../../../components/teacher/BodyAddStudent";
+import { useState } from 'react';
+import { Button, Modal, Sheet } from "@mui/joy";
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import ImportStudent from "../../../components/teacher/ImportStudent";
 
 export default function AddStudent() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleOpenModal = () => setIsModalOpen(true);
+    const handleCloseModal = () => setIsModalOpen(false);
 
     return (
         <>
-              <Box component="header"
+            <Box
+                component="header"
                 sx={{
                     display: 'flex',
                     mt: 2,
@@ -25,27 +31,49 @@ export default function AddStudent() {
                 <Typography level="h2" component="h1">
                     Nombre del curso
                 </Typography>
-
                 <Box
-                sx={{
-
-                   display: 'flex',
-                   gap: 1,
-                   flexDirection: { xs: 'column', sm: 'row' },                    
-                }}
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                    }}
                 >
-                   <CreateStudent /> 
+                    <CreateStudent />
                     <Button
-                        
                         color="primary"
-                        startDecorator= {<FileUploadIcon />}
-                        size="sm"
+                        
+                        startDecorator={<FileUploadIcon />}
+                        onClick={handleOpenModal}
                     >
                         Importar estudiantes
                     </Button>
                 </Box>
-                <BodyAddStudent/>
+                <BodyAddStudent />
             </Box>
+
+            <Modal
+                aria-labelledby="modal-title"
+                aria-describedby="modal-desc"
+                open={isModalOpen}
+                onClose={handleCloseModal}
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <Sheet
+                    variant="outlined"
+                    sx={{
+                        maxWidth: 500,
+                        borderRadius: 'md',
+                        p: 3,
+                        boxShadow: 'lg',
+                    }}
+                >
+                    <ImportStudent handleClose={handleCloseModal} />
+                </Sheet>
+            </Modal>
         </>
-    )
+    );
 }

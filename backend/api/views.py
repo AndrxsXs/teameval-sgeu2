@@ -1,3 +1,5 @@
+import csv
+import io
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 # from django.contrib.auth.models import User
@@ -29,6 +31,62 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_student(request):
+    csv_file = request.FILES["csv_file"] #Asi se debe llamar el nombre del campo en front
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.reader(io_string, delimiter=';', quotechar="|")
+    next(reader)
+    for row in reader:
+        try:
+            student_data = {
+                "name": row[0],
+                "last_name": row[1],
+                "code": row[2],
+                "email": row[3],
+            }
+        except IndexError:
+            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            try:
+                serializer_student.save()
+            except:
+                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+        else:
+            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Estudiantes importados exitosamente'}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_teacher(request):
+    csv_file = request.FILES["csv_file"]
+    decoded_file = csv_file.read().decode('utf-8')
+    io_string = io.StringIO(decoded_file)
+    reader = csv.reader(io_string, delimiter=';', quotechar='|')
+    next(reader)
+    for row in reader:
+        try:
+            teacher_data = {
+            "name": row[0],
+            "last_name": row[1],
+            "code": row[2],
+            "email": row[3],
+            "phone": row[4]
+        }
+        except IndexError:
+            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer_teacher = TeacherSerializer(data=teacher_data)
+        if serializer_teacher.is_valid():
+            try:
+                serializer_teacher.save()
+            except:
+                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+        else:
+            return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Profesores importados exitosamente'}, status=status.HTTP_201_CREATED)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -58,67 +116,94 @@ class MyTokenObtainPairView(TokenObtainPairView):
 @permission_classes([IsAuthenticated])
 def register_student(request):
     data = request.data
-    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name'))
+    password = User.default_password(
+        data.get("name"), data.get("code"), data.get("last_name")
+    )
     student_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
         "group": None,
-        "password": password 
+        "password": password,
     }
     serializer_student = StudentSerializer(data=student_data)
     if serializer_student.is_valid():
         try:
             serializer_student.save()
-            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+            )
         except:
-            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
+            return Response(
+                {"message": "User with this code already exists"},
+                status=status.HTTP_409_CONFLICT,
+            )
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_admin(request):
     data = request.data
-    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name'))
+    password = User.default_password(
+        data.get("name"), data.get("code"), data.get("last_name")
+    )
     admin_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
         "phone": data.get("phone"),
-        "password": password 
+        "password": password,
     }
     serializer_admin = AdminSerializer(data=admin_data)
     if serializer_admin.is_valid():
         try:
             serializer_admin.save()
-            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+            )
         except:
-            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
-    return Response({'message': 'error creating user'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "User with this code already exists"},
+                status=status.HTTP_409_CONFLICT,
+            )
+    return Response(
+        {"message": "error creating user"}, status=status.HTTP_400_BAD_REQUEST
+    )
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_teacher(request):
     data = request.data
-    password = User.default_password(data.get('name'), data.get('code'), data.get('last_name')) 
+    password = User.default_password(
+        data.get("name"), data.get("code"), data.get("last_name")
+    )
     teacher_data = {
         "name": data.get("name"),
         "last_name": data.get("last_name"),
         "code": data.get("code"),
         "email": data.get("email"),
         "phone": data.get("phone"),
-        "password": password 
+        "password": password,
     }
     serializer_teacher = TeacherSerializer(data=teacher_data)
     if serializer_teacher.is_valid():
         try:
             serializer_teacher.save()
-            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+            )
         except:
-            return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
-    return Response({'message': 'error creating user'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "User with this code already exists"},
+                status=status.HTTP_409_CONFLICT,
+            )
+    return Response(
+        {"message": "error creating user"}, status=status.HTTP_400_BAD_REQUEST
+    )
 
 @csrf_exempt
 @api_view(['POST'])
@@ -206,7 +291,7 @@ def register_admin1(request):
         user = serializer_user.save()
         admin_data = {
             "user": user,
-         #   "email": user.email,
+            #   "email": user.email,
             "name": user.name,
             "last_name": user.last_name,
             "code": user.code,
@@ -365,18 +450,31 @@ def search_user(request):
     return Response(user_data)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_course(request):
-    data = {
-        "name": request.data.get("name"),
-        "code": request.data.get("code"),
-        "academic_period": request.data.get("academic_period"),
-        "teacher": request.data.get("teacher"),
-    }
-    serializer_course = CourseSerializer(data)
+    data = request.data  # Obtener los datos de la solicitud
+    serializer_course = CourseSerializer(
+        data=data
+    )  # Pasar los datos con la clave 'data='
     if serializer_course.is_valid():
         serializer_course.save()
         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# def create_course(request):
+#     data = {
+#         "name": request.data.get("name"),
+#         "code": request.data.get("code"),
+#         "academic_period": request.data.get("academic_period"),
+#         "teacher": request.data.get("teacher"),
+#     }
+#     serializer_course = CourseSerializer(data)
+#     if serializer_course.is_valid():
+#         serializer_course.save()
+#         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+#     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Vista para hacer pruebas backend

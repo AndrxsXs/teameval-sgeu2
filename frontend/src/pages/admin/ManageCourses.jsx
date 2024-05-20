@@ -1,12 +1,26 @@
-import { Box } from "@mui/joy"
-import { Typography } from "@mui/joy"
-import { Button } from "@mui/joy"
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import { Fragment } from "react";
+
+import {
+    Box,
+    Stack,
+    Typography,
+    FormControl,
+    FormLabel,
+    Input,
+    Select,
+    Option,
+
+} from "@mui/joy"
+
+import SearchIcon from "@mui/icons-material/Search";
+
+import CreateCourse from "../../components/admin/CreateCourse";
+import CourseTable from "../../components/CourseTable";
 
 export default function ManageCourses() {
 
     return (
-        <>
+        <Fragment>
             <Box component="header"
                 sx={{
                     display: 'flex',
@@ -24,13 +38,55 @@ export default function ManageCourses() {
                     Cursos
                 </Typography>
 
-                <Button
-                    color="primary"
-                    startDecorator={<AddRoundedIcon />}
-                >
-                    Nuevo curso
-                </Button>
+                <CreateCourse />
             </Box>
-        </>
+            <Stack
+            component='section'
+                direction='row'
+                gap={2}
+                // sx={{
+                //     alignSelf: 'flex-start',
+                // }}
+
+                sx={{
+                    alignSelf: 'flex-start',
+                    minWidth: '50%',
+                    borderRadius: 'sm',
+                    py: 2,
+                    display: { xs: 'none', sm: 'flex' },
+                    flexWrap: 'nowrap',
+                    justifyContent: 'flex-start',
+                    gap: 1.5,
+                    // '& > *': {
+                    //     minWidth: { xs: '120px', md: '160px' },
+                    // },
+                }}
+
+            >
+                <FormControl sx={{ flex: 1, maxWidth: '70%' }} size="sm">
+                    <FormLabel>Buscar curso</FormLabel>
+                    <Input
+                        // value={searchQuery}
+                        // onChange={handleSearchChange}
+                        size="sm"
+                        placeholder="Código, nombre, docente, etc."
+                        startDecorator={<SearchIcon />}
+                        />
+                </FormControl>
+
+                <FormControl sx={{ flex: 1, maxWidth: '30%'}} size="sm">
+                    <FormLabel>Estado</FormLabel>
+
+                    <Select
+                        placeholder="Seleccionar"
+                    >
+                        <Option value="enabled">Habilitado</Option>
+                        <Option value="disabled">Deshabilitado</Option>
+                    </Select>
+
+                </FormControl>
+            </Stack>
+            <CourseTable />
+        </Fragment>
     )
 }

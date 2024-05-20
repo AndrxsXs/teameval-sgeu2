@@ -35,6 +35,7 @@ export default function ManageTeachers() {
                     <Button
                         variant="soft"
                         startDecorator={<FileUploadRoundedIcon />}
+                        disabled
                     >
                         Importar docentes
                     </Button>
