@@ -8,8 +8,8 @@ import LogoutButton from './auth/LogoutButton';
 import Skeleton from '@mui/joy/Skeleton';
 
 const USER_ROLES = {
-    ADMIN: 'Administrador',
-    TEACHER: 'Profesor',
+    ADMIN: 'Admin',
+    TEACHER: 'Docente',
     STUDENT: 'Estudiante',
 };
 
