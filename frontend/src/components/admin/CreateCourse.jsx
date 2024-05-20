@@ -242,6 +242,7 @@ export default function CreateCourse() {
                                         <Autocomplete
                                             size='sm'
                                             options={testTeachers}
+                                            isOptionEqualToValue={(option, value) => option.code === value.code}
                                             // getOptionValue={(option) => option.code}
                                             placeholder='Seleccione un docente'
                                             getOptionLabel={(option) => `${option.name} ${option.last_name}`}
