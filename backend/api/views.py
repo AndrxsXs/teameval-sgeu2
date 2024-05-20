@@ -449,25 +449,38 @@ def search_user(request):
     return Response(user_data)
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
+#@api_view(["POST"])
+#@permission_classes([IsAuthenticated])
+
 def create_course(request):
-    data = request.data  # Obtener los datos de la solicitud
-    teacher = models.User.objects.get(code=data.get("teacher")) 
-    course_data = {
+    if request.method == 'GET':
+        return render(request, "cursos.html")
+    else:
+        #data = request.data  # Obtener los datos de la solicitud
+        user = models.User.objects.get(code= request.POST.get("teacher"))
+    
+        print(user.name + ' ' + user.last_name)
+        print(request.POST.get("name"))
+        print(request.POST.get("code"))
+        print(request.POST.get("academic_period"))
         
-            "name": data.get("name"),
-            "code": data.get("code"),
-            "academic_period": data.get("academic_period"),
-            "teacher": teacher,
-    }
-    serializer_course = CourseSerializer(
-        data=course_data
-    ) # Pasar los datos con la clave 'data='
-    if serializer_course.is_valid():
-        serializer_course.save()
-        return Response(serializer_course.data, status=status.HTTP_201_CREATED)
-    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+        course_data = {
+        
+            "name": request.POST.get("name"),
+            "code": request.POST.get("code"),
+            "academic_period": request.POST.get("academic_period"),
+            "user_teacher": user.id,
+        }    
+
+        serializer_course = CourseSerializer(
+          data=course_data
+        ) # Pasar los datos con la clave 'data='
+        if serializer_course.is_valid():
+           serializer_course.save()
+           return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # def create_course(request):

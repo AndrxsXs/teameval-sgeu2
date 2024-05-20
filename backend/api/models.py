@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
 
     is_superuser = models.BooleanField(default=False)
+    is_staff= models.BooleanField(default=False)
     role = models.IntegerField(choices=STATUS_CHOICES)
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
@@ -153,7 +154,7 @@ class Student(models.Model):
 
 class Teacher(models.Model):
 
-    #    status = models.BooleanField(default=False)
+        #status = models.BooleanField(default=False)
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
@@ -161,6 +162,12 @@ class Teacher(models.Model):
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
+    
+    def get_teacher(codigo):
+        user = User.objects.get(code=codigo)
+        teacher = user.teacher
+
+        return teacher
 
 
 class Scale(models.Model):
@@ -177,19 +184,22 @@ class Course(models.Model):
     course_status = models.BooleanField(default=False)
     #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
 
+    user_students = models.ManyToManyField(
+        Student,
+        related_name="courses_user_student",
+    )
+
+
     user_teacher = models.ForeignKey(
-        Teacher,
+        User,
         null=True,
         on_delete=models.PROTECT,
         related_name="courses_user_teacher",
     )
 
-    #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
 
-    user_students = models.ManyToManyField(
-        Student,
-        related_name="courses_user_student",
-    )
+    #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
+    
 
     # obtiene el nombre del profesor
     @property
