@@ -98,9 +98,6 @@ class Student(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
-    group = models.ForeignKey(
-        Group, null=True, on_delete=models.PROTECT, related_name="students"
-    )
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
@@ -141,10 +138,8 @@ class Course(models.Model):
 
     #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
 
-    user_student = models.ForeignKey(
+    user_students = models.ManyToManyField(
         Student,
-        null=True,
-        on_delete=models.PROTECT,
         related_name="courses_user_student",
     )
 
@@ -155,7 +150,7 @@ class Course(models.Model):
 
     # obtiene la cantidad de estudiantes
     @property
-    def student_counr(self):
+    def student_count(self):
         return Student.objects.filter(course_user_student=self).count()
 
 
@@ -225,9 +220,12 @@ class Rating(models.Model):
 
 class Group(models.Model):
     name = models.CharField(max_length=50)
-    Assigned_project = models.TextField()
+    assigned_project = models.TextField()
     course = models.ForeignKey(
         Course, null=True, on_delete=models.PROTECT, related_name="groups"
+    )
+    students = models.ManyToManyField(
+        Group, related_name="students"
     )
 
 

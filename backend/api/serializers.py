@@ -1,4 +1,4 @@
-from .models import User, Student, Teacher, Admi, Course
+from .models import User, Student, Teacher, Admi, Course, Group
 from rest_framework import serializers
 from django.db import IntegrityError
 # from .models import User
@@ -119,7 +119,21 @@ class AdminSerializer(serializers.ModelSerializer):
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         admin = Admi.objects.create(user=user, **validated_data)
         return admin
+
+class GroupSerializer(serializers.ModelSerializer):
+    students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
+    class Meta:
+        model = Group
+        fields = ["name", "assigned_project", "course", "students"]
     
+    def create(self, validated_data):
+        students = validated_data.pop('students')
+        group = self.Meta.model(**validated_data)
+        for student in students:
+            group.students.add(student)
+        group.save
+        return group
+            
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
@@ -138,6 +152,7 @@ class CourseSerializer(serializers.ModelSerializer):
         
         # Devolver la instancia creada
         return instance
+
 
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:

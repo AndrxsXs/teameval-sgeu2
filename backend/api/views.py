@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-
+from django.views.decorators.csrf import csrf_exempt
 # from django.contrib.auth.models import User
 from .models import User, Course
 from .models import User
@@ -12,6 +12,7 @@ from .serializers import (
     TeacherSerializer,
     AdminSerializer,
     CourseSerializer,
+    GroupSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -118,6 +119,26 @@ def register_teacher(request):
         except:
             return Response({'message': 'User with this code already exists'}, status=status.HTTP_409_CONFLICT)
     return Response({'message': 'error creating user'}, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_group(request):
+    data = request.data
+    print(data) 
+    group_data = {
+        "name": data.get("name"),
+        "assigned_project": data.get("assigned_project"),
+        "course": data.get("course"),
+        "students": data.get("students"),      
+    }
+    serializer_group = GroupSerializer(data=group_data)
+    if serializer_group.is_valid():
+        serializer_group.save()
+        return Response({'message': 'Group created successfully'}, status=status.HTTP_201_CREATED)
+    print(serializer_group.errors)
+    return Response({'message': 'Error creating group'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 # creacion de un profesor
