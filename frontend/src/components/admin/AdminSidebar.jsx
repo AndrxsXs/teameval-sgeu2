@@ -15,7 +15,7 @@ export default function AdminSidebar({ userData }) {
             icon: <SupervisorAccountRoundedIcon key="admin" />,
         },
         {
-            text: 'Profesores',
+            text: 'Docentes',
             route: '/admin/manage/teachers',
             icon: <PersonRoundedIcon key="teachers" />,
         },
