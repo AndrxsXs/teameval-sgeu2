@@ -22,6 +22,8 @@ from django.contrib.auth import authenticate, login
 from . import models
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.core.mail import EmailMultiAlternatives
+from backend import settings
 
 # Create your views here.
 
@@ -428,11 +430,8 @@ def main_teacher(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def search_user(request):
-
     name = request.data.get("seeker")
-
     data = models.User.objects.filter(name__icontains=name, last_name__icontains=name)
-
     if data is None:
         return Response({"error": "no matches"}, status=status.HTTP_400_BAD_REQUEST)
     else:
@@ -454,9 +453,17 @@ def search_user(request):
 @permission_classes([IsAuthenticated])
 def create_course(request):
     data = request.data  # Obtener los datos de la solicitud
+    teacher = models.User.objects.get(code=data.get("teacher")) 
+    course_data = {
+        
+            "name": data.get("name"),
+            "code": data.get("code"),
+            "academic_period": data.get("academic_period"),
+            "teacher": teacher,
+    }
     serializer_course = CourseSerializer(
-        data=data
-    )  # Pasar los datos con la clave 'data='
+        data=course_data
+    ) # Pasar los datos con la clave 'data='
     if serializer_course.is_valid():
         serializer_course.save()
         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
@@ -476,7 +483,21 @@ def create_course(request):
 #         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
 #     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_mail(request):
+    q = request.POST.get('user_mail', '')
+    subject = 'Restablecer contraseña'
+    if models.User.objects.filter(email__icontains=q).exists():
+        message = EmailMultiAlternatives(subject,  # Titulo
+                                        "Hola, para restablecer su contraseña ingrese al siguiente link ....",
+                                        settings.EMAIL_HOST_USER,  # Remitente
+                                        [q])  # Destinatario
+        message.send()
+        return Response({'message': 'Correo enviado correctamente'}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "No existe un usuario con esta direccion de correo electronico"}, status=status.HTTP_400_BAD_REQUEST)
+    
 # Vista para hacer pruebas backend
 def singin(request):
     if request.method == "GET":
