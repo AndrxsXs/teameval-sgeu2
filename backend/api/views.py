@@ -449,12 +449,11 @@ def search_user(request):
     return Response(user_data)
 
 
-#@api_view(["POST"])
-#@permission_classes([IsAuthenticated])
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_course(request):
     data = request.data  # Obtener los datos de la solicitud
-    user = models.User.objects.get(code= request.POST.get("teacher"))
+    user = models.User.objects.get(code= data.get("user_teacher"))
     course_data = {
         
         "name": data.get("name"),
