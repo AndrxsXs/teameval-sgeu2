@@ -3,6 +3,8 @@ import { useEffect, useState, Fragment } from 'react';
 
 import api from '../api';
 
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import {
     Table,
     Sheet,
@@ -22,8 +24,8 @@ import {
 } from '@mui/icons-material'
 
 // import SearchField from './admin/SearchField';
-import EditUser from '../components/EditUser';
-import DisableUser from '../components/DisableUser';
+import EditCourse from './EditCourse';
+import DisableCourse from './DisableCourse';
 
 function RowMenu(props) {
 
@@ -35,14 +37,57 @@ function RowMenu(props) {
             // size='sm'
             sx={{ display: 'flex', gap: 1 }}
         >
-            <EditUser course={course} />
-            <DisableUser course={course} />
+            <EditCourse course={course} />
+            <DisableCourse course={course} />
 
         </Box>
     )
 }
 
+const LinkableRow = ({ to, children }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleClick = () => {
+        const newPath = `${location.pathname}/${to}`;
+        navigate(newPath);
+    };
+
+    return (
+        <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
+            {children}
+        </tr>
+    );
+};
+
 export default function CourseTable() {
+
+    const testCourses = [
+        {
+            code: '0870',
+            name: 'Proyecto Integrador I',
+            teacher: {
+                code: '2020',
+                name: 'Juan',
+                last_name: 'Perez',
+                email: 'juan.perez@mail.edu.co',
+                phone: '',
+            },
+            academic_period: '2024-1',
+        },
+        {
+            code: '0871',
+            name: 'Desarrollo de software II',
+            teacher: {
+                code: '2021',
+                name: 'David',
+                last_name: 'Marquez',
+                email: '',
+                phone: '',
+            },
+            academic_period: '2024-1',
+        }
+    ]
 
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -139,41 +184,26 @@ export default function CourseTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {courses.map(row => (
-                            <tr key={row.code}>
+                        {testCourses.map(row => (
+                            <LinkableRow to={row.code} key={row.code}>
                                 <td style={{ paddingInline: '16px' }}>
                                     <Typography level="body-xs">{row.code}</Typography>
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
-                                    <Typography level="body-xs">{row.name} {''} {row.last_name}</Typography>
+                                    <Typography level="body-xs">{row.name}</Typography>
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
-                                    <Typography level="body-xs">{row.teacher}</Typography>
+                                    <Typography level="body-xs">{row.academic_period}</Typography>
                                 </td>
-                                {/* <td style={{ paddingInline: '16px' }}> */}
-                                {/* <Typography level="body-xs">{row.status}</Typography> */}
-                                {/* {row.status === 'Habilitado' ?
-                                        <Chip
-                                            color='success'
-                                            size="sm"
-                                        // startDecorator={<Check />}
-                                        >{row.status}</Chip>
-                                        :
-                                        <Chip
-                                            color='danger'
-                                            size="sm"
-                                        // startDecorator={<Cancel />}
-                                        >{row.status}</Chip>} */}
-                                {/* </td> */}
-                                <td>
-                                    <Typography level='body-xs'>
-                                        {row.academic_period}
+                                <td style={{ paddingInline: '16px' }}>
+                                    <Typography level="body-xs">
+                                        {row.teacher.name} {row.teacher.last_name}
                                     </Typography>
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
                                     <RowMenu course={row} />
                                 </td>
-                            </tr>
+                            </LinkableRow>
                         ))}
                     </tbody>
                 </Table>
@@ -214,12 +244,12 @@ export default function CourseTable() {
                             width: '100%',
                             height: '100%',
                             minHeight: '41px',
-                            borderTop: courses && courses.length < 1 ? 'transparent' : '1px solid',
+                            borderTop: testCourses && testCourses.length < 1 ? 'transparent' : '1px solid',
                             borderTopColor: 'divider',
                             userSelect: 'none',
                         }}
                     >
-                        {courses && courses.length === 0 ? <Fragment>No hay cursos</Fragment> : <Fragment>Nada más por aquí</Fragment>}
+                        {testCourses && testCourses.length === 0 ? <Fragment>No hay cursos</Fragment> : <Fragment>Nada más por aquí</Fragment>}
                     </Typography>
                 }
             </Sheet>
