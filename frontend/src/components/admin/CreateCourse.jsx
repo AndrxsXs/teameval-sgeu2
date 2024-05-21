@@ -45,20 +45,25 @@ export default function CreateCourse() {
         user_teacher: ''
     });
 
-    const testTeachers = [
-        {
-            code: 1,
-            name: 'Juan',
-            last_name: 'Pérez',
-            email: 'juan@mail.com'
-        },
-        {
-            code: 2,
-            name: 'María',
-            last_name: 'González',
-            email: 'maria@mail.com'
-        },
-    ]
+    const [teachers, setTeachers] = useState([]);
+
+    const fetchTeachers = async () => {
+        const token = localStorage.getItem('ACCESS_TOKEN');
+        try {
+            const response = await api.get('api/user_list/', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    role: 2
+                }
+            });
+            setTeachers(response.data);
+            console.log('Docentes:', response.data);
+        } catch (error) {
+            console.error('Error obteniendo datos de docentes:', error);
+        }
+    };
 
     useEffect(() => {
         if (year && cycle) {
@@ -241,7 +246,8 @@ export default function CreateCourse() {
 
                                         <Autocomplete
                                             size='sm'
-                                            options={testTeachers}
+                                            options={teachers}
+                                            onFocus={fetchTeachers}
                                             isOptionEqualToValue={(option, value) => option.code === value.code}
                                             // getOptionValue={(option) => option.code}
                                             placeholder='Seleccione un docente'

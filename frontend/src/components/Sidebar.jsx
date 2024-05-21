@@ -117,7 +117,7 @@ export default function Sidebar(props) {
                                 icon={icon}
                                 text={text}
                                 route={route}
-                                isSelected={location.pathname === route}
+                                isSelected={location.pathname === (route || `${route}/`)}
                             />
                         );
                     })}
