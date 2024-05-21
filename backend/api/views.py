@@ -408,23 +408,26 @@ def user_data(request):
 def main_teacher(request):
     user = request.user
     data = models.Course.objects.filter(
-        teacher_id=user.id, course_status=1
-    ).values_list("name")
-    if data is None:
-        return Response(
-            {"status": "non-associated courses"}, status=status.HTTP_400_BAD_REQUEST
-        )
-    else:
+        user_teacher= user.id, course_status=1
+    )
+    if models.Course.objects.filter(
+        user_teacher= user.id, course_status=1
+    ).exists:
         course_data = [
             {
                 "code": course.code,
                 "name": course.name,
-                "teacher": course.teacher_name,
-                "student_count": course.student_count,
+                "teacher": course.user_teacher,
+                "students": course.user_students,
+                "academic_period": course.academic_period,
             }
             for course in data
         ]
-    return Response(course_data)
+        return Response(course_data)
+    else:
+        return Response(
+            {"status": "non-associated courses"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 @api_view(["POST"])
@@ -500,6 +503,15 @@ def create_mail(request):
         return Response({'message': 'Correo enviado correctamente'}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "No existe un usuario con esta direccion de correo electronico"}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def evaluated(request):
+    user= request.data
+    
+    
+    
+    
     
 # Vista para hacer pruebas backend
 def singin(request):
