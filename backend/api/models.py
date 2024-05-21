@@ -221,26 +221,27 @@ class Rubric(models.Model):
     scale = models.ForeignKey(
         Scale, null=True, on_delete=models.PROTECT, related_name="rubrics"
     )
-    course = models.ForeignKey(
+    course = models.ForeignKey( # debe ser muchos a muchos
         Course, null=True, on_delete=models.PROTECT, related_name="rubrics"
     )
 
+ #   is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
-    description = models.TextField()
+    description = models.TextField() #describe el criterio
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
+    scale_description = models.TextField(default=False) # describe la escala
 
-
-class Description(models.Model):
-    text = models.TextField()
-    scale = models.ForeignKey(
-        Scale, null=True, on_delete=models.PROTECT, related_name="descriptions"
-    )
-    standard = models.ForeignKey(
-        Standard, null=True, on_delete=models.PROTECT, related_name="descriptions"
-    )
+#class Description(models.Model):
+ #   text = models.TextField()
+  #  scale = models.ForeignKey(
+   #     Scale, null=True, on_delete=models.PROTECT, related_name="descriptions"
+  #  )
+ #   standard = models.ForeignKey(
+ #       Standard, null=True, on_delete=models.PROTECT, related_name="descriptions"
+ #   )
 
 
 class Report(models.Model):
