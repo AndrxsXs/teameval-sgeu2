@@ -33,8 +33,8 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 export default function CreateCourse() {
 
     const [academicPeriod, setAcademicPeriod] = useState('');
-    const [year, setYear] = useState('');
-    const [cycle, setCycle] = useState('');
+    const [year, setYear] = useState(undefined);
+    const [cycle, setCycle] = useState(undefined);
 
     const [loading, setLoading] = useState(false);
     const route = "api/create_course/"
@@ -68,6 +68,10 @@ export default function CreateCourse() {
     useEffect(() => {
         if (year && cycle) {
             setAcademicPeriod(`${year}-${cycle}`);
+            setFormData({ ...formData, academic_period: `${year}-${cycle}` });
+        } else {
+            setAcademicPeriod(undefined);
+            setFormData({ ...formData, academic_period: '' });
         }
     }, [year, cycle]);
 
@@ -86,9 +90,9 @@ export default function CreateCourse() {
             });
 
             if (response.status === 201) {
-                const data = await response.json();
+                const data = await response.data.json();
                 console.log(data);
-                // Emitir el evento 'userCreated' después de crear un nuevo usuario
+                // Emitir el evento 'courseCreated' después de crear un nuevo usuario
                 window.dispatchEvent(new Event('courseCreated'));
             } else {
                 console.error('Error:', response.status, response.statusText);
@@ -252,6 +256,7 @@ export default function CreateCourse() {
                                             // getOptionValue={(option) => option.code}
                                             placeholder='Seleccione un docente'
                                             getOptionLabel={(option) => `${option.name} ${option.last_name}`}
+                                            onChange={(e, value) => { setFormData({ ...formData, user_teacher: value.code }) }}
                                             sx={{
                                                 width: '92%'
                                             }}
