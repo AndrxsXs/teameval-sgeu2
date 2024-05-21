@@ -204,12 +204,12 @@ class Course(models.Model):
     # obtiene el nombre del profesor
     @property
     def teacher_name(self):
-        return self.user_teacher.user.name + " " + self.user_teacher.last_name
+        return self.user_teacher.name + " " + self.user_teacher.last_name
 
     # obtiene la cantidad de estudiantes
     @property
     def student_count(self):
-        return Student.objects.filter(course_user_student=self).count()
+        return self.user_students.count()
 
 
 # option 2 for academic period
