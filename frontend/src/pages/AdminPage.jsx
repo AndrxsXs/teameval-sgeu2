@@ -2,19 +2,34 @@
 import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
 import {
-    // Routes,
-    // Route,
-    Outlet
+    Routes,
+    Route,
+    Outlet,
+    useNavigate,
+    useLocation
 } from 'react-router-dom';
+
+import { useEffect } from "react";
+
 import AdminSidebar from "../components/admin/AdminSidebar"
 import "../styles/pages/admin/AdminPage.css"
 import Box from '@mui/material/Box'
-// import ManageAdmin from "./admin/ManageAdmin";
-// import ManageTeachers from "../pages/admin/ManageTeachers"
-// import ManageCourses from "./admin/ManageCourses";
-// import ManageScales from "./admin/ManageScales";
+import ManageAdmin from "./admin/ManageAdmin";
+import ManageTeachers from "../pages/admin/ManageTeachers"
+import ManageCourses from "./admin/ManageCourses";
+import ManageScales from "./admin/ManageScales";
+import CourseDetailed from "../components/admin/CourseDetailed";
 
-function AdminPage({userData}) {
+function AdminPage({ userData }) {
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === '/admin' || location.pathname === '/admin/') {
+            navigate('/admin/manage');
+        }
+    }, [navigate, location]);
 
     return (
         <CssVarsProvider disableTransitionOnChange>
@@ -40,14 +55,16 @@ function AdminPage({userData}) {
                         margin: 'auto 0',
                     }}>
 
-                    <Outlet />
-                    {/* <Routes>
-                        <Route index path='/manage/admin' element={<ManageAdmin />} />
-                        <Route path='/manage/teachers' element={<ManageTeachers />} />
-                        <Route path='/manage/courses' element={<ManageCourses />} />
-                        <Route path='/manage/scales' element={<ManageScales />} />
-                    </Routes> */}
-
+                    <Routes>
+                        <Route path="manage" element={<Outlet />}>
+                            <Route index element={<ManageAdmin />} />
+                            <Route path="teachers" element={<ManageTeachers />} />
+                            <Route path="courses" element={<ManageCourses />}>
+                                <Route path=":courseCode" element={<CourseDetailed />} />
+                            </Route>
+                            <Route path="scales" element={<ManageScales />} />
+                        </Route>
+                    </Routes>
                 </Box>
             </Box>
         </CssVarsProvider >
