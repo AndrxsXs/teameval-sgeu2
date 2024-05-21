@@ -3,7 +3,7 @@ import io
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 # from django.contrib.auth.models import User
-from .models import User, Course
+from .models import User, Course, Scale, Rubric, Standard
 from .models import User
 from . import models
 from rest_framework import generics, status
@@ -15,6 +15,7 @@ from .serializers import (
     AdminSerializer,
     CourseSerializer,
     GroupSerializer,
+    RubricSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -143,6 +144,46 @@ def register_student(request):
             )
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def scale_rubric(request):
+    rubric_id = request.data.get('rubric_id')
+    upper_limit = int(request.data.get('upper_limit'))
+    
+    lower_limit = 1 # limite inferior es 1
+    
+    scale = Scale.objects.create(Upper_limit=upper_limit, Lower_limit=lower_limit)
+    rubric = Rubric.objects.get(id=rubric_id)
+    rubric.scale = scale
+    rubric.save()
+    
+    return Response({'message': 'Escala creada y asociada con éxito a la rúbrica.'}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_rubric(request):
+    serializer = RubricSerializer(data=request.data)
+    if serializer.is_valid():
+        rubric = serializer.save()
+        #rubrica global
+        if rubric.is_global:
+            courses = Course.objects.all()
+            for course in courses:
+                rubric.courses.add(course)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def standard_rubric(request):
+    rubric_id = request.data.get('rubric_id')
+    description = request.data.get('description')
+    
+    standard = Standard.objects.create(description=description)
+    rubric = Rubric.objects.get(id=rubric_id)
+    rubric.standards.add(standard) #relacion muchos standards
+    
+    return Response({'message': 'Criterio añadido con éxito a la rúbrica.'}, status=status.HTTP_201_CREATED)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
