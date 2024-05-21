@@ -39,41 +39,10 @@ export default function AddStudent() {
                     }}
                 >
                     <CreateStudent />
-                    <Button
-                        color="primary"
-                        
-                        startDecorator={<FileUploadIcon />}
-                        onClick={handleOpenModal}
-                    >
-                        Importar estudiantes
-                    </Button>
+                    <ImportStudent />
                 </Box>
                 <BodyAddStudent />
             </Box>
-
-            <Modal
-                aria-labelledby="modal-title"
-                aria-describedby="modal-desc"
-                open={isModalOpen}
-                onClose={handleCloseModal}
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
-            >
-                <Sheet
-                    variant="outlined"
-                    sx={{
-                        maxWidth: 500,
-                        borderRadius: 'md',
-                        p: 3,
-                        boxShadow: 'lg',
-                    }}
-                >
-                    <ImportStudent handleClose={handleCloseModal} />
-                </Sheet>
-            </Modal>
         </>
     );
 }

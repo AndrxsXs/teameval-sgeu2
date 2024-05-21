@@ -65,10 +65,6 @@ function App() {
           element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}><AdminPage /></ProtectedRoute>}
           errorElement={<NotFound />}
         >
-          <Route index element={<ManageAdmin />} />
-          <Route path='manage/teachers' element={<ManageTeachers />} />
-          <Route path='manage/courses' element={<ManageCourses />} />
-          <Route path='manage/scales' element={<ManageScales />} />
           <Route path='settings' />
         </Route>
 
