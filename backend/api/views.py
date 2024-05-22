@@ -144,33 +144,36 @@ def register_student(request):
             )
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#crea la escala de la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def scale_rubric(request):
-    rubric_id = request.data.get('rubric_id')
     upper_limit = int(request.data.get('upper_limit'))
-    
     lower_limit = 1 # limite inferior es 1
     
     scale = Scale.objects.create(Upper_limit=upper_limit, Lower_limit=lower_limit)
-    rubric = Rubric.objects.get(id=rubric_id)
-    rubric.scale = scale
-    rubric.save()
     
-    return Response({'message': 'Escala creada y asociada con éxito a la rúbrica.'}, status=status.HTTP_201_CREATED)
+    return Response({'message': f'Escala creada con éxito con ID {scale.id}.'}, status=status.HTTP_201_CREATED)
 
+#el profesor crea la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric(request):
+def create_rubric(request):    
+    print(request.data)
+    course_id = request.data.get('courses') 
+    print(f"course_id: {course_id}") 
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    
     serializer = RubricSerializer(data=request.data)
     if serializer.is_valid():
         rubric = serializer.save()
-        #rubrica global
-        if rubric.is_global:
-            courses = Course.objects.all()
-            for course in courses:
-                rubric.courses.add(course)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        rubric.courses.add(course)
+        return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+    else:
+        print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
@@ -498,8 +501,7 @@ def search_user(request):
 def create_course(request):
     data = request.data  # Obtener los datos de la solicitud
     user = models.User.objects.get(code= data.get("user_teacher"))
-    course_data = {
-        
+    course_data = {        
         "name": data.get("name"),
         "code": data.get("code"),
         "academic_period": data.get("academic_period"),

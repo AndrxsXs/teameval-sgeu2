@@ -147,6 +147,10 @@ class Student(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
+   # courses = models.ManyToManyField(
+   #     Course, 
+   #     related_name="students"
+  #  )
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
@@ -221,8 +225,8 @@ class Rubric(models.Model):
     scale = models.ForeignKey(
         Scale, null=True, on_delete=models.PROTECT, related_name="rubrics"
     )
-    course = models.ForeignKey( # debe ser muchos a muchos
-        Course, null=True, on_delete=models.PROTECT, related_name="rubrics"
+    courses = models.ManyToManyField( # debe ser muchos a muchos
+        Course, related_name="rubrics"
     )
 
  #   is_global = models.BooleanField(default=False)
@@ -232,7 +236,7 @@ class Standard(models.Model):
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
-    scale_description = models.TextField(default=False) # describe la escala
+    scale_description = models.TextField(default=False, blank=True) # describe la escala
 
 #class Description(models.Model):
  #   text = models.TextField()

@@ -128,21 +128,28 @@ class ScaleSerialiazer(serializers.ModelSerializer):
 class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standard
-        fields = ['description']
+        fields = ['description', 'scale_description']
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
         scale = ScaleSerialiazer()
         standards = StandardSerializer(many=True)
+        courses = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
         
         model = Rubric
-        fields = ['scale', 'course', 'is_global', 'standards']
+        fields = ['scale', 'standards', 'courses']
+        
+        def validate(self, data):
+            if 'scale' not in data:
+                raise serializers.ValidationError("Primero defina la escala")
+            return data
         
         def create(self, validated_data):
-            scale_data = validated_data.pop('scale')
+            print(validated_data)
+           # scale_data = validated_data.pop('scale')
             standards_data = validated_data.pop('standards')
-            scale = Scale.objects.create(**scale_data)
-            rubric = Rubric.objects.create(scale=scale, **validated_data)
+          #  scale = Scale.objects.create(**scale_data)
+            rubric = Rubric.objects.create(**validated_data)
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
