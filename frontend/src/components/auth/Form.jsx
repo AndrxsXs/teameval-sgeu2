@@ -104,7 +104,20 @@ export default function Form({ method }) {
                     navigate("/login")
                 }
             } catch (error) {
-                alert(error)
+                // console.log(error)
+
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: `${error.response.status === 401 ? "Código o contraseña incorrectos"
+                                :
+                                "Error al iniciar sesión. Verifique su código y contraseña e intente nuevamente."
+                            }`,
+                            severity: 'danger',
+                        },
+                    })
+                );
+
                 // description = error;
                 setOpen(true)
             } finally {

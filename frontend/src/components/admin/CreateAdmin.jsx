@@ -44,19 +44,55 @@ export default function CreateAdmin() {
             });
 
             if (response.status === 201) {
-                const data = await response.json();
-                console.log(data);
+                const data = await response.data;
+                // console.log(data);
+                setFormData({
+                    code: '',
+                    name: '',
+                    last_name: '',
+                    email: '',
+                    phone: undefined
+                });
                 // Emitir el evento 'userCreated' después de crear un nuevo usuario
                 window.dispatchEvent(new Event('userCreated'));
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: `${data.message}`,
+                            severity: 'success',
+                        },
+                    })
+                );
+
+                handleCloseModal(false);
             } else {
-                console.error('Error:', response.status, response.statusText);
+                const data = await response.data;
+                // console.error('Error:', response.status, response.statusText);
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: `${data.message}`,
+                            severity: 'danger',
+                        },
+                    })
+                );
             }
+
         } catch (error) {
-            console.error('Error:', error);
+            // console.error('Error:', error);
+            window.dispatchEvent(
+                new CustomEvent('responseEvent', {
+                    detail: {
+                        message: `${error.response.status === 409 ? "La cédula ya existe en el sistema."
+                            : "Error al crear el administrador. Intente nuevamente."
+                            }`,
+                        severity: 'danger',
+                    },
+                })
+            );
         }
 
         setLoading(false);
-        handleCloseModal(false);
     };
 
     const [isModalOpen, setIsModalOpen] = useState(false);

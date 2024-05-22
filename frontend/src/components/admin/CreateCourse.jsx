@@ -86,12 +86,34 @@ export default function CreateCourse() {
             });
 
             if (response.status === 201) {
-                const data = await response.data.json();
+                const data = await response.data
                 console.log(data);
+
                 // Emitir el evento 'courseCreated' después de crear un nuevo usuario
                 window.dispatchEvent(new Event('courseCreated'));
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: 'Curso creado correctamente',
+                            severity: 'success',
+                        },
+                    })
+                );
+                setFormData({
+                    code: '',
+                    name: '',
+                    academic_period: '',
+                    user_teacher: '',
+                });
             } else {
-                console.error('Error:', response.status, response.statusText);
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: `${response.statusText}`,
+                            severity: 'danger',
+                        },
+                    })
+                );
             }
         } catch (error) {
             console.error('Error:', error);

@@ -2,6 +2,29 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 // import { interpretNumbers } from './utils/interpretNumbers';
 
+import
+// React,
+{
+  useState,
+  useEffect,
+
+} from 'react';
+
+import {
+  // Alert as MuiAlert,
+  Snackbar,
+  IconButton,
+  Typography,
+
+} from '@mui/joy';
+
+// import SimpleSnackbar from './components/SimpleSnackbar';
+
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+// import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
+
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -13,10 +36,10 @@ import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
 import CreatePassword from './pages/auth/CreatePassword';
 
-import ManageAdmin from "./pages/admin/ManageAdmin";
-import ManageTeachers from "./pages/admin/ManageTeachers"
-import ManageCourses from "./pages/admin/ManageCourses";
-import ManageScales from "./pages/admin/ManageScales";
+// import ManageAdmin from "./pages/admin/ManageAdmin";
+// import ManageTeachers from "./pages/admin/ManageTeachers"
+// import ManageCourses from "./pages/admin/ManageCourses";
+// import ManageScales from "./pages/admin/ManageScales";
 
 import MainTeacherView from './pages/teacher/MainTeacherView';
 
@@ -29,7 +52,7 @@ import RubricResult from './pages/student/RubricResult';
 import ViewFeedback from './pages/student/ViewFeedback';
 import ForgotPassword from './components/ForgotPassword';
 import CodePassword from './components/CodePassword';
-import ImportStudent from './components/teacher/ImportStudent';
+// import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {
   localStorage.clear();
@@ -42,7 +65,31 @@ const USER_ROLES = {
   STUDENT: 'student'
 }
 
+// const Alert = React.forwardRef(function Alert(props, ref) {
+//   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+// });
+
 function App() {
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  const handleResponseEvent = (event) => {
+    // console.log('Evento recibido:', event);
+    const { message, severity } = event.detail;
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  // console.log(snackbarOpen)
+
+  useEffect(() => {
+    window.addEventListener('responseEvent', handleResponseEvent);
+    return () => {
+      window.removeEventListener('responseEvent', handleResponseEvent);
+    };
+  }, []);
 
   return (
 
@@ -96,6 +143,43 @@ function App() {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
+
+      {/* <SimpleSnackbar
+        onOpen={snackbarOpen}
+        // onOpen={true}
+        reason={snackbarSeverity}
+        description={snackbarMessage}
+
+      /> */}
+
+      <Snackbar
+        open={snackbarOpen}
+        // open={true}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        color={snackbarSeverity === 'success' ? 'success' : 'danger'}
+        variant='soft'
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        startDecorator={snackbarSeverity === 'success' ? <CheckCircleRoundedIcon /> : <ErrorRoundedIcon />}
+        endDecorator={
+          <IconButton
+            onClick={() => setSnackbarOpen(false)}
+            variant="soft"
+            // size="sm"
+            color={snackbarSeverity === 'success' ? 'success' : 'danger'}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        }
+      >
+        <Typography
+        color={snackbarSeverity === 'success' ? 'success' : 'danger'}
+        level='title-md'
+        >
+          {snackbarMessage}
+        </Typography>
+      </Snackbar>
+
     </CssVarsProvider>
   )
 }

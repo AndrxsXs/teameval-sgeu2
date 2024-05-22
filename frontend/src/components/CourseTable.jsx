@@ -13,6 +13,7 @@ import {
     // Button,
     // Chip,
     CircularProgress,
+    Button,
     // ButtonGroup
 } from '@mui/joy';
 
@@ -25,7 +26,7 @@ import {
 
 // import SearchField from './admin/SearchField';
 import EditCourse from './EditCourse';
-import DisableCourse from './DisableCourse';
+// import DisableCourse from './DisableCourse';
 
 function RowMenu(props) {
 
@@ -38,27 +39,70 @@ function RowMenu(props) {
             sx={{ display: 'flex', gap: 1 }}
         >
             <EditCourse course={course} />
-            <DisableCourse course={course} />
+            <OpenDetails
+                route={course.code}
+            />
+            {/* <DisableCourse course={course} /> */}
 
         </Box>
     )
 }
 
-const LinkableRow = ({ to, children }) => {
+// const LinkableRow = ({ to, children }) => {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+
+//     const handleClick = () => {
+//         const newPath = `${location.pathname}/${to}`;
+//         navigate(newPath);
+//     };
+
+//     return (
+//         <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
+//             {children}
+//         </tr>
+//     );
+// };
+
+const OpenDetails = ({ route }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleClick = () => {
-        const newPath = `${location.pathname}/${to}`;
+        const newPath = `${location.pathname}/${route}`;
         navigate(newPath);
     };
 
     return (
-        <tr onClick={handleClick} style={{ cursor: 'pointer' }}>
-            {children}
-        </tr>
+        <>
+            <Button
+                disabled
+                onClick={handleClick}
+                variant='soft'
+                color='primary'
+            >
+                Detalles
+            </Button>
+        </>
     );
 };
+
+// function openCourseDetails(course) {
+
+//     navigate = useNavigate();
+
+//     return (
+//         <>
+//             <Button
+//                 onClick={navigate(`/course/${course.code}`)}
+//                 variant='soft'
+//                 color='primary'
+//             >
+//                 <Typography level='body-xs'>Detalles</Typography>
+//             </Button>
+//         </>
+//     )
+// }
 
 export default function CourseTable() {
 
@@ -92,28 +136,39 @@ export default function CourseTable() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchCourses = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('ACCESS_TOKEN');
+            const response = await api.get('api/course_list/', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setCourses(response.data);
+            // console.log('Cursos:', response.data);
+        } catch (error) {
+            console.error('Error obteniendo datos de cursos:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const token = localStorage.getItem('ACCESS_TOKEN');
-                const response = await api.get('api/course_list/', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setCourses(response.data);
-                console.log('Cursos:', response.data);
-            } catch (error) {
-                console.error('Error obteniendo datos de cursos:', error);
-            } finally {
-                setLoading(false);
-            }
+        fetchCourses();
+
+        // Escuchar el evento 'courseCreated'
+        const handleCourseCreated = () => {
+            fetchCourses(); // Llamar a la función para obtener la lista actualizada de cursos
         };
 
-        fetchData();
-    }, []);
+        window.addEventListener('courseCreated', handleCourseCreated);
 
+        // Limpiar el evento al desmontar el componente
+        return () => {
+            window.removeEventListener('courseCreated', handleCourseCreated);
+        };
+    }, []);
 
     return (
         <Fragment>
@@ -185,7 +240,8 @@ export default function CourseTable() {
                     </thead>
                     <tbody>
                         {courses.map(row => (
-                            <LinkableRow to={row.code} key={row.code}>
+                            // <LinkableRow to={row.code} key={row.code}>
+                            <tr key={row.code}>
                                 <td style={{ paddingInline: '16px' }}>
                                     <Typography level="body-xs">{row.code}</Typography>
                                 </td>
@@ -203,7 +259,8 @@ export default function CourseTable() {
                                 <td style={{ paddingInline: '16px' }}>
                                     <RowMenu course={row} />
                                 </td>
-                            </LinkableRow>
+                            </tr>
+                            // </LinkableRow>
                         ))}
                     </tbody>
                 </Table>
