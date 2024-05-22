@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CardCurso from "../../components/teacher/CardCurso"
 import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
@@ -7,16 +7,20 @@ import Typography from '@mui/joy/Typography'
 import fondo from '../../assets/Fondo.png'
 import fondoCard from '../../assets/FondoCardDefecto.png'
 import fondoCiber from '../../assets/FondoCiber.png'
+import { Button } from '@mui/joy';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 
 
 export default function MainTeacherView() {
+
+const navigate = useNavigate();
 
     return (
         <Box
             sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, justifyContent: 'center' }}
         >
             <TopNavbar />
-
+            
             <Box className="contenedor"
                 sx={{
                     flex: 1,

@@ -6,13 +6,22 @@
     flex-flow: row wrap;
     align-items: center;
     height: 64px;
+    align-content: center;
     /*border-bottom: 1px solid #e0e1e3;*/
 }
 
 .top-navbar {
-    justify-content: center;
+    justify-content: space-evenly;
 }
 
 .session {
     justify-content: space-between;
+}
+
+.session .cerrar-sesión-button {
+    display: none
+}
+
+.cerrar-sesión-button {
+    position: absolute;
 }
