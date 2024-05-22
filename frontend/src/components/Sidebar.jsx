@@ -137,11 +137,17 @@ export default function Sidebar(props) {
                         Sistema
                     </ListSubheader>
                     <ListItem>
-                        <ListItemButton selected={location.pathname === settingsRoute}>
+                        <ListItemButton selected={location.pathname === settingsRoute}
+                            disabled
+                        >
                             <SettingsRoundedIcon />
                             <ListItemContent>
                                 <Link to={settingsRoute}>
-                                    <Typography level="title-sm">
+                                    <Typography level="title-sm"
+                                        sx={{
+                                            color: 'var(--joy-palette-neutral-400, #9FA6AD)'
+                                        }}
+                                    >
                                         Ajustes
                                     </Typography>
                                 </Link>
