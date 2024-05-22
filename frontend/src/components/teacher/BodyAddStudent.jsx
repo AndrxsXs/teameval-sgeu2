@@ -1,5 +1,5 @@
 import * as React from 'react';
-import AdminTable from '../../components/admin/AdminTable';
+import StudentTable from './StudentTable';
 
 
 
@@ -8,7 +8,7 @@ export default function BodyAddStudent() {
 
     <>
 
-      <AdminTable />
+      <StudentTable />
     </>
   );
 }
