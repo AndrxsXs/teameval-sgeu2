@@ -1,0 +1,9 @@
+/* DragUpload.css */
+div[data-mui-component="Card"][variant="outlined"] {
+    border: 2px dashed transparent;
+  }
+  
+  div[data-mui-component="Card"][variant="outlined"]:drop {
+    border: 2px dashed #ccc;
+    background-color: #f0f0f0;
+  }
