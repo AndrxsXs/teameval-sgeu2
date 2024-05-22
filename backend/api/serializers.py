@@ -1,5 +1,6 @@
 from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from django.db import IntegrityError
 # from .models import User
 # from .models import Note
@@ -131,9 +132,10 @@ class StandardSerializer(serializers.ModelSerializer):
         model = Standard
         fields = ['description', 'scale_description']
 
+
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
-        scale = ScaleSerialiazer()
+        scale = serializers.PrimaryKeyRelatedField(queryset=Scale.objects.all())
         standards = StandardSerializer(many=True)
         courses = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
         
@@ -146,10 +148,7 @@ class RubricSerializer(serializers.ModelSerializer):
             return data
         
         def create(self, validated_data):
-            print(validated_data)
-           # scale_data = validated_data.pop('scale')
             standards_data = validated_data.pop('standards')
-          #  scale = Scale.objects.create(**scale_data)
             rubric = Rubric.objects.create(**validated_data)
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)

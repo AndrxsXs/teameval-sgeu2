@@ -18,6 +18,7 @@ from .serializers import (
     CourseSerializer,
     GroupSerializer,
     RubricSerializer,
+    StandardSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -220,6 +221,7 @@ def register_student(request, course_id):
 
     return Response(
         {"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+
 #crea la escala de la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -234,24 +236,60 @@ def scale_rubric(request):
 #el profesor crea la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric(request):    
-    print(request.data)
-    course_id = request.data.get('courses') 
-    print(f"course_id: {course_id}") 
+def create_rubric1(request, course_id):    
+  #  print(request.data)
+  #  print(f"course_id: {course_id}") 
     try:
         course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
         return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
     
+    request.data['courses'] = [course_id]
     serializer = RubricSerializer(data=request.data)
     if serializer.is_valid():
         rubric = serializer.save()
-        rubric.courses.add(course)
         return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
-    else:
-        print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_rubric(request, course_id):    
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Asegúrate de que la escala exista
+    scale_id = request.data.get('scale')
+    try:
+        scale = Scale.objects.get(id=scale_id)
+    except Scale.DoesNotExist:
+        return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Crear los estándares primero
+    standards_data = request.data.get('standards')
+    standards = []
+    for standard_data in standards_data:
+        standard_serializer = StandardSerializer(data=standard_data)
+        if standard_serializer.is_valid():
+            standard = standard_serializer.save()
+            standards.append(standard)
+        else:
+            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear la rúbrica y asociar los estándares a ella
+    rubric_data = {
+        'scale': scale.id,
+        'courses': [course_id],
+        'standards': [standard.id for standard in standards]
+    }
+    rubric_serializer = RubricSerializer(data=rubric_data)
+    if rubric_serializer.is_valid():
+        rubric_serializer.save()
+    else:
+        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])
