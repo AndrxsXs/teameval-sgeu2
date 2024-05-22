@@ -1,4 +1,4 @@
-from .models import User, Student, Teacher, Admi, Course, Group
+from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard
 from rest_framework import serializers
 from django.db import IntegrityError
 # from .models import User
@@ -119,6 +119,40 @@ class AdminSerializer(serializers.ModelSerializer):
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         admin = Admi.objects.create(user=user, **validated_data)
         return admin
+
+class ScaleSerialiazer(serializers.ModelSerializer):
+    class Meta:
+        model = Scale
+        fields = ['Upper_limit', 'Lower_limit']
+        
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
+        fields = ['description', 'scale_description']
+
+class RubricSerializer(serializers.ModelSerializer):
+    class Meta:
+        scale = ScaleSerialiazer()
+        standards = StandardSerializer(many=True)
+        courses = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
+        
+        model = Rubric
+        fields = ['scale', 'standards', 'courses']
+        
+        def validate(self, data):
+            if 'scale' not in data:
+                raise serializers.ValidationError("Primero defina la escala")
+            return data
+        
+        def create(self, validated_data):
+            print(validated_data)
+           # scale_data = validated_data.pop('scale')
+            standards_data = validated_data.pop('standards')
+          #  scale = Scale.objects.create(**scale_data)
+            rubric = Rubric.objects.create(**validated_data)
+            for standard_data in standards_data:
+                Standard.objects.create(rubric=rubric, **standard_data)
+            return rubric
 
 class GroupSerializer(serializers.ModelSerializer):
     students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())

@@ -147,6 +147,10 @@ class Student(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
+   # courses = models.ManyToManyField(
+   #     Course, 
+   #     related_name="students"
+  #  )
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
@@ -204,12 +208,12 @@ class Course(models.Model):
     # obtiene el nombre del profesor
     @property
     def teacher_name(self):
-        return self.user_teacher.user.name + " " + self.user_teacher.last_name
+        return self.user_teacher.name + " " + self.user_teacher.last_name
 
     # obtiene la cantidad de estudiantes
     @property
     def student_count(self):
-        return Student.objects.filter(course_user_student=self).count()
+        return self.user_students.count()
 
 
 # option 2 for academic period
@@ -221,26 +225,27 @@ class Rubric(models.Model):
     scale = models.ForeignKey(
         Scale, null=True, on_delete=models.PROTECT, related_name="rubrics"
     )
-    course = models.ForeignKey(
-        Course, null=True, on_delete=models.PROTECT, related_name="rubrics"
+    courses = models.ManyToManyField( # debe ser muchos a muchos
+        Course, related_name="rubrics"
     )
 
+ #   is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
-    description = models.TextField()
+    description = models.TextField() #describe el criterio
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
+    scale_description = models.TextField(default=False, blank=True) # describe la escala
 
-
-class Description(models.Model):
-    text = models.TextField()
-    scale = models.ForeignKey(
-        Scale, null=True, on_delete=models.PROTECT, related_name="descriptions"
-    )
-    standard = models.ForeignKey(
-        Standard, null=True, on_delete=models.PROTECT, related_name="descriptions"
-    )
+#class Description(models.Model):
+ #   text = models.TextField()
+  #  scale = models.ForeignKey(
+   #     Scale, null=True, on_delete=models.PROTECT, related_name="descriptions"
+  #  )
+ #   standard = models.ForeignKey(
+ #       Standard, null=True, on_delete=models.PROTECT, related_name="descriptions"
+ #   )
 
 
 class Report(models.Model):

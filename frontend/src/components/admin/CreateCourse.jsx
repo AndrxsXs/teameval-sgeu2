@@ -10,17 +10,14 @@ import ModalFrame from '../ModalFrame';
 import ImportStudents from './ImportStudents';
 
 import {
+    Box,
+    Stack,
+    FormControl,
+    FormLabel,
     Select,
     Option,
     Button,
-    FormControl,
-    FormLabel,
     Input,
-    IconButton,
-    Box,
-    Stack,
-    AspectRatio,
-    Avatar,
     Autocomplete,
 } from '@mui/joy';
 
@@ -28,21 +25,19 @@ import {
     Add,
 } from '@mui/icons-material';
 
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 export default function CreateCourse() {
 
-    const [academicPeriod, setAcademicPeriod] = useState('');
-    const [year, setYear] = useState('');
-    const [cycle, setCycle] = useState('');
-
     const [loading, setLoading] = useState(false);
     const route = "api/create_course/"
+
+    const [year, setYear] = useState(undefined);
+    const [cycle, setCycle] = useState(undefined);
     const [formData, setFormData] = useState({
         code: '',
         name: '',
-        academic_period: academicPeriod,
-        user_teacher: ''
+        academic_period: '',
+        user_teacher: '',
     });
 
     const [teachers, setTeachers] = useState([]);
@@ -67,7 +62,12 @@ export default function CreateCourse() {
 
     useEffect(() => {
         if (year && cycle) {
-            setAcademicPeriod(`${year}-${cycle}`);
+            const newAcademicPeriod = `${year}-${cycle}`;
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                academic_period: newAcademicPeriod,
+            }));
+            // console.log('Periodo académico:', newAcademicPeriod);
         }
     }, [year, cycle]);
 
@@ -86,9 +86,9 @@ export default function CreateCourse() {
             });
 
             if (response.status === 201) {
-                const data = await response.json();
+                const data = await response.data.json();
                 console.log(data);
-                // Emitir el evento 'userCreated' después de crear un nuevo usuario
+                // Emitir el evento 'courseCreated' después de crear un nuevo usuario
                 window.dispatchEvent(new Event('courseCreated'));
             } else {
                 console.error('Error:', response.status, response.statusText);
@@ -145,59 +145,6 @@ export default function CreateCourse() {
                             // spacing={3}
                             sx={{ display: 'flex', my: 1 }}>
 
-                            {/* profile picture */}
-
-                            <Stack direction="column" spacing={1}
-                                sx={{
-                                    display: { sm: 'none', md: 'none' },
-                                }}
-                            >
-                                <AspectRatio
-                                    ratio="1"
-                                    maxHeight={200}
-                                    sx={{
-                                        // position: 'relative',
-                                        flex: 1,
-                                        minWidth: 120,
-                                        borderRadius: '100%',
-                                        // border: '1px solid',
-                                        borderColor: 'divider',
-                                        // backgroundImage: `url(${<PersonAddRoundedIcon />})`,
-                                    }}
-                                >
-
-                                    <Avatar variant="outlined"
-                                        // src={profilePicture}
-                                        alt=""
-                                        sx={{
-                                            width: '',
-                                            height: ''
-                                        }} />
-
-                                </AspectRatio>
-                                <IconButton
-                                    aria-label="Subir una nueva imagen"
-                                    size="sm"
-                                    variant="outlined"
-                                    color="neutral"
-                                    sx={{
-                                        bgcolor: 'background.body',
-                                        position: 'absolute',
-                                        zIndex: 2,
-                                        borderRadius: '50%',
-                                        left: 110,
-                                        top: 150,
-                                        boxShadow: 'sm',
-                                    }}
-                                >
-                                    {/* <Input type="file"> */}
-                                    <EditRoundedIcon />
-                                    {/* </Input> */}
-                                </IconButton>
-                            </Stack>
-
-                            {/* end profile picture */}
-
                             <Stack component='section' spacing={2} sx={{ flexGrow: 1, }}>
                                 <Stack component='section'
                                     sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}
@@ -217,7 +164,8 @@ export default function CreateCourse() {
                                         <Input size="sm" placeholder="Código del curso"
                                             value={formData.code}
                                             onChange={e => setFormData({ ...formData, code: e.target.value })}
-                                            type='text' required />
+                                            type='text'
+                                            required />
                                     </FormControl>
                                 </Stack>
                                 <Stack component='section'
@@ -252,6 +200,8 @@ export default function CreateCourse() {
                                             // getOptionValue={(option) => option.code}
                                             placeholder='Seleccione un docente'
                                             getOptionLabel={(option) => `${option.name} ${option.last_name}`}
+                                            onChange={(e, value) => { setFormData({ ...formData, user_teacher: value.code }) }}
+                                            required
                                             sx={{
                                                 width: '92%'
                                             }}
@@ -283,14 +233,25 @@ export default function CreateCourse() {
                                             <Select
                                                 size="sm"
                                                 placeholder="Año"
-                                                onChange={e => setYear(e.target.value)}
+                                                onChange={(e, value) => setYear(value)}
+                                                required
                                             >
-                                                <Option value="1">2024</Option>
+                                                <Option value="2017">2017</Option>
+                                                <Option value="2018">2018</Option>
+                                                <Option value="2019">2019</Option>
+                                                <Option value="2020">2020</Option>
+                                                <Option value="2021">2021</Option>
+                                                <Option value="2022">2022</Option>
+                                                <Option value="2023">2023</Option>
+                                                <Option value="2024">2024</Option>
+                                                <Option value="2025">2025</Option>
+                                                <Option value="2026">2026</Option>
                                             </Select>
                                             <Select
                                                 size="sm"
                                                 placeholder="Ciclo"
-                                                onChange={e => setCycle(e.target.value)}
+                                                onChange={(e, value) => setCycle(value)}
+                                                required
                                             >
                                                 <Option value="1">1</Option>
                                                 <Option value="2">2</Option>
