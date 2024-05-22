@@ -41,13 +41,7 @@ export default function Groups() {
                     >
                         Crear grupos
                     </Button>
-                    <Button
-                        color="primary"
-                        startDecorator= {<FileUploadIcon />}
-                        size="sm"
-                    >
-                        Recursos
-                    </Button>
+                    
                 </Box>
             </Box>
         </>
