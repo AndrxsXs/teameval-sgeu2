@@ -10,6 +10,7 @@ import ScalesCriteria from './teacher/ScalesCriteria'
 import Report from './teacher/Report'
 import MainTeacherView from './teacher/MainTeacherView';
 import ImportStudent from '../components/teacher/ImportStudent';
+import Resources from './teacher/Resources';
 
 function TeacherPage({ userData }) {
     return (
@@ -24,7 +25,7 @@ function TeacherPage({ userData }) {
             <Route path='grupos' element={<Groups />} />
             <Route path='escalas' element={<ScalesCriteria />} />
             <Route path='informes' element={<Report />} />
-            <Route path='recursos' element={<Report />} />
+            <Route path='recursos' element={<Resources />} />
           </Route>
         </Routes>
 
