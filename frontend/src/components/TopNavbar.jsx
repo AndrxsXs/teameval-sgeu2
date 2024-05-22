@@ -23,18 +23,7 @@ export default function TopNavbar(props) {
             <Link to="/">
                 <img src={logo} alt="Logo de TeamEval" />
             </Link>
-            <Button
-            className='cerrar-sesión-button'
-            variant="plain"
-            color="neutral"
-            onClick={() => navigate("/logout")}
-            endDecorator={<LogoutRoundedIcon />}
-            sx={{
-                alignSelf: "flex-end"
-            }}
-            >
-                Cerrar sesión
-            </Button>
+           
         </header>
     );
 }
