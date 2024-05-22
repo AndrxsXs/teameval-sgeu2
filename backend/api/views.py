@@ -2,9 +2,10 @@ import csv
 import io
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 
 # from django.contrib.auth.models import User
-from .models import User, Course, Scale, Rubric, Standard
+from .models import User, Course, Scale, Rubric, Standard, Student
 from .models import User
 from . import models
 from rest_framework import generics, status
@@ -145,7 +146,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 # student creation
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_student(request):
+def register_student2(request):
     data = request.data
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
@@ -161,7 +162,13 @@ def register_student(request):
     serializer_student = StudentSerializer(data=student_data)
     if serializer_student.is_valid():
         try:
-            serializer_student.save()
+            student = serializer_student.save()
+            course_id = data.get('course_id')
+            course = Course.objects.get(id=course_id)
+            if course in student.course_set.all():
+                return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+            student.course_set.add(course)
+            course.user_students.add(student)
             return Response(
                 {"message": "User created successfully"}, status=status.HTTP_201_CREATED
             )
@@ -172,6 +179,47 @@ def register_student(request):
             )
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# creacion de un estudiante
+# student creation
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def register_student(request, course_id):
+    data = request.data
+    password = User.default_password(
+        data.get("name"), data.get("code"), data.get("last_name")
+    )
+    student_data = {
+        "name": data.get("name"),
+        "last_name": data.get("last_name"),
+        "code": data.get("code"),
+        "email": data.get("email"),
+        "group": None,
+        "password": password,
+    }
+    try:
+        # Verifica si el estudiante ya existe
+        student = Student.objects.get(user__code=student_data["code"])
+    except Student.DoesNotExist:
+        # Si el estudiante no existe, crea uno nuevo
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            student = serializer_student.save()
+        else:
+            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Obtiene el curso
+    course = Course.objects.get(id=course_id)
+
+    # Verifica si el estudiante ya está en el curso
+    if course in student.courses_user_student.all():
+        return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+
+    # Agrega el estudiante al curso
+    student.courses_user_student.add(course)
+    course.user_students.add(student)
+
+    return Response(
+        {"message": "User created successfully"}, status=status.HTTP_201_CREATED)
 #crea la escala de la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -203,6 +251,8 @@ def create_rubric(request):
     else:
         print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

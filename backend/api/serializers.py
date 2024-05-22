@@ -35,6 +35,7 @@ class StudentSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
     code = serializers.CharField(source='user.code')
+ #   courses = serializers.SlugRelatedField(many=True, slug_field='code', queryset=Course.objects.all())
 
     class Meta:
         model = Student
