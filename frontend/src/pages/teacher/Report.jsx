@@ -1,60 +1,29 @@
-import React from 'react';
-import { Box, Button, Typography } from '@mui/joy';
-import UploadIcon from '@mui/icons-material/Upload';
+import { Box } from "@mui/joy"
+import { Typography } from "@mui/joy"
 
+export default function Report() {
 
-const Report = () => {
     return (
         <>
-            <Box sx={{ border: '1px solid gray', padding: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
-                    Recursos
+              <Box component="header"
+                sx={{
+                    display: 'flex',
+                    mt: 2,
+                    mb: 1,
+                    gap: 1,
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'start', sm: 'center' },
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                }}
+            >
+                <Typography level="h2" component="h1">
+                    Informes
                 </Typography>
+
                 
-                <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                    Compartir recursos para el mejoramiento del trabajo en equipo
-                </Typography>
-
-                <Box
-                    sx={{
-                        border: '1px solid lightgray',
-                        padding: '16px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderRadius: '4px',
-                        marginBottom: 2,
-                    }}
-                >
-                    <UploadIcon sx={{ color:'blue', marginRight:'8px' }}/>
-                    <Typography variant="body2">
-                        Haga clic para actualizar o arrastre y suelte.
-                    </Typography>
-                </Box>
-
-                <Box sx={{ display:'flex', justifyContent:'space-between' }}>
-                    <Button
-                        variant="text"
-                        sx={{
-                            textTransform:'none'
-                         }}
-                     >
-                         Cancelar
-                     </Button>
-                     
-                     <Button 
-                         variant="contained" 
-                         color="primary"
-                         sx={{
-                             textTransform:'none'
-                          }}
-                      >
-                          Guardar
-                      </Button>
-                 </Box>
             </Box>
         </>
-    );
-};
-
-export default Report;
+    )
+}
