@@ -2,6 +2,7 @@ import csv
 import io
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+
 # from django.contrib.auth.models import User
 from .models import User, Course, Scale, Rubric, Standard
 from .models import User
@@ -34,13 +35,16 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_student(request):
-    csv_file = request.FILES["csv_file"] #Asi se debe llamar el nombre del campo en front
-    decoded_file = csv_file.read().decode('utf-8')
+    csv_file = request.FILES[
+        "csv_file"
+    ]  # Asi se debe llamar el nombre del campo en front
+    decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=';', quotechar="|")
+    reader = csv.reader(io_string, delimiter=";", quotechar="|")
     next(reader)
     for row in reader:
         try:
@@ -51,45 +55,69 @@ def import_student(request):
                 "email": row[3],
             }
         except IndexError:
-            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "El archivo CSV tiene un formato incorrecto"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer_student = StudentSerializer(data=student_data)
         if serializer_student.is_valid():
             try:
                 serializer_student.save()
             except:
-                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+                return Response(
+                    {"message": f"El usuario con el código {row[2]} ya existe"},
+                    status=status.HTTP_409_CONFLICT,
+                )
         else:
-            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'message': 'Estudiantes importados exitosamente'}, status=status.HTTP_201_CREATED)
+            return Response(
+                serializer_student.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(
+        {"message": "Estudiantes importados exitosamente"},
+        status=status.HTTP_201_CREATED,
+    )
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_teacher(request):
     csv_file = request.FILES["csv_file"]
-    decoded_file = csv_file.read().decode('utf-8')
+    decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=';', quotechar='|')
+    reader = csv.reader(io_string, delimiter=";", quotechar="|")
     next(reader)
     for row in reader:
         try:
             teacher_data = {
-            "name": row[0],
-            "last_name": row[1],
-            "code": row[2],
-            "email": row[3],
-            "phone": row[4]
-        }
+                "name": row[0],
+                "last_name": row[1],
+                "code": row[2],
+                "email": row[3],
+                "phone": row[4],
+            }
         except IndexError:
-            return Response({'message': 'El archivo CSV tiene un formato incorrecto'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "El archivo CSV tiene un formato incorrecto"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer_teacher = TeacherSerializer(data=teacher_data)
         if serializer_teacher.is_valid():
             try:
                 serializer_teacher.save()
             except:
-                return Response({'message': f'El usuario con el código {row[2]} ya existe'}, status=status.HTTP_409_CONFLICT)
+                return Response(
+                    {"message": f"El usuario con el código {row[2]} ya existe"},
+                    status=status.HTTP_409_CONFLICT,
+                )
         else:
-            return Response(serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'message': 'Profesores importados exitosamente'}, status=status.HTTP_201_CREATED)
+            return Response(
+                serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+    return Response(
+        {"message": "Profesores importados exitosamente"},
+        status=status.HTTP_201_CREATED,
+    )
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -251,25 +279,29 @@ def register_teacher(request):
         {"message": "error creating user"}, status=status.HTTP_400_BAD_REQUEST
     )
 
+
 @csrf_exempt
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_group(request):
     data = request.data
-    print(data) 
+    print(data)
     group_data = {
         "name": data.get("name"),
         "assigned_project": data.get("assigned_project"),
         "course": data.get("course"),
-        "students": data.get("students"),      
+        "students": data.get("students"),
     }
     serializer_group = GroupSerializer(data=group_data)
     if serializer_group.is_valid():
         serializer_group.save()
-        return Response({'message': 'Group created successfully'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Group created successfully"}, status=status.HTTP_201_CREATED
+        )
     print(serializer_group.errors)
-    return Response({'message': 'Error creating group'}, status=status.HTTP_400_BAD_REQUEST)
-        
+    return Response(
+        {"message": "Error creating group"}, status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 # creacion de un profesor
@@ -392,11 +424,17 @@ def change_password(request):
 @permission_classes([IsAuthenticated])
 def user_list(request):
     role = request.GET.get("role")
-    if role is not None:
-        users = User.objects.filter(role=role)
-    else:
-        users = User.objects.all()
-    # obtiene el name, codigo, apellido y email para que se muestren
+    course_id = request.GET.get("course")
+
+    users = User.objects.all()
+
+    if role:
+        users = users.filter(role=role)
+
+    if course_id:
+        course = Course.objects.get(id=course_id)
+        users = users.filter(student__courses_user_student=course)
+
     user_data = [
         {
             "role": user.role,
@@ -405,10 +443,10 @@ def user_list(request):
             "last_name": user.last_name,
             "email": user.email,
             "status": user.status,
-            # recorre cada usuario de la lista
         }
         for user in users
     ]
+
     return Response(user_data)
 
 
@@ -418,16 +456,21 @@ def user_list(request):
 @permission_classes([IsAuthenticated])
 def course_list(request):
     courses = Course.objects.all()
-    # obtiene el name, codigo, docente y cantidad de estudiantes para que se muestren
-    course_data = [
-        {
-            "code": course.code,
-            "name": course.name,
-            "teacher": course.teacher_name,
-            "student_count": course.student_count,
-        }
-        for course in courses
-    ]
+    course_data = []
+    for course in courses:
+        students = course.user_students.values(
+            "user__name", "user__last_name", "user__code", "user__email"
+        )
+        course_data.append(
+            {
+                "code": course.code,
+                "name": course.name,
+                "teacher": course.teacher_name,
+                "academic_period": course.academic_period,
+                "student_count": course.student_count,
+                "students": list(students),
+            }
+        )
     return Response(course_data)
 
 
@@ -499,24 +542,28 @@ def search_user(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_course(request):
-    data = request.data  # Obtener los datos de la solicitud
-    user = models.User.objects.get(code= data.get("user_teacher"))
-    course_data = {        
+    data = request.data
+    try:
+        user = models.User.objects.get(code=data.get("user_teacher"))
+    except User.DoesNotExist:
+        return Response(
+            {"error": "El código de usuario proporcionado no es válido."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    course_data = {
         "name": data.get("name"),
         "code": data.get("code"),
         "academic_period": data.get("academic_period"),
         "user_teacher": user.id,
-    }    
+    }
 
-    serializer_course = CourseSerializer(
-        data=course_data
-    ) # Pasar los datos con la clave 'data='
+    serializer_course = CourseSerializer(data=course_data)
     if serializer_course.is_valid():
         serializer_course.save()
         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # def create_course(request):
@@ -532,21 +579,30 @@ def create_course(request):
 #         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
 #     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_mail(request):
-    q = request.POST.get('user_mail', '')
-    subject = 'Restablecer contraseña'
+    q = request.POST.get("user_mail", "")
+    subject = "Restablecer contraseña"
     if models.User.objects.filter(email__icontains=q).exists():
-        message = EmailMultiAlternatives(subject,  # Titulo
-                                        "Hola, para restablecer su contraseña ingrese al siguiente link ....",
-                                        settings.EMAIL_HOST_USER,  # Remitente
-                                        [q])  # Destinatario
+        message = EmailMultiAlternatives(
+            subject,  # Titulo
+            "Hola, para restablecer su contraseña ingrese al siguiente link ....",
+            settings.EMAIL_HOST_USER,  # Remitente
+            [q],
+        )  # Destinatario
         message.send()
-        return Response({'message': 'Correo enviado correctamente'}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Correo enviado correctamente"}, status=status.HTTP_200_OK
+        )
     else:
-        return Response({"error": "No existe un usuario con esta direccion de correo electronico"}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "No existe un usuario con esta direccion de correo electronico"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def evaluated(request):
@@ -578,9 +634,13 @@ def home(request):
 
 
 def prueba(request):
-    curso= models.Course.objects.get(id=2)
-    return render(request, "prueba.html", {
-        'name': curso.name,
-        'code': curso.code,
-        'teacher': curso.user_teacher.name + " " + curso.user_teacher.last_name
-    })
+    curso = models.Course.objects.get(id=2)
+    return render(
+        request,
+        "prueba.html",
+        {
+            "name": curso.name,
+            "code": curso.code,
+            "teacher": curso.user_teacher.name + " " + curso.user_teacher.last_name,
+        },
+    )

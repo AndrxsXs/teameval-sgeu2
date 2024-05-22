@@ -62,32 +62,32 @@ const LinkableRow = ({ to, children }) => {
 
 export default function CourseTable() {
 
-    const testCourses = [
-        {
-            code: '0870',
-            name: 'Proyecto Integrador I',
-            teacher: {
-                code: '2020',
-                name: 'Juan',
-                last_name: 'Perez',
-                email: 'juan.perez@mail.edu.co',
-                phone: '',
-            },
-            academic_period: '2024-1',
-        },
-        {
-            code: '0871',
-            name: 'Desarrollo de software II',
-            teacher: {
-                code: '2021',
-                name: 'David',
-                last_name: 'Marquez',
-                email: '',
-                phone: '',
-            },
-            academic_period: '2024-1',
-        }
-    ]
+    // const testCourses = [
+    //     {
+    //         code: '0870',
+    //         name: 'Proyecto Integrador I',
+    //         teacher: {
+    //             code: '2020',
+    //             name: 'Juan',
+    //             last_name: 'Perez',
+    //             email: 'juan.perez@mail.edu.co',
+    //             phone: '',
+    //         },
+    //         academic_period: '2024-1',
+    //     },
+    //     {
+    //         code: '0871',
+    //         name: 'Desarrollo de software II',
+    //         teacher: {
+    //             code: '2021',
+    //             name: 'David',
+    //             last_name: 'Marquez',
+    //             email: '',
+    //             phone: '',
+    //         },
+    //         academic_period: '2024-1',
+    //     }
+    // ]
 
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -184,7 +184,7 @@ export default function CourseTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {testCourses.map(row => (
+                        {courses.map(row => (
                             <LinkableRow to={row.code} key={row.code}>
                                 <td style={{ paddingInline: '16px' }}>
                                     <Typography level="body-xs">{row.code}</Typography>
@@ -197,7 +197,7 @@ export default function CourseTable() {
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
                                     <Typography level="body-xs">
-                                        {row.teacher.name} {row.teacher.last_name}
+                                        {row.teacher}
                                     </Typography>
                                 </td>
                                 <td style={{ paddingInline: '16px' }}>
@@ -244,12 +244,12 @@ export default function CourseTable() {
                             width: '100%',
                             height: '100%',
                             minHeight: '41px',
-                            borderTop: testCourses && testCourses.length < 1 ? 'transparent' : '1px solid',
+                            borderTop: courses && courses.length < 1 ? 'transparent' : '1px solid',
                             borderTopColor: 'divider',
                             userSelect: 'none',
                         }}
                     >
-                        {testCourses && testCourses.length === 0 ? <Fragment>No hay cursos</Fragment> : <Fragment>Nada más por aquí</Fragment>}
+                        {courses && courses.length === 0 ? <Fragment>No hay cursos</Fragment> : <Fragment>Nada más por aquí</Fragment>}
                     </Typography>
                 }
             </Sheet>
