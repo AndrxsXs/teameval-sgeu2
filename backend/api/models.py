@@ -147,10 +147,6 @@ class Student(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
-   # courses = models.ManyToManyField(
-   #     Course, 
-   #     related_name="students"
-  #  )
 
     def _str_(self):
         return self.user.name + " " + self.user.last_name
