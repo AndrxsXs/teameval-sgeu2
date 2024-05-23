@@ -148,7 +148,15 @@ export default function CourseTable() {
             setCourses(response.data);
             // console.log('Cursos:', response.data);
         } catch (error) {
-            console.error('Error obteniendo datos de cursos:', error);
+            window.dispatchEvent(
+                new CustomEvent('responseEvent', {
+                    detail: {
+                        message: `${error.response.status} ${error.response.statusText}`,
+                        severity: 'danger',
+                    },
+                })
+            );
+            // console.error('Error obteniendo datos de cursos:', error);
         } finally {
             setLoading(false);
         }
@@ -190,7 +198,7 @@ export default function CourseTable() {
                 }}
             >
                 <Table
-                    aria-labelledby="Tabla de administradores"
+                    aria-labelledby="Tabla de cursos"
                     stickyHeader
                     hoverRow
                     sx={{
