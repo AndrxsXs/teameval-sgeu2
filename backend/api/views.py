@@ -961,10 +961,26 @@ def create_mail(request):
         )
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def evaluated(request):
-    user= request.data
+def evaluar(request):
+    data= request.data
+    user= request.user
+    evaluator= models.Student.objects.get(user_code =  user.code)
+    try:
+        evaluated= models.Student.objects.get(user_code =  data.get("evaluated"))
+        #user = models.User.objects.get(code=data.get("user_teacher"))
+    except User.DoesNotExist:
+        return Response(
+            {"error": "El código de usuario proporcionado no es válido."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    
+    course_data = {
+        "evaluated": evaluated.id,
+        "evaluator": evaluator.id,
+    }
     
     
     
