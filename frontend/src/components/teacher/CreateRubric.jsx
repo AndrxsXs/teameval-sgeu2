@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import Button from '@mui/joy/Button';
 import Add from '@mui/icons-material/Add';
+import ModalFrame from '../ModalFrame';
 
 export default function CreateRubric() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,7 +14,8 @@ export default function CreateRubric() {
     const handleCloseModal = (value) => {
         setIsModalOpen(value);
     }
-    return(
+
+    return (
         <React.Fragment>
             <Button
                 color="primary"
@@ -21,8 +23,14 @@ export default function CreateRubric() {
                 startDecorator={<Add />}
                 onClick={handleOpenModal}
             >
-                Crear rubrica
+                Nueva rubrica
             </Button>
+            <ModalFrame
+                open={isModalOpen}
+                onClose={handleCloseModal}
+                ModalTitle="Crear rubrica">
+                <p>Contenido del modal</p>
+            </ModalFrame>
         </React.Fragment>
     )
 }
