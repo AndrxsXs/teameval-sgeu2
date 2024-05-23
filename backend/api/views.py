@@ -487,8 +487,58 @@ def create_group(request):
     else:
         return Response(serializer_group.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+#muestra la lista de grupos de ese curso
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_list(request):
+    course_id = request.GET.get("course")
     
+    if course_id:
+        course = Course.objects.get(id=course_id)
+        groups = Group.objects.filter(course=course)
+    
+    group_data = [
+        {
+            "id": group.id,
+            "name": group.name,
+            "assigned_project": group.assigned_project,
+            "student_count": group.students.count(),            
+        }
+        for group in groups
+    ]
+    
+    return Response(group_data)
+    
+#muestra la informacion de un grupo
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_detail(request):
+    group_id = request.GET.get("group")
+    course_id = request.GET.get("course")
+    
+    if group_id and course_id:
+        group = Group.objects.get(id=group_id, course__id=course_id)
+        
+        student_data = [
+            {
+                "student_code": student.code,
+                "student_name": student.user.name + " " + student.user.last_name,
+            }
+            for student in group.students.all()
+        ]
+        
+        group_data = {
+            "group_id": group.id,
+            "course_id": course_id,
+            "assigned_project": group.assigned_project,
+            "students": student_data,
+        }
+        
+        return Response(group_data)
+    else:
+        return Response({"error": "Group ID and Course ID are required."})
+        
+
 # creacion de un profesor
 # teacher creation
 @api_view(["POST"])
