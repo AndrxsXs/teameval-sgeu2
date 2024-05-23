@@ -6,10 +6,10 @@ import Button from '@mui/joy/Button';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
-import IconButton from '@mui/joy/IconButton';
+// import IconButton from '@mui/joy/IconButton';
 import Box from '@mui/joy/Box';
 import Stack from '@mui/joy/Stack';
-import { AspectRatio } from '@mui/joy';
+// import { AspectRatio } from '@mui/joy';
 import Add from '@mui/icons-material/Add';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
@@ -18,7 +18,7 @@ export default function CreateStudent() {
 
     const [loading, setLoading] = useState(false);
 
-    const route = "api/register_admin/"
+    const route = "api/register_student/"
 
     const [formData, setFormData] = useState({
         name: '',
@@ -40,11 +40,27 @@ export default function CreateStudent() {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            console.log(data);
+            const data = await response.data;
+            // console.log(data);
             // Aquí puedes manejar la respuesta de la API
+            window.dispatchEvent(
+                new CustomEvent('responseEvent', {
+                    detail: {
+                        message: `${data.message}`,
+                        severity: 'danger',
+                    },
+                })
+            );
         } else {
-            console.error('Error:', response.status, response.statusText);
+            // console.error('Error:', response.status, response.statusText);
+            window.dispatchEvent(
+                new CustomEvent('responseEvent', {
+                    detail: {
+                        message: `${response.statusText}`,
+                        severity: 'danger',
+                    },
+                })
+            );
         }
         setLoading(false);
     };
@@ -73,7 +89,7 @@ export default function CreateStudent() {
                 Añadir otro estudiante
             </Button>
 
-            
+
 
             <ModalFrame
                 open={isModalOpen}
@@ -92,61 +108,61 @@ export default function CreateStudent() {
 
                         }}
                     >
-                       
+
                         <Stack direction="row" spacing={3} sx={{ display: { xs: 'none', md: 'flex' }, my: 1 }}>
-  <Stack spacing={2} sx={{ flexGrow: 1 }}>
-    <Stack component='section' sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}>
-      <FormControl sx={{ width: '300px' }}>
-        <FormLabel>Nombre</FormLabel>
-        <Input
-          size="sm"
-          placeholder="Nombres"
-          type='text'
-          value={formData.name}
-          onChange={e => setFormData({ ...formData, name: e.target.value })}
-          required
-        />
-      </FormControl>
-      <FormControl sx={{ width: '300px' }}>
-      <FormLabel>Apellidos</FormLabel>
-        <Input
-          size="sm"
-          placeholder="Apellidos"
-          value={formData.last_name}
-          onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-          type='text'
-          required
-        />
-      </FormControl>
-    </Stack>
-    <Stack component='section' sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}>
-      <FormControl sx={{ width: '300px' }}>
-      <FormLabel>Correo electrónico</FormLabel>
-        <Input
-          size="sm"
-          type="email"
-          startDecorator={<EmailRoundedIcon />}
-          placeholder="su.correo@institución.com"
-          value={formData.email}
-          onChange={e => setFormData({ ...formData, email: e.target.value })}
-          required
-        />
-        
-      </FormControl>
-      <FormControl sx={{ width: '300px' }}>
-      <FormLabel>Código</FormLabel>
-        <Input
-          size="sm"
-          placeholder="Ingrese el código"
-          value={formData.code}
-          onChange={e => setFormData({ ...formData, code: e.target.value })}
-          type='number'
-          required
-        />
-      </FormControl>
-    </Stack>
-  </Stack>
-</Stack>
+                            <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                                <Stack component='section' sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}>
+                                    <FormControl sx={{ width: '300px' }}>
+                                        <FormLabel>Nombre</FormLabel>
+                                        <Input
+                                            size="sm"
+                                            placeholder="Nombres"
+                                            type='text'
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                            required
+                                        />
+                                    </FormControl>
+                                    <FormControl sx={{ width: '300px' }}>
+                                        <FormLabel>Apellidos</FormLabel>
+                                        <Input
+                                            size="sm"
+                                            placeholder="Apellidos"
+                                            value={formData.last_name}
+                                            onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                            type='text'
+                                            required
+                                        />
+                                    </FormControl>
+                                </Stack>
+                                <Stack component='section' sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}>
+                                    <FormControl sx={{ width: '300px' }}>
+                                        <FormLabel>Correo electrónico</FormLabel>
+                                        <Input
+                                            size="sm"
+                                            type="email"
+                                            startDecorator={<EmailRoundedIcon />}
+                                            placeholder="su.correo@institución.com"
+                                            value={formData.email}
+                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                            required
+                                        />
+
+                                    </FormControl>
+                                    <FormControl sx={{ width: '300px' }}>
+                                        <FormLabel>Código</FormLabel>
+                                        <Input
+                                            size="sm"
+                                            placeholder="Ingrese el código"
+                                            value={formData.code}
+                                            onChange={e => setFormData({ ...formData, code: e.target.value })}
+                                            type='number'
+                                            required
+                                        />
+                                    </FormControl>
+                                </Stack>
+                            </Stack>
+                        </Stack>
                         <Box
                             sx={{
                                 display: 'flex',
