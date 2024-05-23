@@ -49,7 +49,10 @@ export default function ProfileInfo(props) {
                 variant="outlined"
                 size="sm"
                 src=""
-            />
+                alt={userData && `${userData.name} ${userData.last_name}`}
+            >
+                {userData && `${userData.name[0]}${userData.last_name[0]}`}
+            </Avatar>
             <Box sx={{
                 //minWidth: 0,
                 display: 'flex',

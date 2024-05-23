@@ -3,7 +3,7 @@ import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
 import { Button } from "@mui/joy"
 import Add from '@mui/icons-material/Add';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import GroupsTable from "../../components/teacher/groups/GroupsTable";
 
 export default function Groups() {
 
@@ -43,6 +43,7 @@ export default function Groups() {
                     </Button>
                     
                 </Box>
+                <GroupsTable/>
             </Box>
         </>
     )
