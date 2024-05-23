@@ -47,7 +47,6 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-
 class User(AbstractBaseUser, PermissionsMixin):
     STUDENT = 1
     TEACHER = 2
@@ -204,12 +203,12 @@ class Course(models.Model):
     # obtiene el nombre del profesor
     @property
     def teacher_name(self):
-        return self.user_teacher.name + " " + self.user_teacher.last_name
+        return self.user_teacher.user.name + " " + self.user_teacher.last_name
 
     # obtiene la cantidad de estudiantes
     @property
     def student_count(self):
-        return self.user_students.count()
+        return Student.objects.filter(course_user_student=self).count()
 
 
 # option 2 for academic period
@@ -232,7 +231,7 @@ class Standard(models.Model):
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
-    scale_description = models.TextField(default=False, blank=True) # describe la escala
+    scale_description = models.TextField(default=False) # describe la escala
 
 #class Description(models.Model):
  #   text = models.TextField()
@@ -283,7 +282,8 @@ class Group(models.Model):
     course = models.ForeignKey(
         Course, null=True, on_delete=models.PROTECT, related_name="groups"
     )
-    students = models.ManyToManyField(Group, related_name="students")
+    students = models.ManyToManyField(Student, related_name="students")
+
 
 
 class Resourse(models.Model):

@@ -1,5 +1,6 @@
 from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from django.db import IntegrityError
 # from .models import User
 # from .models import Note
@@ -130,10 +131,23 @@ class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standard
         fields = ['description', 'scale_description']
+        
+class RubricDetailSerializer(serializers.ModelSerializer):
+    standards = StandardSerializer(many=True)
+    scale = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Rubric
+        fields = ['id', 'scale', 'standards']
+
+    def get_scale(self, obj):
+        scale = obj.scale
+        return list(range(scale.Lower_limit, scale.Upper_limit + 1))
+
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
-        scale = ScaleSerialiazer()
+        scale = serializers.PrimaryKeyRelatedField(queryset=Scale.objects.all())
         standards = StandardSerializer(many=True)
         courses = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
         
@@ -146,10 +160,7 @@ class RubricSerializer(serializers.ModelSerializer):
             return data
         
         def create(self, validated_data):
-            print(validated_data)
-           # scale_data = validated_data.pop('scale')
             standards_data = validated_data.pop('standards')
-          #  scale = Scale.objects.create(**scale_data)
             rubric = Rubric.objects.create(**validated_data)
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
@@ -157,16 +168,19 @@ class RubricSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
+
     class Meta:
         model = Group
-        fields = ["name", "assigned_project", "course", "students"]
-    
+        fields = ['id', 'name', 'assigned_project', 'course', 'students']
+        extra_kwargs = {
+            'course': {'required': True},
+            'students': {'required': False}
+        }
+
     def create(self, validated_data):
-        students = validated_data.pop('students')
-        group = self.Meta.model(**validated_data)
-        for student in students:
-            group.students.add(student)
-        group.save
+        students = validated_data.pop('students', [])  # Obtener estudiantes del validated_data
+        group = Group.objects.create(**validated_data)  # Crear grupo sin estudiantes
+        group.students.set(students)  # Asignar estudiantes al grupo
         return group
             
 class CourseSerializer(serializers.ModelSerializer):
