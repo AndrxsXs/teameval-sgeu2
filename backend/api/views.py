@@ -264,6 +264,51 @@ def register_student(request, course_id):
     return Response(
         {"message": "User created successfully"}, status=status.HTTP_201_CREATED)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def register_student_params(request):    
+    course_id = request.GET.get("course")
+    if not course_id:
+        return Response({'error': 'ID del curso no proporcionado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    data = request.data
+    password = User.default_password(
+        data.get("name"), data.get("code"), data.get("last_name")
+    )
+    student_data = {
+        "name": data.get("name"),
+        "last_name": data.get("last_name"),
+        "code": data.get("code"),
+        "email": data.get("email"),
+        "group": None,
+        "password": password,
+    }
+    try:
+        # Verifica si el estudiante ya existe
+        student = Student.objects.get(user__code=student_data["code"])
+    except Student.DoesNotExist:
+        # Si el estudiante no existe, crea uno nuevo
+        serializer_student = StudentSerializer(data=student_data)
+        if serializer_student.is_valid():
+            student = serializer_student.save()
+        else:
+            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Obtiene el curso
+    course = Course.objects.get(code=course_id)
+
+    # Verifica si el estudiante ya está en el curso
+    if course in student.courses_user_student.all():
+        return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+
+    # Agrega el estudiante al curso
+    student.courses_user_student.add(course)
+    course.user_students.add(student)
+
+    return Response(
+        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED)
+
+
 #crea la escala de la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -293,7 +338,6 @@ def create_rubric1(request, course_id):
         return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# crea la rubrica de un profesor
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_rubric(request, course_id):    
@@ -304,6 +348,50 @@ def create_rubric(request, course_id):
     
     # Asegúrate de que la escala exista
     scale_id = request.data.get('scale')
+    try:
+        scale = Scale.objects.get(id=scale_id)
+    except Scale.DoesNotExist:
+        return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Crear los estándares primero
+    standards_data = request.data.get('standards')
+    standards = []
+    for standard_data in standards_data:
+        standard_serializer = StandardSerializer(data=standard_data)
+        if standard_serializer.is_valid():
+            standard = standard_serializer.save()
+            standards.append(standard)
+        else:
+            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear la rúbrica y asociar los estándares a ella
+    rubric_data = {
+        'scale': scale.id,
+        'courses': [course_id],
+        'standards': [standard.id for standard in standards]
+    }
+    rubric_serializer = RubricSerializer(data=rubric_data)
+    if rubric_serializer.is_valid():
+        rubric_serializer.save()
+    else:
+        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_rubric_params(request):    
+    course_id = request.GET.get("course")
+    scale_id = request.GET.get("scale")
+
+    if not course_id or not scale_id:
+        return Response({'error': 'ID del curso y de la escala son requeridos.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    
     try:
         scale = Scale.objects.get(id=scale_id)
     except Scale.DoesNotExist:
@@ -346,6 +434,21 @@ def get_rubric(request, rubric_id):
     serializer = RubricDetailSerializer(rubric)
     return Response(serializer.data)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_rubric_params(request):    
+    rubric_id = request.GET.get("rubric")
+    if not rubric_id:
+        return Response({'error': 'ID de la rúbrica no proporcionado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        rubric = Rubric.objects.get(id=rubric_id)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = RubricDetailSerializer(rubric)
+    return Response(serializer.data)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -367,15 +470,15 @@ def register_admin(request):
         try:
             serializer_admin.save()
             return Response(
-                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+                {"message": "Administrador creado exitosamente"}, status=status.HTTP_201_CREATED
             )
         except:
             return Response(
-                {"message": "User with this code already exists"},
+                {"message": "Un administrador con esta cedula ya existe"},
                 status=status.HTTP_409_CONFLICT,
             )
     return Response(
-        {"message": "error creating user"}, status=status.HTTP_400_BAD_REQUEST
+        {"message": "Error al crear administrador"}, status=status.HTTP_400_BAD_REQUEST
     )
 
 
@@ -399,15 +502,15 @@ def register_teacher(request):
         try:
             serializer_teacher.save()
             return Response(
-                {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+                {"message": "Profesor creado exitosamente"}, status=status.HTTP_201_CREATED
             )
         except:
             return Response(
-                {"message": "User with this code already exists"},
+                {"message": "Un profesor con esta cedula ya existe"},
                 status=status.HTTP_409_CONFLICT,
             )
     return Response(
-        {"message": "error creating user"}, status=status.HTTP_400_BAD_REQUEST
+        {"message": "Error al crear profesor"}, status=status.HTTP_400_BAD_REQUEST
     )
 
 #obtener estudiantes de mi grupo
@@ -450,13 +553,33 @@ def group_members_no(request, student_id):
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_list(request):
+    course_id = request.GET.get("course")
+    
+    if course_id:
+        course = Course.objects.get(id=course_id)
+        groups = Group.objects.filter(course=course)
+    
+    group_data = [
+        {
+            "id": group.id,
+            "name": group.name,
+            "assigned_project": group.assigned_project,
+            "student_count": group.students.count(),            
+        }
+        for group in groups
+    ]
+    
+    return Response(group_data)
+
 #crear grupo
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_group(request):
-    
+    course_id = request.GET.get("course")
     data = request.data
-    course_id = data.get("course")
     student_ids = data.get("students")
 
     if not course_id or not data.get("name"):
@@ -521,7 +644,7 @@ def group_detail(request):
         
         student_data = [
             {
-                "student_code": student.code,
+                "student_code": student.user.code,
                 "student_name": student.user.name + " " + student.user.last_name,
             }
             for student in group.students.all()
