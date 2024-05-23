@@ -5,7 +5,7 @@ import CreateAdmin from "../../components/admin/CreateAdmin"
 import CreateRubric from "../../components/teacher/CreateRubric"
 import SearchStudent from "../../components/teacher/SearchStudent"
 import SearchRubric from "../../components/teacher/SearchRubric"
-
+import RubricTable from "../../components/RubricTable"
 
 export default function ScalesCriteria() {
 
@@ -31,6 +31,7 @@ export default function ScalesCriteria() {
             <CreateRubric />
         </Box>
         <SearchRubric />
+        <RubricTable />
     </>
     )
 }
