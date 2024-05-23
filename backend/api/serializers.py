@@ -152,7 +152,7 @@ class RubricSerializer(serializers.ModelSerializer):
         courses = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
         
         model = Rubric
-        fields = ['scale', 'standards', 'courses']
+        fields = ['name', 'scale', 'standards', 'courses']
         
         def validate(self, data):
             if 'scale' not in data:

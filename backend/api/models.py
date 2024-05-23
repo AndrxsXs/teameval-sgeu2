@@ -217,6 +217,8 @@ class Course(models.Model):
 
 
 class Rubric(models.Model):
+    name = models.CharField(max_length=60)
+    
     scale = models.ForeignKey(
         Scale, null=True, on_delete=models.PROTECT, related_name="rubrics"
     )

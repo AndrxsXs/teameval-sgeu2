@@ -413,6 +413,7 @@ def create_rubric_params(request):
 
     # Crear la rúbrica y asociar los estándares a ella
     rubric_data = {
+        'name': request.data.get('name'),
         'scale': scale.id,
         'courses': [course_id],
         'standards': [standard.id for standard in standards]
