@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+/* eslint-disable react/prop-types */
+import { Link } from 'react-router-dom';
 import CardCurso from "../../components/teacher/CardCurso"
 import TopNavbar from "../../components/TopNavbar"
 import Box from '@mui/material/Box'
@@ -8,10 +9,9 @@ import fondoCard from '../../assets/FondoCardDefecto.png'
 import fondoCiber from '../../assets/FondoCiber.png'
 import { Button } from '@mui/joy';
 
+import api from '../../api';
 
-import { Fragment } from 'react';
-import { useState } from 'react';
-import IconButton from '@mui/joy/IconButton';
+import { Fragment, useState, useEffect } from 'react';
 import { Typography } from '@mui/joy';
 
 
@@ -19,10 +19,12 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import ModalFrame from '../../components/ModalFrame';
 
 
-export default function MainTeacherView() {
+export default function MainTeacherView(props) {
 
+    const { userData } = props;
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [courses, setCourses] = useState([]);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -32,7 +34,36 @@ export default function MainTeacherView() {
         setIsModalOpen(value);
     }
 
-    //const navigate = useNavigate();
+    const fetchCourses = async () => {
+        try {
+            const token = localStorage.getItem('ACCESS_TOKEN');
+            const response = await api.get('api/courses_teacher/', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    user: userData.code,
+                },
+            });
+            const data = response.data;
+            setCourses(data);
+        } catch (error) {
+            window.dispatchEvent(
+                new CustomEvent('responseEvent', {
+                    detail: {
+                        message: `${error.response.status} ${error.response.statusText}`,
+                        severity: 'danger',
+                    },
+                })
+            );
+        }
+        // console.error('Error:', error);
+    }
+
+    useEffect(() => {
+        fetchCourses();
+    }
+        , []);
 
     return (
         <Box
@@ -41,14 +72,17 @@ export default function MainTeacherView() {
             <TopNavbar />
 
             <Box className="contenedor"
+            component="main"
                 sx={{
                     flex: 1,
                     display: 'flex',
                     flexDirection: 'column', // Cambia a columna para que "Mis cursos" esté arriba
                     minWidth: 0,
                     height: '100%',
+                    width: '70%',
+                    maxWidth: '1200px',
                     gap: 2,
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     alignItems: 'flex-start', // Alinea a la izquierda
                 }}
             >
@@ -69,9 +103,15 @@ export default function MainTeacherView() {
                         justifyContent: 'center',
                     }}>
 
-                    <Link to="curso"> <CardCurso name="Desarrollo de software" src={fondoCard} /></Link>
+                    {courses.map((course) => (
+                        <Link to={`/curso/${course.code}`} key={course.code}>
+                            <CardCurso name={course.name} src={fondoCard} />
+                        </Link>
+                    ))}
+
+                    {/* <Link to="curso"> <CardCurso name="Desarrollo de software" src={fondoCard} /></Link>
                     <Link to="curso"> <CardCurso name="Base de datos" src={fondo} /></Link>
-                    <Link to="curso"> <CardCurso name="Ciberseguridad" src={fondoCiber} /></Link>
+                    <Link to="curso"> <CardCurso name="Ciberseguridad" src={fondoCiber} /></Link> */}
 
                 </Box>
 
