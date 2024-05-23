@@ -521,7 +521,7 @@ def group_detail(request):
         
         student_data = [
             {
-                "student_code": student.code,
+                "student_code": student.user.code,
                 "student_name": student.user.name + " " + student.user.last_name,
             }
             for student in group.students.all()
