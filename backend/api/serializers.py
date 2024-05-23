@@ -156,16 +156,19 @@ class RubricSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
+
     class Meta:
         model = Group
-        fields = ["name", "assigned_project", "course", "students"]
-    
+        fields = ['id', 'name', 'assigned_project', 'course', 'students']
+        extra_kwargs = {
+            'course': {'required': True},
+            'students': {'required': False}
+        }
+
     def create(self, validated_data):
-        students = validated_data.pop('students')
-        group = self.Meta.model(**validated_data)
-        for student in students:
-            group.students.add(student)
-        group.save
+        students = validated_data.pop('students', [])  # Obtener estudiantes del validated_data
+        group = Group.objects.create(**validated_data)  # Crear grupo sin estudiantes
+        group.students.set(students)  # Asignar estudiantes al grupo
         return group
             
 class CourseSerializer(serializers.ModelSerializer):
