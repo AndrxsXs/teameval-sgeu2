@@ -19,6 +19,7 @@ from .serializers import (
     GroupSerializer,
     RubricSerializer,
     StandardSerializer,
+    RubricDetailSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -292,6 +293,7 @@ def create_rubric1(request, course_id):
         return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# crea la rubrica de un profesor
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_rubric(request, course_id):    
@@ -332,18 +334,18 @@ def create_rubric(request, course_id):
 
     return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
 
-
-@api_view(["POST"])
+#obtiene la informacion de la rubrica para poder evaluar un estudiante
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def standard_rubric(request):
-    rubric_id = request.data.get('rubric_id')
-    description = request.data.get('description')
-    
-    standard = Standard.objects.create(description=description)
-    rubric = Rubric.objects.get(id=rubric_id)
-    rubric.standards.add(standard) #relacion muchos standards
-    
-    return Response({'message': 'Criterio añadido con éxito a la rúbrica.'}, status=status.HTTP_201_CREATED)
+def get_rubric(request, rubric_id):
+    try:
+        rubric = Rubric.objects.get(id=rubric_id)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = RubricDetailSerializer(rubric)
+    return Response(serializer.data)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

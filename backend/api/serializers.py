@@ -131,6 +131,18 @@ class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standard
         fields = ['description', 'scale_description']
+        
+class RubricDetailSerializer(serializers.ModelSerializer):
+    standards = StandardSerializer(many=True)
+    scale = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Rubric
+        fields = ['id', 'scale', 'standards']
+
+    def get_scale(self, obj):
+        scale = obj.scale
+        return list(range(scale.Lower_limit, scale.Upper_limit + 1))
 
 
 class RubricSerializer(serializers.ModelSerializer):
