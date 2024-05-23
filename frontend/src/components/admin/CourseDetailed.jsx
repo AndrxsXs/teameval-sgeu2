@@ -1,4 +1,3 @@
-// CourseDetailed.jsx
 import {
     // useParams,
 
