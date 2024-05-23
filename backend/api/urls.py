@@ -23,20 +23,24 @@ urlpatterns = [
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 
-    path('scale_rubric/', views.scale_rubric, name='scale_rubric'),
-  # path('create_rubric/', views.create_rubric, name='create_rubric'),
-    path('courses/<int:course_id>/create_rubric/', views.create_rubric, name='create_rubric'),
-    path('courses/<int:course_id>/register_student/', views.register_student, name='register_student'),
-    #path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'),
-    path('group_list/', views.group_list, name='group_list'),
-    path('group_detail/', views.group_detail, name='group_detail'),
+    path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
+  #  path('create_rubric/', views.create_rubric, name='create_rubric'),
+    path('courses/<int:course_id>/create_rubric/', views.create_rubric, name='create_rubric'), #karol
+    path('courses/<int:course_id>/register_student/', views.register_student, name='register_student'), #karol
+    path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
+    path('group_list/', views.group_list, name='group_list'), #karol
+    path('group_detail/', views.group_detail, name='group_detail'), #karol
     
     #crea la rubrica usando params 
-    path('create_rubric_params/', views.create_rubric_params, name='create_rubric_params'),
+    path('create_rubric_params/', views.create_rubric_params, name='create_rubric_params'), #karol
     #estudiante con params
-    path('register_student_params/', views.register_student_params, name='register_student_params'),
+    path('register_student_params/', views.register_student_params, name='register_student_params'), #karol
     #obtener rubrica con params
-    path('get_rubric_params/', views.get_rubric_params, name='get_rubric_params'),
+    path('get_rubric_params/', views.get_rubric_params, name='get_rubric_params'), #karol
+    #obtener la lista de rubricas con cuerpo
+    path('list_rubric/<int:course_id>/', views.list_rubric, name='list_rubric'),
+
+    
 
     
 ]

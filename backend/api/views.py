@@ -1,6 +1,6 @@
 import csv
 import io
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 
@@ -465,6 +465,21 @@ def get_rubric_params(request):
         return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = RubricDetailSerializer(rubric)
+    return Response(serializer.data)
+
+#obtener la informacion de todas las rubricas que tiene un curso
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_rubric(request, course_id):
+    # Obtiene el curso por su ID
+    course = get_object_or_404(Course, id=course_id)
+
+    # Obtiene todas las rúbricas asociadas a este curso
+    rubrics = Rubric.objects.filter(courses=course)
+
+    # Serializa las rúbricas
+    serializer = RubricDetailSerializer(rubrics, many=True)
+
     return Response(serializer.data)
 
 

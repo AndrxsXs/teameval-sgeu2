@@ -138,7 +138,7 @@ class RubricDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rubric
-        fields = ['id', 'scale', 'standards']
+        fields = ['id', 'name', 'scale', 'standards']
 
     def get_scale(self, obj):
         scale = obj.scale
