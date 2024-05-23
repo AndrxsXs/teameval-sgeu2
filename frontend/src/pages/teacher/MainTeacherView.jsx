@@ -83,7 +83,7 @@ export default function MainTeacherView() {
                         variant="plain"
                         color="neutral"
                         onClick={handleOpenModal}
-                        endDecorator={<LogoutRoundedIcon />}
+                        startDecorator={<LogoutRoundedIcon />}
                         sx={{
                             position: 'absolute',
                             bottom: '16px',
