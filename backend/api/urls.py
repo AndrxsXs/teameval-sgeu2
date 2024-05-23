@@ -25,7 +25,7 @@ urlpatterns = [
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
     path('courses/<int:course_id>/create_rubric/', views.create_rubric, name='create_rubric'),
     path('courses/<int:course_id>/register_student/', views.register_student, name='register_student'),
-    path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'),
+    #path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'),
     path('group_list/', views.group_list, name='group_list'),
     path('group_detail/', views.group_detail, name='group_detail'),
 ]

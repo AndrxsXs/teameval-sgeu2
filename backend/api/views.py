@@ -293,7 +293,6 @@ def create_rubric1(request, course_id):
         return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# crea la rubrica de un profesor
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_rubric(request, course_id):    
@@ -334,6 +333,7 @@ def create_rubric(request, course_id):
 
     return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
 
+
 #obtiene la informacion de la rubrica para poder evaluar un estudiante
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -346,6 +346,17 @@ def get_rubric(request, rubric_id):
     serializer = RubricDetailSerializer(rubric)
     return Response(serializer.data)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def standard_rubric(request):
+    rubric_id = request.data.get('rubric_id')
+    description = request.data.get('description')
+    
+    standard = Standard.objects.create(description=description)
+    rubric = Rubric.objects.get(id=rubric_id)
+    rubric.standards.add(standard) #relacion muchos standards
+    
+    return Response({'message': 'Criterio añadido con éxito a la rúbrica.'}, status=status.HTTP_201_CREATED)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -450,13 +461,33 @@ def group_members_no(request, student_id):
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def group_list(request):
+    course_id = request.GET.get("course")
+    
+    if course_id:
+        course = Course.objects.get(id=course_id)
+        groups = Group.objects.filter(course=course)
+    
+    group_data = [
+        {
+            "id": group.id,
+            "name": group.name,
+            "assigned_project": group.assigned_project,
+            "student_count": group.students.count(),            
+        }
+        for group in groups
+    ]
+    
+    return Response(group_data)
+
 #crear grupo
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_group(request):
-    
+    course_id = request.GET.get("course")
     data = request.data
-    course_id = data.get("course")
     student_ids = data.get("students")
 
     if not course_id or not data.get("name"):
