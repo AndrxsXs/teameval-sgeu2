@@ -20,6 +20,7 @@ from .serializers import (
     RubricSerializer,
     StandardSerializer,
     RubricDetailSerializer,
+    InfoRubricSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -63,6 +64,19 @@ def student_courses(request):
         return Response(course_data)
     else:
         return Response({"status": "No enrolled courses"}, status=status.HTTP_400_BAD_REQUEST)
+
+#Luisa
+#informacion completa de la rubrica
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def info_rubric(request, rubric_id):
+    try:
+        rubric = Rubric.objects.get(id=rubric_id)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = InfoRubricSerializer(rubric)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 #Luisa
 #

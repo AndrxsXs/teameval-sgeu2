@@ -17,13 +17,14 @@ urlpatterns = [
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
     path('student_courses/', views.student_courses, name='student-courses'), #Luisa
     path('group_members/', views.group_members, name='group_members'), #Luisa
-    path('create_group/<int:course_id>/', views.create_group, name='create_group'),
-     path('create_group/', views.create_group2, name='create_group'), #Luisa
+    path('create_group/<int:course_id>/', views.create_group, name='create_group'), #Luisa
+    path('create_group/', views.create_group2, name='create_group'), #Luisa
+    path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'),
-  #  path('create_rubric/', views.create_rubric, name='create_rubric'),
+  # path('create_rubric/', views.create_rubric, name='create_rubric'),
     path('courses/<int:course_id>/create_rubric/', views.create_rubric, name='create_rubric'),
     path('courses/<int:course_id>/register_student/', views.register_student, name='register_student'),
     #path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'),
