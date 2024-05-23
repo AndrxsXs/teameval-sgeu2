@@ -38,6 +38,8 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+#Luisa
+#Los cursos del estudiante 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def student_courses(request):
@@ -62,7 +64,8 @@ def student_courses(request):
     else:
         return Response({"status": "No enrolled courses"}, status=status.HTTP_400_BAD_REQUEST)
 
-
+#Luisa
+#
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_teacher_rubrics(request):
@@ -513,6 +516,7 @@ def register_teacher(request):
         {"message": "Error al crear profesor"}, status=status.HTTP_400_BAD_REQUEST
     )
 
+#Luisa
 #obtener estudiantes de mi grupo
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -574,10 +578,47 @@ def group_list(request):
     
     return Response(group_data)
 
+#Luisa
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_group(request, course_id):
+    
+    data = request.data
+    student_ids = data.get("students")
+
+    if not data.get("name"):
+        return Response({"error": "El nombre del grupo es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    group_data = {
+        "name": data.get("name"),
+        "assigned_project": data.get("assigned_project"),
+        "course": course.pk,
+        "students": student_ids  # Incluir estudiantes en los datos del grupo
+    }
+
+    serializer_group = GroupSerializer(data=group_data)
+    if serializer_group.is_valid():
+        group = serializer_group.save()
+
+        # Asociar estudiantes con el grupo
+        if student_ids:
+            students = Student.objects.filter(pk__in=student_ids)
+            group.students.add(*students)  # Agregar estudiantes al grupo
+
+        return Response(serializer_group.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer_group.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Luisa
 #crear grupo
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_group(request):
+def create_group2(request):
     course_id = request.GET.get("course")
     data = request.data
     student_ids = data.get("students")

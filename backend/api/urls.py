@@ -14,10 +14,11 @@ urlpatterns = [
     path('create_course/', views.create_course, name='create_course'),
     path('import_student/', views.import_student, name='import_student'),
     path('import_teacher/', views.import_teacher, name='import_teacher'),
-    path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'),
-    path('student_courses/', views.student_courses, name='student-courses'),
-    path('group_members/', views.group_members, name='group_members'),
-    path('create_group/', views.create_group, name='create_group'),
+    path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
+    path('student_courses/', views.student_courses, name='student-courses'), #Luisa
+    path('group_members/', views.group_members, name='group_members'), #Luisa
+    path('create_group/<int:course_id>/', views.create_group, name='create_group'),
+     path('create_group/', views.create_group2, name='create_group'), #Luisa
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 
