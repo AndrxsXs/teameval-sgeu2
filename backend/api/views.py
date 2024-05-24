@@ -923,24 +923,26 @@ def user_data(request):
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
     user= request.user
+    print(user.id)
     courses = Course.objects.filter(
-        user_teacher= user.id, course_status=1)
+        user_teacher= user.id)
+    print(courses)
     course_data = []
     for course in courses:
-        course_data = [
-            course_data.append(
+        students = course.user_students.values(
+           "user__name", "user__last_name", "user__code", "user__email")
+        course_data.append(
             {
                 "code": course.code,
                 "name": course.name,
-                "teacher": course.user_teacher,
-                "students": course.user_students,
+                "teacher": course.teacher_name,
+                "students": list(students),
                 "academic_period": course.academic_period,
             }
-            )
-        ]
-        return Response(course_data)
-    else:
-        return Response(
+        )
+    return Response(course_data)
+    #else:
+    return Response(
             {"status": "El docente actualmente no tiene cursos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
