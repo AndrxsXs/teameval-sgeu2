@@ -922,14 +922,13 @@ def user_data(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
-    user = request.user
-    data = models.Course.objects.filter(
-        user_teacher= user.id, course_status=1
-    )
-    if models.Course.objects.filter(
-        user_teacher= user.id, course_status=1
-    ).exists:
+    user= request.user
+    courses = Course.objects.filter(
+        user_teacher= user.id, course_status=1)
+    course_data = []
+    for course in courses:
         course_data = [
+            course_data.append(
             {
                 "code": course.code,
                 "name": course.name,
@@ -937,12 +936,12 @@ def main_teacher(request):
                 "students": course.user_students,
                 "academic_period": course.academic_period,
             }
-            for course in data
+            )
         ]
         return Response(course_data)
     else:
         return Response(
-            {"status": "non-associated courses"}, status=status.HTTP_400_BAD_REQUEST
+            {"status": "El docente actualmente no tiene cursos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
 
