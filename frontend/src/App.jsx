@@ -29,12 +29,12 @@ import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HomePage from './pages/HomePage';
-import Login from './pages/auth/Login';
+// import Login from './pages/auth/Login';
 import AdminPage from './pages/AdminPage';
 import NotFound from './pages/NotFound';
 import TeacherPage from './pages/TeacherPage';
 import StudentPage from './pages/StudentPage';
-import CreatePassword from './pages/auth/CreatePassword';
+// import CreatePassword from './pages/auth/CreatePassword';
 
 // import ManageAdmin from "./pages/admin/ManageAdmin";
 // import ManageTeachers from "./pages/admin/ManageTeachers"
@@ -52,6 +52,8 @@ import RubricResult from './pages/student/RubricResult';
 import ViewFeedback from './pages/student/ViewFeedback';
 import ForgotPassword from './components/ForgotPassword';
 import CodePassword from './components/CodePassword';
+import LoginPage from './pages/auth/LoginPage';
+import CreatePasswordPage from './pages/auth/CreatePasswordPage';
 // import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {
@@ -102,10 +104,10 @@ function App() {
           <HomePage />
 
         } />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/login/recuperar" element={<ForgotPassword />} />
         <Route path="login/recuperar/codigo" element={<CodePassword />} />
-        <Route path="/crear-contrasena" element={<CreatePassword />} />
+        <Route path="/crear-contrasena" element={<CreatePasswordPage />} />
 
         <Route
           path="/admin/*"
