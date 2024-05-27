@@ -6,14 +6,14 @@ import Add from '@mui/icons-material/Add';
 import GroupsTable from "../../components/teacher/groups/GroupsTable";
 
 export default function Groups() {
-
     return (
         <>
-              <Box component="header"
+            <Box
+                component="header"
                 sx={{
                     display: 'flex',
-                    mt: 2,
-                    mb: 1,
+                    mt: 4, // Aumentamos el margen superior (mt)
+                    mb: 2, // Aumentamos el margen inferior (mb)
                     gap: 1,
                     flexDirection: { xs: 'column', sm: 'row' },
                     alignItems: { xs: 'start', sm: 'center' },
@@ -25,26 +25,21 @@ export default function Groups() {
                 <Typography level="h2" component="h1">
                     Grupos
                 </Typography>
-
                 <Box
-                sx={{
-
-                   display: 'flex',
-                   gap: 1,
-                   flexDirection: { xs: 'column', sm: 'row' },                    
-                }}
+                    sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                    }}
                 >
-                    <Button
-                        color="primary"
-                        startDecorator={<Add />}
-                        size="sm"
-                    >
+                    <Button color="primary" startDecorator={<Add />} size="sm">
                         Crear grupos
                     </Button>
-                    
                 </Box>
-                <GroupsTable/>
+            </Box>
+            <Box sx={{ mt: 1 }}>
+                <GroupsTable />
             </Box>
         </>
-    )
+    );
 }

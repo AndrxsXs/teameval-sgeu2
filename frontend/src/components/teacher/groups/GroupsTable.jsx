@@ -6,7 +6,7 @@ export default function AdminTable() {
 
     return (
         <UserGroupTable
-            role={1} 
+            role={1}
             columns={columns}
         />
     )
