@@ -16,7 +16,7 @@ function TeacherPage({ userData }) {
     return (
       <>
         <Routes>
-          <Route index element={<MainTeacherView />} />
+          <Route index element={<MainTeacherView userData={userData}/>} />
           <Route path='/curso/*' element={<CourseView userData={userData} />}>
             <Route path='importar-estudiante/*' element={<AddStudent />}>
               <Route path='subir' element={<ImportStudent />} />

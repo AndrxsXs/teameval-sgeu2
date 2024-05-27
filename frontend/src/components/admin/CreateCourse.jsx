@@ -54,7 +54,7 @@ export default function CreateCourse() {
                 }
             });
             setTeachers(response.data);
-            console.log('Docentes:', response.data);
+            // console.log('Docentes:', response.data);
         } catch (error) {
             console.error('Error obteniendo datos de docentes:', error);
         }
@@ -159,21 +159,30 @@ export default function CreateCourse() {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 2,
-                            alignItems: 'flex-start'
-
+                            alignItems: 'flex-start',
+                            minWidth: '500px',
                         }}
                     >
                         <Stack direction="row"
                             // spacing={3}
-                            sx={{ display: 'flex', my: 1 }}>
+                            sx={{ display: 'flex', my: 1, width: '100%' }}>
 
-                            <Stack component='section' spacing={2} sx={{ flexGrow: 1, }}>
+                            <Stack component='section' spacing={2} sx={{ flexGrow: 1, width: '100%' }}>
                                 <Stack component='section'
-                                    sx={{ flexDirection: 'row', gap: 2, alignItems: 'flex-end' }}
+                                    direction='row'
+                                    gap={2}
+                                    alignItems='flex-end'
+                                    justifyContent='center'
+
+                                    sx={{
+                                        width: '100%',
+                                    }}
                                 >
                                     <FormControl
-                                    //sx={{ display: { sm: 'flex-column', md: 'flex-row' }, gap: 2 }}
-
+                                        //sx={{ display: { sm: 'flex-column', md: 'flex-row' }, gap: 2 }}
+                                        sx={{
+                                            width: '48%',
+                                        }}
                                     >
                                         <FormLabel>Nombre</FormLabel>
                                         <Input size="sm" placeholder="Nombre del curso" type='text'
@@ -181,7 +190,11 @@ export default function CreateCourse() {
                                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                                             required />
                                     </FormControl>
-                                    <FormControl>
+                                    <FormControl
+                                        sx={{
+                                            width: '50%',
+                                        }}
+                                    >
                                         <FormLabel>Código</FormLabel>
                                         <Input size="sm" placeholder="Código del curso"
                                             value={formData.code}
@@ -191,16 +204,24 @@ export default function CreateCourse() {
                                     </FormControl>
                                 </Stack>
                                 <Stack component='section'
+                                    direction='row'
+                                    gap={2}
+                                    alignItems='flex-end'
+                                    justifyContent='space-between'
                                     sx={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '1fr 1fr',
-                                        // flexDirection: 'row',
-                                        gap: 2,
-                                        maxWidth: '100%'
+                                        width: '100%'
                                     }}
+
+                                // sx={{
+                                //     display: 'grid',
+                                //     gridTemplateColumns: '1fr 1fr',
+                                //     // flexDirection: 'row',
+                                //     gap: 2,
+                                //     maxWidth: '100%', justifyContent: 'center'
+                                // }}
                                 >
                                     <FormControl
-                                        sx={{ width: '100%' }}
+                                        sx={{ width: '48%', justifyContent: 'space-between' }}
                                     >
                                         <FormLabel>Docente asignado</FormLabel>
                                         {/* <Input size="sm" placeholder="Ingrese el código"
@@ -224,15 +245,12 @@ export default function CreateCourse() {
                                             getOptionLabel={(option) => `${option.name} ${option.last_name}`}
                                             onChange={(e, value) => { setFormData({ ...formData, user_teacher: value.code }) }}
                                             required
-                                            sx={{
-                                                width: '92%'
-                                            }}
                                         />
 
                                     </FormControl>
                                     <Box
                                         sx={{
-
+                                            width: '49%'
                                         }}
                                     >
                                         <FormLabel

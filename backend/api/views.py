@@ -1,6 +1,6 @@
 import csv
 import io
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 
@@ -20,6 +20,7 @@ from .serializers import (
     RubricSerializer,
     StandardSerializer,
     RubricDetailSerializer,
+    InfoRubricSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -37,6 +38,7 @@ class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
 
 #Luisa
 #Los cursos del estudiante 
@@ -63,6 +65,203 @@ def student_courses(request):
         return Response(course_data)
     else:
         return Response({"status": "No enrolled courses"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_student(request, student_id):
+    try:
+        student = models.Student.objects.get(pk=student_id).user
+
+        # Verificar que el usuario que hace la solicitud sea el mismo que el estudiante que se va a actualizar
+        if request.user != student:
+            return Response({"error": "You are not authorized to update this student"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = StudentSerializer(student.student, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except models.Student.DoesNotExist:
+        return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+
+#Luisa
+#Editar profesor
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_teacher(request, teacher_id):
+    try:
+        teacher = models.Teacher.objects.get(pk=teacher_id).user
+
+        # Verificar que el usuario que hace la solicitud sea el mismo que el profesor que se va a actualizar
+        if request.user != teacher:
+            return Response({"error": "You are not authorized to update this teacher"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = TeacherSerializer(teacher.teacher, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except models.Teacher.DoesNotExist:
+        return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+#Luisa
+#Informacion profesor
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def teacher_info(request, teacher_id):
+    try:
+        teacher = models.Teacher.objects.get(pk=teacher_id).user
+        teacher_info = {
+            "id": teacher.id,
+            "code": teacher.code,
+            "name": teacher.name,
+            "last_name": teacher.last_name,
+            "email": teacher.email,
+            "status": teacher.status,
+        }
+        if hasattr(teacher, 'teacher'):
+            teacher_info["phone"] = teacher.teacher.phone
+        else:
+            teacher_info["phone"] = None
+        return Response(teacher_info)
+    except models.Teacher.DoesNotExist:
+        return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
+
+#Luisa
+#Informacion administrador
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def admin_info(request, admin_id):
+    try:
+        admin = models.Admi.objects.get(pk=admin_id).user
+        admin_info = {
+            "id": admin.id,
+            "code": admin.code,
+            "name": admin.name,
+            "last_name": admin.last_name,
+            "email": admin.email,
+            "status": admin.status,
+        }
+        if hasattr(admin, 'admi'):
+            admin_info["phone"] = admin.admi.phone
+        else:
+            admin_info["phone"] = None
+        return Response(admin_info)
+    except models.Admi.DoesNotExist:
+        return Response({"error": "Admin not found"}, status=status.HTTP_404_NOT_FOUND)
+
+#Luisa
+#Detalle del curso
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def course_info(request, course_id):
+    try:
+        course = models.Course.objects.get(pk=course_id)
+        course_info = {
+            "name": course.name,
+            "code": course.code,
+            "academic_period": course.academic_period,
+            "student_status": course.student_status,
+            "course_status": course.course_status,
+            "teacher": {
+                "id": course.user_teacher.id if course.user_teacher else None,
+                "name": f"{course.user_teacher.name} {course.user_teacher.last_name}" if course.user_teacher else "Not assigned"
+            }
+        }
+        return Response(course_info)
+    except models.Course.DoesNotExist:
+        return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+#No es importante
+@api_view(["GET"])
+def list_user_teachers(request):
+    teachers = User.objects.filter(role=User.TEACHER)
+    serializer = UserSerializer(teachers, many=True)
+    return Response(serializer.data)
+
+#Luisa
+#editar los datos del curso
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_course(request, course_id):
+    data = request.data
+    print("Datos recibidos:", data)  # Depuración: imprimir datos recibidos
+
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "El curso con el ID proporcionado no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if "user_teacher" in data:
+        try:
+            user_teacher = User.objects.get(code=data.get("user_teacher"))
+            print("Usuario encontrado:", user_teacher)  # Depuración: imprimir usuario encontrado
+            course.user_teacher = user_teacher
+        except User.DoesNotExist:
+            print("Código de usuario no encontrado:", data.get("user_teacher"))  # Depuración: imprimir código no encontrado
+            return Response(
+                {"error": "El código de usuario proporcionado no es válido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    course.name = data.get("name", course.name)
+    course.code = data.get("code", course.code)
+    course.academic_period = data.get("academic_period", course.academic_period)
+
+    serializer_course = CourseSerializer(course, data=request.data, partial=True)
+    if serializer_course.is_valid():
+        serializer_course.save()
+        return Response(serializer_course.data, status=status.HTTP_200_OK)
+    
+    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Luisa
+#Deshabilitar estudiante de un curso
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def unregister_student(request, course_id):
+    data = request.data
+    student_code = data.get("code")
+    
+    # Obtiene el estudiante usando el código del estudiante proporcionado
+    student = get_object_or_404(Student, user__code=student_code)
+
+    # Obtiene el curso usando el ID del curso proporcionado
+    course = get_object_or_404(Course, id=course_id)
+
+    # Verifica si el estudiante está inscrito en el curso
+    if course not in student.courses_user_student.all():
+        return Response({"message": "El estudiante no está inscrito en este curso"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Elimina la relación entre el estudiante y el curso específico
+    student.courses_user_student.remove(course)
+    course.user_students.remove(student)
+
+    # Deshabilita al estudiante del curso en todos los grupos
+    groups = course.groups.all()
+    for group in groups:
+        if student in group.students.all():
+            group.students.remove(student)
+
+    return Response({"message": "Estudiante deshabilitado del curso y grupos correctamente"}, status=status.HTTP_200_OK)
+
+#Luisa
+#informacion completa de la rubrica
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def info_rubric(request, rubric_id):
+    try:
+        rubric = Rubric.objects.get(id=rubric_id)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = InfoRubricSerializer(rubric)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 #Luisa
 #
@@ -451,6 +650,21 @@ def get_rubric_params(request):
         return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = RubricDetailSerializer(rubric)
+    return Response(serializer.data)
+
+#obtener la informacion de todas las rubricas que tiene un curso
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_rubric(request, course_id):
+    # Obtiene el curso por su ID
+    course = get_object_or_404(Course, id=course_id)
+
+    # Obtiene todas las rúbricas asociadas a este curso
+    rubrics = Rubric.objects.filter(courses=course)
+
+    # Serializa las rúbricas
+    serializer = RubricDetailSerializer(rubrics, many=True)
+
     return Response(serializer.data)
 
 
@@ -893,27 +1107,28 @@ def user_data(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
-    user = request.user
-    data = models.Course.objects.filter(
-        user_teacher= user.id, course_status=1
-    )
-    if models.Course.objects.filter(
-        user_teacher= user.id, course_status=1
-    ).exists:
-        course_data = [
+    user= request.user
+    print(user.id)
+    courses = Course.objects.filter(
+        user_teacher= user.id)
+    print(courses)
+    course_data = []
+    for course in courses:
+        students = course.user_students.values(
+           "user__name", "user__last_name", "user__code", "user__email")
+        course_data.append(
             {
                 "code": course.code,
                 "name": course.name,
-                "teacher": course.user_teacher,
-                "students": course.user_students,
+                "teacher": course.teacher_name,
+                "students": list(students),
                 "academic_period": course.academic_period,
             }
-            for course in data
-        ]
-        return Response(course_data)
-    else:
-        return Response(
-            {"status": "non-associated courses"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    return Response(course_data)
+    #else:
+    return Response(
+            {"status": "El docente actualmente no tiene cursos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
 
@@ -1002,11 +1217,33 @@ def create_mail(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-
-@api_view(["GET"])
+#Boceto idea metodo para realizar evaluacion
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def evaluated(request):
-    user= request.data
+def evaluar(request):
+    data= request.data
+    user= request.user
+    evaluator= models.Student.objects.get(user_code =  user.code)
+    
+    try:
+        evaluated= models.Student.objects.get(user_code =  data.get("evaluated"))
+        #user = models.User.objects.get(code=data.get("user_teacher"))
+    except User.DoesNotExist:
+        return Response(
+            {"error": "El código de usuario proporcionado no es válido."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    number_standars= models.Standard.objects.filter(rubric_id= data.get("")).count
+    
+    for calificacion in range(0, number_standars):
+        models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
+    
+    
+    course_data = {
+        "evaluated": evaluated.id,
+        "evaluator": evaluator.id,
+    }
     
     
     

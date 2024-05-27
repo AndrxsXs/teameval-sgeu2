@@ -138,7 +138,7 @@ class RubricDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rubric
-        fields = ['id', 'scale', 'standards']
+        fields = ['id', 'name', 'scale', 'standards']
 
     def get_scale(self, obj):
         scale = obj.scale
@@ -165,6 +165,7 @@ class RubricSerializer(serializers.ModelSerializer):
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
+        
 
 class GroupSerializer(serializers.ModelSerializer):
     students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
@@ -202,6 +203,14 @@ class CourseSerializer(serializers.ModelSerializer):
         # Devolver la instancia creada
         return instance
 
+class InfoRubricSerializer(serializers.ModelSerializer):
+    scale = ScaleSerialiazer()
+    standards = StandardSerializer(many=True)
+    courses = CourseSerializer(many=True)
+
+    class Meta:
+        model = Rubric
+        fields = ['name', 'scale', 'standards', 'courses']
 
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:
