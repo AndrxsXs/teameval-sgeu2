@@ -161,6 +161,7 @@ export default function CreateCourse() {
                             gap: 2,
                             alignItems: 'flex-start',
                             minWidth: '500px',
+                            overflow: 'auto'
                         }}
                     >
                         <Stack direction="row"

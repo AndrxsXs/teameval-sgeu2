@@ -136,7 +136,7 @@ export default function CreateAdmin() {
                         }}
                     >
                         <Stack direction="row"
-                            spacing={3}
+                            // spacing={3}
                             sx={{ display: 'flex', my: 1 }}>
 
                             {/* profile picture */}
