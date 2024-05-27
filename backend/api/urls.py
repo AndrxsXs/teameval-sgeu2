@@ -14,11 +14,22 @@ urlpatterns = [
     path('create_course/', views.create_course, name='create_course'),
     path('import_student/', views.import_student, name='import_student'),
     path('import_teacher/', views.import_teacher, name='import_teacher'),
-    path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'),
-    path('student_courses/', views.student_courses, name='student-courses'),
-    path('group_members/', views.group_members, name='group_members'),
-    path('create_group/', views.create_group, name='create_group'),
-    path('courses_teacher/', views.main_teacher, name='create_group'),
+
+    path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
+    path('student_courses/', views.student_courses, name='student-courses'), #Luisa
+    path('group_members/', views.group_members, name='group_members'), #Luisa
+    path('create_group/<int:course_id>/', views.create_group, name='create_group'), #Luisa
+    path('create_group/', views.create_group2, name='create_group'), #Luisa
+    path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
+    path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa
+    path('course_info/<int:course_id>/', views.course_info, name='course_info'), #Luisa
+    path('admin_info/<int:admin_id>/', views.admin_info, name='admin_info'), #Luisa
+    path('teacher_info/<int:teacher_id>/', views.teacher_info, name='teacher_info'), #Luisa
+    path('update_teacher/<int:teacher_id>/', views.update_teacher, name='update_teacher'), #Luisa probar con el super usuario
+    path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa probar con el super usuario
+
+    #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no sirve bien
+    #path('list_user_teachers/', views.list_user_teachers, name='list_user_teachers'), #Luisa no importante
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 
