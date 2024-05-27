@@ -12,7 +12,7 @@ export default function HomePage() {
         <>
             <TopNavbar />
             <Box component="main" className="main-homepage">
-                <article>
+                <article className="hero">
                     <section className="presentation">
                         <Typography level="title-lg" color="primary">
                             El poder de hacer más
