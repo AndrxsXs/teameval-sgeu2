@@ -271,7 +271,7 @@ class Evaluation(models.Model):
 
 class Rating(models.Model):
     #average = models.DecimalField(max_digits=10, decimal_places=3) # Creo que este atributo iria en evaluation
-    qualification= models.BigIntegerField(null=False)
+  #  qualification= models.BigIntegerField(null=False)
     
     standard = models.OneToOneField(
         Standard, null=False, on_delete=models.PROTECT, primary_key=True

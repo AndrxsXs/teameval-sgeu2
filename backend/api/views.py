@@ -428,7 +428,7 @@ def register_student2(request):
 # student creation
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_student(request, course_id):
+def register_student(request, course_code):
     data = request.data
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
@@ -453,18 +453,22 @@ def register_student(request, course_id):
             return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Obtiene el curso
-    course = Course.objects.get(id=course_id)
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response({"message": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
     # Verifica si el estudiante ya está en el curso
     if course in student.courses_user_student.all():
-        return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+        return Response({"message": "El estudiante ya está en este curso"}, status=status.HTTP_409_CONFLICT)
 
     # Agrega el estudiante al curso
     student.courses_user_student.add(course)
     course.user_students.add(student)
 
     return Response(
-        {"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1236,14 +1240,14 @@ def evaluar(request):
     
     number_standars= models.Standard.objects.filter(rubric_id= data.get("")).count
     
-    for calificacion in range(0, number_standars):
-        models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
+   # for calificacion in range(0, number_standars):
+#        models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
     
     
-    course_data = {
-        "evaluated": evaluated.id,
-        "evaluator": evaluator.id,
-    }
+  #  course_data = {
+  #      "evaluated": evaluated.id,
+  #      "evaluator": evaluator.id,
+  #  }
     
     
     
