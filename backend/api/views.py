@@ -1289,34 +1289,33 @@ def create_mail(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-'''
-#Boceto idea metodo para realizar 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def evaluar(request):
-    data= request.data
-    user= request.user
-    evaluator= models.Student.objects.get(user_code =  user.code)
+#Boceto idea metodo para realizar evaluacion
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def evaluar(request):
+#     data= request.data
+#     user= request.user
+#     evaluator= models.Student.objects.get(user_code =  user.code)
     
-    try:
-        evaluated= models.Student.objects.get(user_code =  data.get("evaluated"))
-        #user = models.User.objects.get(code=data.get("user_teacher"))
-    except User.DoesNotExist:
-        return Response(
-            {"error": "El código de usuario proporcionado no es válido."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+#     try:
+#         evaluated= models.Student.objects.get(user_code =  data.get("evaluated"))
+#         #user = models.User.objects.get(code=data.get("user_teacher"))
+#     except User.DoesNotExist:
+#         return Response(
+#             {"error": "El código de usuario proporcionado no es válido."},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
     
-    number_standars= models.Standard.objects.filter(rubric_id= data.get("")).count
+#     number_standars= models.Standard.objects.filter(rubric_id= data.get("")).count
     
-   # for calificacion in range(0, number_standars):
-#        models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
+#     for calificacion in range(0, number_standars):
+#         models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
     
     
-  #  course_data = {
-  #      "evaluated": evaluated.id,
-  #      "evaluator": evaluator.id,
-  #  }
+#     course_data = {
+#         "evaluated": evaluated.id,
+#         "evaluator": evaluator.id,
+#     }
     
     
 '''  
