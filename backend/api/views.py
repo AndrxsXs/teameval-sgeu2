@@ -47,7 +47,7 @@ class CreateUserView(generics.CreateAPIView):
 def student_courses(request):
     user = request.user
     if user.role != models.User.STUDENT:
-        return Response({"error": "User is not a student"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": "El usuario no es un estudiante"}, status=status.HTTP_403_FORBIDDEN)
 
     student = models.Student.objects.get(user=user)
     courses = student.courses_user_student.all()
@@ -64,7 +64,7 @@ def student_courses(request):
         ]
         return Response(course_data)
     else:
-        return Response({"status": "No enrolled courses"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
@@ -95,7 +95,7 @@ def update_teacher(request, teacher_id):
 
         # Verificar que el usuario que hace la solicitud sea el mismo que el profesor que se va a actualizar
         if request.user != teacher:
-            return Response({"error": "You are not authorized to update this teacher"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "No estas autorizado para actualizar la información"}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = TeacherSerializer(teacher.teacher, data=request.data, partial=True)
         if serializer.is_valid():
@@ -104,15 +104,15 @@ def update_teacher(request, teacher_id):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except models.Teacher.DoesNotExist:
-        return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     
 #Luisa
 #Informacion profesor
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def teacher_info(request, teacher_id):
+def teacher_info(request, teacher_code):
     try:
-        teacher = models.Teacher.objects.get(pk=teacher_id).user
+        teacher = models.Teacher.objects.get(user__code=teacher_code).user
         teacher_info = {
             "id": teacher.id,
             "code": teacher.code,
@@ -127,15 +127,15 @@ def teacher_info(request, teacher_id):
             teacher_info["phone"] = None
         return Response(teacher_info)
     except models.Teacher.DoesNotExist:
-        return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
 #Luisa
 #Informacion administrador
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def admin_info(request, admin_id):
+def admin_info(request, admin_code):
     try:
-        admin = models.Admi.objects.get(pk=admin_id).user
+        admin = models.Admi.objects.get(user__code=admin_code).user
         admin_info = {
             "id": admin.id,
             "code": admin.code,
@@ -150,15 +150,28 @@ def admin_info(request, admin_id):
             admin_info["phone"] = None
         return Response(admin_info)
     except models.Admi.DoesNotExist:
-        return Response({"error": "Admin not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Administrador no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
 #Luisa
 #Detalle del curso
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def course_info(request, course_id):
+def course_info(request, course_code):
     try:
-        course = models.Course.objects.get(pk=course_id)
+        course = models.Course.objects.get(code=course_code)
+        students = course.user_students.all()
+
+        student_info = []
+        for student in students:
+            student_info.append({
+                "id": student.user.id,
+                "code": student.user.code,
+                "name": student.user.name,
+                "last_name": student.user.last_name,
+                "email": student.user.email,
+                "status": student.user.status,
+            })
+
         course_info = {
             "name": course.name,
             "code": course.code,
@@ -166,14 +179,14 @@ def course_info(request, course_id):
             "student_status": course.student_status,
             "course_status": course.course_status,
             "teacher": {
-                "id": course.user_teacher.id if course.user_teacher else None,
-                "name": f"{course.user_teacher.name} {course.user_teacher.last_name}" if course.user_teacher else "Not assigned"
-            }
+                "code": course.user_teacher.code if course.user_teacher else None,
+                "name": f"{course.user_teacher.name} {course.user_teacher.last_name}" if course.user_teacher else "No asignado"
+            },
+            "students": student_info
         }
         return Response(course_info)
     except models.Course.DoesNotExist:
-        return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)    
 #No es importante
 @api_view(["GET"])
 def list_user_teachers(request):
@@ -271,13 +284,13 @@ def get_teacher_rubrics(request):
     user = request.user
     
     if user.role != User.TEACHER:
-        return Response({"error": "User is not a teacher"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": "El usuario no es un profesor"}, status=status.HTTP_403_FORBIDDEN)
     
     courses = Course.objects.filter(user_teacher=user)
     rubrics = Rubric.objects.filter(courses__in=courses).distinct()
     
     if not rubrics.exists():
-        return Response({"message": "No rubrics found for this teacher"}, status=status.HTTP_200_OK)
+        return Response({"message": "No se encuentran rubricas para el profesor"}, status=status.HTTP_200_OK)
     
     serializer = RubricSerializer(rubrics, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -743,13 +756,13 @@ def group_members(request):
     try:
         student = Student.objects.get(user=request.user)
     except Student.DoesNotExist:
-        return Response({"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "El estudiante no existe"}, status=status.HTTP_404_NOT_FOUND)
 
     # Obtener el grupo al que pertenece el estudiante
     try:
         group = Group.objects.get(students=student)
     except Group.DoesNotExist:
-        return Response({"error": "Student is not a member of any group"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "La estudiante no es miembro de ningún grupo."}, status=status.HTTP_404_NOT_FOUND)
 
     # Obtener los integrantes del grupo excluyendo al estudiante autenticado
     group_members = group.students.exclude(pk=student.pk)
@@ -833,42 +846,6 @@ def create_group(request, course_id):
     else:
         return Response(serializer_group.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#Luisa
-#crear grupo
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_group2(request):
-    course_id = request.GET.get("course")
-    data = request.data
-    student_ids = data.get("students")
-
-    if not course_id or not data.get("name"):
-        return Response({"error": "El ID del curso y el nombre del grupo son obligatorios"}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        course = Course.objects.get(pk=course_id)
-    except Course.DoesNotExist:
-        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
-    group_data = {
-        "name": data.get("name"),
-        "assigned_project": data.get("assigned_project"),
-        "course": course.pk,
-        "students": student_ids  # Incluir estudiantes en los datos del grupo
-    }
-
-    serializer_group = GroupSerializer(data=group_data)
-    if serializer_group.is_valid():
-        group = serializer_group.save()
-
-        # Asociar estudiantes con el grupo
-        if student_ids:
-            students = Student.objects.filter(pk__in=student_ids)
-            group.students.add(*students)  # Agregar estudiantes al grupo
-
-        return Response(serializer_group.data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer_group.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #muestra la lista de grupos de ese curso
 @api_view(['GET'])
