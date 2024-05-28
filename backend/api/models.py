@@ -67,7 +67,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=80)
     password = models.CharField(max_length=35)
     first_login = models.BooleanField(default=True)
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(default=True)
     last_login = models.DateTimeField(default=timezone.now)
 
     groups = models.ManyToManyField(

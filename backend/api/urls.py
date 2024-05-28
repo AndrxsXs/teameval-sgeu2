@@ -54,7 +54,7 @@ urlpatterns = [
     #obtener rubrica con params
     path('get_rubric_params/', views.get_rubric_params, name='get_rubric_params'), #karol
     #obtener la lista de rubricas con cuerpo
-    path('list_rubric/<int:course_id>/', views.list_rubric, name='list_rubric'),
+    path('list_rubric/<str:course_code>/', views.list_rubric, name='list_rubric'),
 
     
 

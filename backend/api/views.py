@@ -672,18 +672,15 @@ def get_rubric_params(request):
 #obtener la informacion de todas las rubricas que tiene un curso
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def list_rubric(request, course_id):
-    # Obtiene el curso por su ID
-    course = get_object_or_404(Course, id=course_id)
+def list_rubric(request, course_code):
+    # Obtiene el curso por su código
+    course = get_object_or_404(Course, code=course_code)
 
     # Obtiene todas las rúbricas asociadas a este curso
     rubrics = Rubric.objects.filter(courses=course)
-
-    # Serializa las rúbricas
     serializer = RubricDetailSerializer(rubrics, many=True)
 
     return Response(serializer.data)
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
