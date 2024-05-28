@@ -559,19 +559,19 @@ def create_rubric1(request, course_id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric(request, course_id):    
+def create_rubric(request, course_code):
     try:
-        course = Course.objects.get(id=course_id)
+        course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
         return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-    
+
     # Asegúrate de que la escala exista
     scale_id = request.data.get('scale')
     try:
         scale = Scale.objects.get(id=scale_id)
     except Scale.DoesNotExist:
         return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-    
+
     # Crear los estándares primero
     standards_data = request.data.get('standards')
     standards = []
@@ -585,8 +585,9 @@ def create_rubric(request, course_id):
 
     # Crear la rúbrica y asociar los estándares a ella
     rubric_data = {
+        'name': request.data.get('name'),
         'scale': scale.id,
-        'courses': [course_id],
+        'courses': [course.id],
         'standards': [standard.id for standard in standards]
     }
     rubric_serializer = RubricSerializer(data=rubric_data)
