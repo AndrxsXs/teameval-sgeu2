@@ -14,7 +14,9 @@ urlpatterns = [
     path('create_course/', views.create_course, name='create_course'),
     path('import_student/', views.import_student, name='import_student'),
     path('import_teacher/', views.import_teacher, name='import_teacher'),
-    path('courses_teacher/', views.main_teacher, name='import_teacher'),
+    path('courses_teacher/', views.main_teacher, name='courses_teacher'),
+    path('student_list/', views.student_list, name='student_list'), #Enlistar los estudiantes de un curso, dado un codigo de un curso
+    
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
     path('student_courses/', views.student_courses, name='student-courses'), #Luisa

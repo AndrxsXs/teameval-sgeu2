@@ -1064,6 +1064,33 @@ def user_list(request):
     return Response(user_data)
 
 
+# obtiene una lista de estudiantes
+# gets a list of students
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def student_list(request):
+    course_id = request.GET.get("course")
+    try:
+        course= Course.objects.get(code= course_id)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "No exite un curso con el codigo proporcionado."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    students= course.user_students.all()
+
+    user_data = [
+        {
+            "name": student.user.name,
+            "last_name": student.user.last_name,
+            "code": student.user.code,
+            "email": student.user.email,
+            "status": student.user.status,
+        }
+        for student in students
+    ]
+    return Response(user_data)
+    
 # obtiene una lista de cursos
 # gets a list of course
 @api_view(["GET"])
@@ -1217,7 +1244,8 @@ def create_mail(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-#Boceto idea metodo para realizar evaluacion
+'''
+#Boceto idea metodo para realizar 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def evaluar(request):
@@ -1246,7 +1274,7 @@ def evaluar(request):
     }
     
     
-    
+'''  
     
     
 # Vista para hacer pruebas backend
@@ -1281,3 +1309,5 @@ def prueba(request):
             "teacher": curso.user_teacher.name + " " + curso.user_teacher.last_name,
         },
     )
+
+
