@@ -235,6 +235,8 @@ class Standard(models.Model):
     )
     scale_description = models.TextField(default=False) # describe la escala
 
+    nota = models.PositiveIntegerField(default=False)
+
 #class Description(models.Model):
  #   text = models.TextField()
   #  scale = models.ForeignKey(
@@ -267,6 +269,8 @@ class Evaluation(models.Model):
     report = models.ForeignKey(
         Report, null=True, on_delete=models.PROTECT, related_name="evaluations"
     )
+
+    completed = models.BooleanField(default=False)
 
 
 class Rating(models.Model):

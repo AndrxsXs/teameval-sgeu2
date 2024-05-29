@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 # from django.contrib.auth.models import User
-from .models import User, Course, Scale, Rubric, Standard,Student, Group
+from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation
 from .models import User
 from . import models
 from rest_framework import generics, status 
@@ -22,6 +22,7 @@ from .serializers import (
     StandardSerializer,
     RubricDetailSerializer,
     InfoRubricSerializer,
+    RatingSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -886,22 +887,53 @@ def create_group(request, course_code):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def evaluate_student(request, student_code, rubric_id):
+    student = get_object_or_404(Student, user__code=student_code)
+    rubric = get_object_or_404(Rubric, id=rubric_id)
+    
+    try:
+        evaluation = Evaluation.objects.get(evaluated=student, report__course=rubric.courses.first())
+        if evaluation.completed:
+            return Response({'message': 'Este estudiante ya ha sido evaluado.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Evaluation.DoesNotExist:
+        pass
+    
+    standards = rubric.standards.all()
+    
+    if request.method == "POST":
+        for standard in standards:
+            score = request.data.get(f"standard_{standard.id}")
+            if score is not None:
+                rating_data = {'standard': standard.id, 'evaluation': evaluation.id, 'score': int(score)}
+                rating_serializer = RatingSerializer(data=rating_data)
+                if rating_serializer.is_valid():
+                    rating_serializer.save()
+                else:
+                    return Response(rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        evaluation.completed = True
+        evaluation.save()
+        
+        return Response({'message': 'Evaluación completada con éxito.'}, status=status.HTTP_200_OK)
+
+    # Renderizar la plantilla con la rúbrica y los estándares
+    return Response({'message': 'Envía las calificaciones para cada estándar.'}, status=status.HTTP_200_OK)
+    
+
 #muestra la lista de grupos de ese curso
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def group_list(request):
-    course_id = request.GET.get("course")
-    
-    if course_id:
-        course = Course.objects.get(id=course_id)
-        groups = Group.objects.filter(course=course)
+def group_list(request, course_code):
+    course = get_object_or_404(Course, code=course_code)
+    groups = Group.objects.filter(course=course)
     
     group_data = [
         {
             "id": group.id,
             "name": group.name,
             "assigned_project": group.assigned_project,
-            "student_count": group.students.count(),            
+            "student_count": group.students.count(),
         }
         for group in groups
     ]
@@ -911,32 +943,25 @@ def group_list(request):
 #muestra la informacion de un grupo
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def group_detail(request):
-    group_id = request.GET.get("group")
-    course_id = request.GET.get("course")
+def group_detail(request, course_code, group_id):
+    group = get_object_or_404(Group, id=group_id, course__code=course_code)
     
-    if group_id and course_id:
-        group = Group.objects.get(id=group_id, course__id=course_id)
-        
-        student_data = [
-            {
-                "student_code": student.user.code,
-                "student_name": student.user.name + " " + student.user.last_name,
-            }
-            for student in group.students.all()
-        ]
-        
-        group_data = {
-            "group_id": group.id,
-            "course_id": course_id,
-            "assigned_project": group.assigned_project,
-            "students": student_data,
+    student_data = [
+        {
+            "student_code": student.user.code,
+            "student_name": f"{student.user.name} {student.user.last_name}",
         }
-        
-        return Response(group_data)
-    else:
-        return Response({"error": "Group ID and Course ID are required."})
-        
+        for student in group.students.all()
+    ]
+    
+    group_data = {
+        "group_id": group.id,
+        "course_id": group.course.code,
+        "assigned_project": group.assigned_project,
+        "students": student_data,
+    }
+    
+    return Response(group_data)
 
 # creacion de un profesor
 # teacher creation

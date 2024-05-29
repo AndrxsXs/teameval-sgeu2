@@ -52,8 +52,10 @@ urlpatterns = [
     path('courses/<str:course_code>/create_rubric/', views.create_rubric, name='create_rubric'), #karol
     path('courses/<str:course_code>/register_student/', views.register_student, name='register_student'), #karol
     path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
-    path('group_list/', views.group_list, name='group_list'), #karol
-    path('group_detail/', views.group_detail, name='group_detail'), #karol
+    #muestra la lista de todos los grupos que hay en un curso
+    path('group_list/<str:course_code>/', views.group_list, name='group_list'), #karol
+    #cuando le da clic encima de un grupo muestra informacion detallada de este
+    path('group_detail/<str:course_code>/<int:group_id>/', views.group_detail, name='group_detail'), #karol
     
     #crea la rubrica usando params 
     path('create_rubric_params/', views.create_rubric_params, name='create_rubric_params'), #karol
@@ -63,6 +65,8 @@ urlpatterns = [
     path('get_rubric_params/', views.get_rubric_params, name='get_rubric_params'), #karol
     #obtener la lista de rubricas con cuerpo
     path('list_rubric/<str:course_code>/', views.list_rubric, name='list_rubric'),
+    #realiza la evaluacion el estudiante
+    path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
 
     
 
