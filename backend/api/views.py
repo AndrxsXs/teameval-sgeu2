@@ -3,6 +3,7 @@ import io
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError
 
 # from django.contrib.auth.models import User
 from .models import User, Course, Scale, Rubric, Standard,Student, Group
@@ -105,6 +106,7 @@ def update_teacher(request, teacher_id):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except models.Teacher.DoesNotExist:
         return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
     
 #Luisa
 #Informacion profesor
@@ -809,41 +811,80 @@ def group_list(request):
     return Response(group_data)
 
 #Luisa
-@api_view(['POST'])
+#Lista de estudiantes que no pertenecen a un grupo@api_view(["GET"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def create_group(request, course_id):
-    
-    data = request.data
-    student_ids = data.get("students")
-
-    if not data.get("name"):
-        return Response({"error": "El nombre del grupo es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
-
+def ungrouped_students(request, course_code):
     try:
-        course = Course.objects.get(pk=course_id)
+        print(f"Buscando curso con código: {course_code}")
+        course = Course.objects.get(code=course_code)
+        print(f"Curso encontrado: {course}")
+        
+        all_students = set(course.user_students.all())
+        print(f"Todos los estudiantes del curso: {all_students}")
+        
+        # Corregir la consulta para obtener estudiantes agrupados
+        grouped_students = set(Student.objects.filter(students__course=course))
+        print(f"Estudiantes agrupados: {grouped_students}")
+        
+        ungrouped_students = all_students - grouped_students
+        print(f"Estudiantes no agrupados: {ungrouped_students}")
+
+        student_info = [
+            {
+                "id": student.user.id,
+                "code": student.user.code,
+                "name": student.user.name,
+                "last_name": student.user.last_name,
+                "email": student.user.email,
+                "status": student.user.status,
+            }
+            for student in ungrouped_students
+        ]
+        
+        print(f"Información de estudiantes no agrupados: {student_info}")
+        
+        return Response(student_info, status=status.HTTP_200_OK)
     except Course.DoesNotExist:
+        print("Curso no encontrado")
+        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+        return Response({"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+#Luisa
+#Creación del grupo
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_group(request, course_code):
+    try:
+        print("Buscando curso...")
+        course = Course.objects.get(code=course_code)
+        print("Curso encontrado:", course)
+    except Course.DoesNotExist:
+        print("Curso no encontrado")
         return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
-    group_data = {
-        "name": data.get("name"),
-        "assigned_project": data.get("assigned_project"),
-        "course": course.pk,
-        "students": student_ids  # Incluir estudiantes en los datos del grupo
-    }
+    student_codes = request.data.get("students", [])  # Obtener los códigos de estudiante de la solicitud POST
 
-    serializer_group = GroupSerializer(data=group_data)
-    if serializer_group.is_valid():
-        group = serializer_group.save()
+    print("Estudiantes recibidos:")
+    for code in student_codes:
+        print("Código de estudiante:", code)
 
-        # Asociar estudiantes con el grupo
-        if student_ids:
-            students = Student.objects.filter(pk__in=student_ids)
-            group.students.add(*students)  # Agregar estudiantes al grupo
+    # Agregamos el curso al diccionario de datos
+    request.data["course"] = course.id
 
-        return Response(serializer_group.data, status=status.HTTP_201_CREATED)
+    serializer = GroupSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            serializer.save()
+        except ValidationError as e:
+            # Manejar la excepción ValidationError del serializador
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Grupo creado correctamente"}, status=status.HTTP_201_CREATED)
     else:
-        return Response(serializer_group.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #muestra la lista de grupos de ese curso
 @api_view(['GET'])

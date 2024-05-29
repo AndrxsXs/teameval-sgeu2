@@ -29,9 +29,14 @@ urlpatterns = [
 
     #Muestra la informacion completa del curso, profesor y estudiantes que pertenecen al curso
     path('course_info/<str:course_code>/', views.course_info, name='course_info'), #Luisa 
+    
+    #Crea un grupo
+    path('create_group/<str:course_code>/', views.create_group, name='create_group'), #Luisa 
 
-    path('create_group/<int:course_id>/', views.create_group, name='create_group'), #Luisa no funciona aun
-    path('update_teacher/<int:teacher_id>/', views.update_teacher, name='update_teacher'), #Luisa no funciona aun
+    #Lista de estudiantes sin grupo
+    path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'),
+
+    path('update_teacher/<str:teacher_code>/', views.update_teacher, name='update_teacher'), #Luisa no funciona aun
     path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa no funciona aun
     path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa no funciona aun
     #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no funciona aun
