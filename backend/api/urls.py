@@ -49,7 +49,7 @@ urlpatterns = [
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
     # el profesor crea una rubrica para ese curso
-    path('courses/<str:course_code>/create_rubric/', views.create_rubric, name='create_rubric'), #karol
+    path('create_rubric/<str:course_code>/<int:scale_id>/', views.create_rubric, name='create_rubric'), #karol
     path('courses/<str:course_code>/register_student/', views.register_student, name='register_student'), #karol
     path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
     #muestra la lista de todos los grupos que hay en un curso
