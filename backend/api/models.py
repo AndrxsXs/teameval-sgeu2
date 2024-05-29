@@ -258,6 +258,12 @@ class Evaluation(models.Model):
     #evaluated = models.CharField(max_length=60)
     date = models.DateTimeField(auto_now_add=True)
     
+    #fecha inicio
+    #fecha fin
+    #nombre
+    #estado enumeracion
+    #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones
+    
     evaluated = models.ForeignKey( 
         Student, null=True, on_delete=models.PROTECT, related_name="evaluations_student"    #uno a muchos
     )
@@ -283,6 +289,9 @@ class Rating(models.Model):
     evaluation = models.ForeignKey(
         Evaluation, null=True, on_delete=models.PROTECT, related_name="rating"
     )
+    
+    
+    
 
 
 class Group(models.Model):

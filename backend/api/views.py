@@ -893,10 +893,8 @@ def evaluate_student(request, student_code, rubric_id):
     
     try:
         evaluation = Evaluation.objects.get(evaluated=student, report__course=rubric.courses.first())
-        if evaluation.completed:
-            return Response({'message': 'Este estudiante ya ha sido evaluado.'}, status=status.HTTP_400_BAD_REQUEST)
     except Evaluation.DoesNotExist:
-        pass
+        return Response({'message': 'No se encontró una evaluación previa para este estudiante y rúbrica.'}, status=status.HTTP_404_NOT_FOUND)
     
     standards = rubric.standards.all()
     
