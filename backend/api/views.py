@@ -1317,10 +1317,6 @@ def create_mail(request):
 #         "evaluator": evaluator.id,
 #     }
     
-    
-'''  
-    
-    
 # Vista para hacer pruebas backend
 def singin(request):
     if request.method == "GET":
