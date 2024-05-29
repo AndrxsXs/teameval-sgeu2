@@ -1,9 +1,16 @@
 body {
     margin: 0;
     padding: 0;
-    height: 100dvh;
+    height: 100vh;
     /* background-image: url("../../assets/gradient-bg.svg"); */
     background-repeat: no-repeat;
     background-size: cover;
-    
+
+}
+
+#root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

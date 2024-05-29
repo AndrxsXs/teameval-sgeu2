@@ -1,11 +1,14 @@
 .main-homepage {
     width: 80%;
+    height: 100%;
     max-width: 800px;
     margin: auto;
     padding: 20px;
+    display: flex;
+    align-items: center;
 }
 
-article {
+.hero {
     display: flex;
     gap: 30px;
 }

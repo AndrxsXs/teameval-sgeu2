@@ -188,7 +188,7 @@ export default function UserGroupTable(props) {
 
     return (
         <React.Fragment>
-            
+
             <Sheet
                 className="TableContainer"
                 variant="outlined"
@@ -251,7 +251,7 @@ export default function UserGroupTable(props) {
                                 <td style={{ paddingInline: '16px' }}>
                                     <Typography level="body-xs">{row.email}</Typography>
                                 </td>
-                                
+
                                 <td style={{ paddingInline: '16px' }}>
                                     <RowMenu user={row} />
                                 </td>
@@ -301,7 +301,7 @@ export default function UserGroupTable(props) {
                             userSelect: 'none',
                         }}
                     >
-                        {rows && rows.length === 0 ? <Fragment>No hay usuarios</Fragment> : <Fragment>Nada más por aquí</Fragment>}
+                        {rows && rows.length === 0 ? <Fragment>Aún no hay grupos creados</Fragment> : <Fragment>Nada más por aquí</Fragment>}
                     </Typography>
                 }
             </Sheet>

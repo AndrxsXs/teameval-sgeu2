@@ -165,25 +165,42 @@ class RubricSerializer(serializers.ModelSerializer):
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
-        
 
 class GroupSerializer(serializers.ModelSerializer):
-    students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
+    student_codes = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = Group
-        fields = ['id', 'name', 'assigned_project', 'course', 'students']
-        extra_kwargs = {
-            'course': {'required': True},
-            'students': {'required': False}
-        }
+        fields = ["name", "assigned_project", "course", "student_codes"]
 
     def create(self, validated_data):
-        students = validated_data.pop('students', [])  # Obtener estudiantes del validated_data
-        group = Group.objects.create(**validated_data)  # Crear grupo sin estudiantes
-        group.students.set(students)  # Asignar estudiantes al grupo
+        student_codes = validated_data.pop('student_codes', [])
+        
+        # Si no se proporcionan estudiantes, lanzar una excepción
+        if not student_codes:
+            raise serializers.ValidationError("Debe proporcionar al menos un estudiante para crear un grupo")
+
+        # Imprimir los códigos de los estudiantes recibidos
+        print("Estudiantes recibidos:")
+        for code in student_codes:
+            print("Código de estudiante:", code)
+
+        group = Group.objects.create(**validated_data)
+        students = []
+        for code in student_codes:
+            try:
+                student = Student.objects.get(user__code=code)
+                students.append(student)
+            except Student.DoesNotExist:
+                # Manejar el caso en que el estudiante no existe
+                pass
+
+        if not students:
+            raise serializers.ValidationError("No se encontraron estudiantes con los códigos proporcionados")
+
+        group.students.set(students)
         return group
-            
+
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
