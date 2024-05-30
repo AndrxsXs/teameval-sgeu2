@@ -19,11 +19,16 @@ urlpatterns = [
     
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
+    #Muestra los cursos del estudiante 
     path('student_courses/', views.student_courses, name='student_courses'), #Luisa
+
+    #Obtener estudiantes de mi grupo
     path('group_members/', views.group_members, name='group_members'), #Luisa
+
+    #Muestra la informacion de una rubrica
     path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
     
-    #Muestra la informacion completra del administrador
+    #Muestra la informacion completa del administrador
     path('admin_info/<str:admin_code>/', views.admin_info, name='admin_info'), #Luisa
 
     #Muestra la informacion completra del profesor
@@ -36,7 +41,11 @@ urlpatterns = [
     path('create_group/<str:course_code>/', views.create_group, name='create_group'), #Luisa 
 
     #Lista de estudiantes sin grupo
-    path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'),
+    path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'), #Luisa
+
+    #Evaluaciones disponibles para que el estudiante realice
+    path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
+
 
     path('update_teacher/<str:teacher_code>/', views.update_teacher, name='update_teacher'), #Luisa no funciona aun
     path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa no funciona aun

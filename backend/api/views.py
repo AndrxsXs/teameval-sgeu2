@@ -24,6 +24,7 @@ from .serializers import (
     InfoRubricSerializer,
     RatingSerializer,
     EvaluationSerializer,
+    EvaluationSerializerE,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -298,6 +299,31 @@ def get_teacher_rubrics(request):
         return Response({"message": "No se encuentran rubricas para el profesor"}, status=status.HTTP_200_OK)
     
     serializer = RubricSerializer(rubrics, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+#Luisa
+#Evaluaciones disponibles para que el estudiante las realice
+@api_view(['GET'])
+def available_evaluations(request, student_code):
+    try:
+        # Obtener el estudiante por código
+        student = Student.objects.get(user__code=student_code)
+    except Student.DoesNotExist:
+        return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Obtener el tiempo actual en la zona horaria de Bogotá
+    bogota_tz = pytz.timezone('America/Bogota')
+    current_time = timezone.now().astimezone(bogota_tz)
+
+    # Filtrar las evaluaciones que están disponibles para el estudiante
+    evaluations = Evaluation.objects.filter(
+        course__user_students=student,
+        date_start__lte=current_time,
+        date_end__gte=current_time,
+        completed=False
+    )
+
+    serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])

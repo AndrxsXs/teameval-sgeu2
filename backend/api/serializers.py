@@ -154,6 +154,11 @@ class EvaluationSerializer(serializers.ModelSerializer):
         model = Evaluation
         fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
 
+class EvaluationSerializerE(serializers.ModelSerializer):
+    class Meta: 
+        model = Evaluation
+        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
+
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
