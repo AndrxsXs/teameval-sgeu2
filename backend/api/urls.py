@@ -46,6 +46,8 @@ urlpatterns = [
     #Evaluaciones disponibles para que el estudiante realice
     path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
 
+    #Muestra al estudiante las evaluaciones finalizadas
+    path('completed_evaluations/<str:student_code>/', views.completed_evaluations, name='completed_evaluations'), #Luisa
 
     path('update_teacher/<str:teacher_code>/', views.update_teacher, name='update_teacher'), #Luisa no funciona aun
     path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa no funciona aun

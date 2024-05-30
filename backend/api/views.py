@@ -339,6 +339,31 @@ def available_evaluations(request, student_code):
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+#Luisa
+#Muestra al estudiante las evaluaciones finalizadas
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def completed_evaluations(request, student_code):
+    try:
+        # Obtener el estudiante por código
+        student = Student.objects.get(user__code=student_code)
+    except Student.DoesNotExist:
+        return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Obtener el tiempo actual en la zona horaria de Bogotá
+    bogota_tz = pytz.timezone('America/Bogota')
+    current_time = timezone.now().astimezone(bogota_tz)
+
+    # Filtrar las evaluaciones que están finalizadas para el estudiante
+    evaluations = Evaluation.objects.filter(
+        course__user_students=student,
+        date_end__lte=current_time,
+        completed=True
+    )
+
+    serializer = EvaluationSerializerE(evaluations, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def import_student(request):
