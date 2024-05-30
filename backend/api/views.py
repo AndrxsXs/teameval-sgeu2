@@ -357,8 +357,7 @@ def completed_evaluations(request, student_code):
     # Filtrar las evaluaciones que están finalizadas para el estudiante
     evaluations = Evaluation.objects.filter(
         course__user_students=student,
-        date_end__lte=current_time,
-        completed=True
+        estado=Evaluation.FINISHED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
