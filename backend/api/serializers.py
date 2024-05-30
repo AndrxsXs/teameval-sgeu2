@@ -1,4 +1,4 @@
-from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard, Rating
+from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard, Rating, Evaluation
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from django.db import IntegrityError
@@ -148,6 +148,11 @@ class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ('standard', 'evaluation', 'score')
+
+class EvaluationSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Evaluation
+        fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
 
 
 class RubricSerializer(serializers.ModelSerializer):

@@ -235,7 +235,7 @@ class Standard(models.Model):
     )
     scale_description = models.TextField(default=False) # describe la escala
 
-    nota = models.PositiveIntegerField(default=False)
+ #   nota = models.PositiveIntegerField(default=False) #no va aqui, sino en rating
 
 #class Description(models.Model):
  #   text = models.TextField()
@@ -254,16 +254,26 @@ class Report(models.Model):
 
 
 class Evaluation(models.Model):
+    TO_START = 1
+    INITIATED = 2
+    FINISHED = 3
+
+    STATUS_CHOICES = [
+        (TO_START, "Por iniciar"),
+        (INITIATED, "Iniciado"),
+        (FINISHED, "Finalizado"),
+    ]
     #evaluator = models.CharField(max_length=60)
     #evaluated = models.CharField(max_length=60)
-    date = models.DateTimeField(auto_now_add=True)
-    
-    #fecha inicio
-    #fecha fin
-    #nombre
-    #estado enumeracion
+    estado = models.IntegerField(choices=STATUS_CHOICES)
+    date_start = models.DateTimeField(auto_now_add=False)
+    date_end = models.DateTimeField(auto_now_add=False)
+    name = models.CharField(max_length=60)
     #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones
-    
+    rubric = models.ForeignKey(
+        Rubric, on_delete=models.CASCADE, related_name="evaluations"
+    )
+    #al que evaluo
     evaluated = models.ForeignKey( 
         Student, null=True, on_delete=models.PROTECT, related_name="evaluations_student"    #uno a muchos
     )
@@ -276,12 +286,14 @@ class Evaluation(models.Model):
         Report, null=True, on_delete=models.PROTECT, related_name="evaluations"
     )
 
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
+
     completed = models.BooleanField(default=False)
 
 
 class Rating(models.Model):
     #average = models.DecimalField(max_digits=10, decimal_places=3) # Creo que este atributo iria en evaluation
-    # qualification= models.BigIntegerField(null=False)
+    qualification= models.BigIntegerField(null=False) #esta da la nota del criterio
     
     standard = models.OneToOneField(
         Standard, null=False, on_delete=models.PROTECT, primary_key=True

@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
-
+from django.utils import timezone
 # from django.contrib.auth.models import User
 from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation
 from .models import User
@@ -23,6 +23,7 @@ from .serializers import (
     RubricDetailSerializer,
     InfoRubricSerializer,
     RatingSerializer,
+    EvaluationSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -32,6 +33,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.mail import EmailMultiAlternatives
 from backend import settings
+import pytz
 
 # Create your views here.
 
@@ -598,6 +600,65 @@ def create_rubric(request, course_code, scale_id):
         return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#crea la evaluacion que se realiza a los estudiantes
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_evaluation(request, course_code):
+    try:
+        # Obtener el curso utilizando el código recibido en la URL
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    data = request.data
+    rubric_name = data.get('rubric_name')
+    name = data.get('name')
+    date_start = data.get('date_start')
+    date_end = data.get('date_end')
+
+    if not rubric_name or not name or not date_start or not date_end:
+        return Response({'error': 'Faltan datos necesarios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Obtener la rúbrica por nombre
+    try:
+        rubric = Rubric.objects.get(name=rubric_name)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Convertir las fechas a objetos datetime conscientes de la zona horaria de Bogotá
+    bogota_tz = pytz.timezone('America/Bogota')
+    date_start = timezone.datetime.fromisoformat(date_start).astimezone(bogota_tz)
+    date_end = timezone.datetime.fromisoformat(date_end).astimezone(bogota_tz)
+
+    # Determinar el estado inicial basado en las fechas
+    current_time = timezone.now().astimezone(bogota_tz)
+    if current_time < date_start:
+        estado = Evaluation.TO_START
+    elif date_start <= current_time <= date_end:
+        estado = Evaluation.INITIATED
+    else:
+        estado = Evaluation.FINISHED
+
+    # Crear la evaluación asociada al curso
+    evaluation_data = {
+        'estado': estado,
+        'date_start': date_start,
+        'date_end': date_end,
+        'name': name,
+        'rubric': rubric.id,
+        'course': course.id, 
+        'report': None,
+        'completed': False
+    }
+    serializer = EvaluationSerializer(data=evaluation_data)
+    if serializer.is_valid():
+        serializer.save()
+        
+        return Response({'message': 'Evaluación creada con éxito.'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
