@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 # from django.contrib.auth.models import User
-from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation
+from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation, Teacher
 from .models import User
 from . import models
 from rest_framework import generics, status 
@@ -25,6 +25,7 @@ from .serializers import (
     RatingSerializer,
     EvaluationSerializer,
     EvaluationSerializerE,
+    TeacherSerializerUpdate,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -96,19 +97,30 @@ def update_student(request, student_id):
 @permission_classes([IsAuthenticated])
 def update_teacher(request, teacher_id):
     try:
-        teacher = models.Teacher.objects.get(pk=teacher_id).user
+        teacher = Teacher.objects.get(pk=teacher_id)
+        user = teacher.user
 
-        # Verificar que el usuario que hace la solicitud sea el mismo que el profesor que se va a actualizar
-        if request.user != teacher:
-            return Response({"error": "No estas autorizado para actualizar la información"}, status=status.HTTP_403_FORBIDDEN)
+        # Actualizar los datos del usuario
+        user_data = {
+            'name': request.data.get('name', user.name),
+            'last_name': request.data.get('last_name', user.last_name),
+            'email': request.data.get('email', user.email),
+            'code': request.data.get('code', user.code),
+        }
+        user_serializer = TeacherSerializer(user, data=user_data, partial=True)
+        if user_serializer.is_valid():
+            user_serializer.save()
 
-        serializer = TeacherSerializer(teacher.teacher, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            # Actualizar los datos del profesor
+            teacher_serializer = TeacherSerializerUpdate(teacher, data=request.data, partial=True)
+            if teacher_serializer.is_valid():
+                teacher_serializer.save()
+                return Response(teacher_serializer.data)
+            else:
+                return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except models.Teacher.DoesNotExist:
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Teacher.DoesNotExist:
         return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
     
@@ -304,6 +316,7 @@ def get_teacher_rubrics(request):
 #Luisa
 #Evaluaciones disponibles para que el estudiante las realice
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def available_evaluations(request, student_code):
     try:
         # Obtener el estudiante por código

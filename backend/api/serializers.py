@@ -97,6 +97,30 @@ class TeacherSerializer(serializers.ModelSerializer):
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         teacher = Teacher.objects.create(user=user, **validated_data)
         return teacher
+    
+class TeacherSerializerUpdate(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+
+    class Meta:
+        model = Teacher
+        fields = ["name", "last_name", "code", "email", "phone"]
+        
+    def update(self, instance, validated_data):
+        # Extraer y actualizar los datos del usuario
+        user_data = validated_data.pop('user', {})
+        for attr, value in user_data.items():
+            setattr(instance.user, attr, value)
+        instance.user.save()
+
+        # Actualizar los datos del profesor
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        return instance
 
 class AdminSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
@@ -153,11 +177,6 @@ class EvaluationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Evaluation
         fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
-
-class EvaluationSerializerE(serializers.ModelSerializer):
-    class Meta: 
-        model = Evaluation
-        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
 
 
 class RubricSerializer(serializers.ModelSerializer):
@@ -244,6 +263,14 @@ class InfoRubricSerializer(serializers.ModelSerializer):
         model = Rubric
         fields = ['name', 'scale', 'standards', 'courses']
 
+class EvaluationSerializerE(serializers.ModelSerializer):
+    course = CourseSerializer()
+    rubric = serializers.PrimaryKeyRelatedField(queryset=Rubric.objects.all())
+
+    class Meta: 
+        model = Evaluation
+        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
+        
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Note
