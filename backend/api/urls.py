@@ -14,33 +14,59 @@ urlpatterns = [
     path('create_course/', views.create_course, name='create_course'),
     path('import_student/', views.import_student, name='import_student'),
     path('import_teacher/', views.import_teacher, name='import_teacher'),
-    path('courses_teacher/', views.main_teacher, name='import_teacher'),
+    path('courses_teacher/', views.main_teacher, name='courses_teacher'),
+    path('student_list/', views.student_list, name='student_list'), #Enlistar los estudiantes de un curso, dado un codigo de un curso
+    
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
-    path('student_courses/', views.student_courses, name='student-courses'), #Luisa
-    path('group_members/', views.group_members, name='group_members'), #Luisa
-    path('create_group/<int:course_id>/', views.create_group, name='create_group'), #Luisa
-    path('create_group/', views.create_group2, name='create_group'), #Luisa
-    path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
-    path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa
-    path('course_info/<int:course_id>/', views.course_info, name='course_info'), #Luisa
-    path('admin_info/<int:admin_id>/', views.admin_info, name='admin_info'), #Luisa
-    path('teacher_info/<int:teacher_id>/', views.teacher_info, name='teacher_info'), #Luisa
-    path('update_teacher/<int:teacher_id>/', views.update_teacher, name='update_teacher'), #Luisa probar con el super usuario
-    path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa probar con el super usuario
+    #Muestra los cursos del estudiante 
+    path('student_courses/', views.student_courses, name='student_courses'), #Luisa
 
-    #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no sirve bien
+    #Obtener estudiantes de mi grupo
+    path('group_members/', views.group_members, name='group_members'), #Luisa
+
+    #Muestra la informacion de una rubrica
+    path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
+    
+    #Muestra la informacion completa del administrador
+    path('admin_info/<str:admin_code>/', views.admin_info, name='admin_info'), #Luisa
+
+    #Muestra la informacion completra del profesor
+    path('teacher_info/<str:teacher_code>/', views.teacher_info, name='teacher_info'), #Luisa
+
+    #Muestra la informacion completa del curso, profesor y estudiantes que pertenecen al curso
+    path('course_info/<str:course_code>/', views.course_info, name='course_info'), #Luisa 
+    
+    #Crea un grupo
+    path('create_group/<str:course_code>/', views.create_group, name='create_group'), #Luisa 
+
+    #Lista de estudiantes sin grupo
+    path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'), #Luisa
+
+    #Evaluaciones disponibles para que el estudiante realice
+    path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
+
+    #Muestra al estudiante las evaluaciones finalizadas
+    path('completed_evaluations/<str:student_code>/', views.completed_evaluations, name='completed_evaluations'), #Luisa
+
+    path('update_teacher/<str:teacher_code>/', views.update_teacher, name='update_teacher'), #Luisa no funciona aun
+    path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa no funciona aun
+    path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa no funciona aun
+    #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no funciona aun
     #path('list_user_teachers/', views.list_user_teachers, name='list_user_teachers'), #Luisa no importante
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
-    path('courses/<int:course_id>/create_rubric/', views.create_rubric, name='create_rubric'), #karol
-    path('courses/<int:course_id>/register_student/', views.register_student, name='register_student'), #karol
+    # el profesor crea una rubrica para ese curso
+    path('create_rubric/<str:course_code>/<int:scale_id>/', views.create_rubric, name='create_rubric'), #karol
+    path('courses/<str:course_code>/register_student/', views.register_student, name='register_student'), #karol
     path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
-    path('group_list/', views.group_list, name='group_list'), #karol
-    path('group_detail/', views.group_detail, name='group_detail'), #karol
+    #muestra la lista de todos los grupos que hay en un curso
+    path('group_list/<str:course_code>/', views.group_list, name='group_list'), #karol
+    #cuando le da clic encima de un grupo muestra informacion detallada de este
+    path('group_detail/<str:course_code>/<int:group_id>/', views.group_detail, name='group_detail'), #karol
     
     #crea la rubrica usando params 
     path('create_rubric_params/', views.create_rubric_params, name='create_rubric_params'), #karol
@@ -49,7 +75,13 @@ urlpatterns = [
     #obtener rubrica con params
     path('get_rubric_params/', views.get_rubric_params, name='get_rubric_params'), #karol
     #obtener la lista de rubricas con cuerpo
-    path('list_rubric/<int:course_id>/', views.list_rubric, name='list_rubric'),
+    path('list_rubric/<str:course_code>/', views.list_rubric, name='list_rubric'),
+    #realiza la evaluacion el estudiante
+    path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
+    #crea la evaluacion que van a usar los estudiantes
+    path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
+
+    
 
     
 

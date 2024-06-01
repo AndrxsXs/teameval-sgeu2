@@ -8,7 +8,8 @@ import { CircularProgress, Box, Typography } from "@mui/joy";
 import AdminPage from "../../pages/AdminPage";
 import TeacherPage from "../../pages/TeacherPage";
 import StudentPage from "../../pages/StudentPage";
-import CreatePassword from "../../pages/auth/CreatePassword";
+// import CreatePassword from "../../pages/auth/CreatePassword";
+import CreatePasswordPage from "../../pages/auth/CreatePasswordPage";
 
 const USER_ROLES = {
     ADMIN: 'admin',
@@ -82,6 +83,14 @@ const ProtectedRoute = ({ allowedRoles }) => {
             } catch (error) {
                 console.log(error);
                 setIsAuthorized(false);
+                window.dispatchEvent(
+                    new CustomEvent('responseEvent', {
+                        detail: {
+                            message: 'No autorizado',
+                            severity: 'danger',
+                        },
+                    })
+                );
             }
         };
 
@@ -120,7 +129,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     }
 
     if (firstLogin) {
-        return <CreatePassword />
+        return <CreatePasswordPage />
     }
 
     if (isAuthorized) {

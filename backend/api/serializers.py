@@ -1,4 +1,4 @@
-from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard
+from .models import User, Student, Teacher, Admi, Course, Group, Scale, Rubric, Standard, Rating, Evaluation
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from django.db import IntegrityError
@@ -97,6 +97,30 @@ class TeacherSerializer(serializers.ModelSerializer):
         # Crear una nueva instancia del modelo Teacher con los datos validados restantes
         teacher = Teacher.objects.create(user=user, **validated_data)
         return teacher
+    
+class TeacherSerializerUpdate(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+
+    class Meta:
+        model = Teacher
+        fields = ["name", "last_name", "code", "email", "phone"]
+        
+    def update(self, instance, validated_data):
+        # Extraer y actualizar los datos del usuario
+        user_data = validated_data.pop('user', {})
+        for attr, value in user_data.items():
+            setattr(instance.user, attr, value)
+        instance.user.save()
+
+        # Actualizar los datos del profesor
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        return instance
 
 class AdminSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
@@ -144,6 +168,16 @@ class RubricDetailSerializer(serializers.ModelSerializer):
         scale = obj.scale
         return list(range(scale.Lower_limit, scale.Upper_limit + 1))
 
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ('standard', 'evaluation', 'score')
+
+class EvaluationSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Evaluation
+        fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
+
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
@@ -165,25 +199,42 @@ class RubricSerializer(serializers.ModelSerializer):
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
-        
 
 class GroupSerializer(serializers.ModelSerializer):
-    students = serializers.PrimaryKeyRelatedField(many=True, queryset=Student.objects.all())
+    student_codes = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = Group
-        fields = ['id', 'name', 'assigned_project', 'course', 'students']
-        extra_kwargs = {
-            'course': {'required': True},
-            'students': {'required': False}
-        }
+        fields = ["name", "assigned_project", "course", "student_codes"]
 
     def create(self, validated_data):
-        students = validated_data.pop('students', [])  # Obtener estudiantes del validated_data
-        group = Group.objects.create(**validated_data)  # Crear grupo sin estudiantes
-        group.students.set(students)  # Asignar estudiantes al grupo
+        student_codes = validated_data.pop('student_codes', [])
+        
+        # Si no se proporcionan estudiantes, lanzar una excepción
+        if not student_codes:
+            raise serializers.ValidationError("Debe proporcionar al menos un estudiante para crear un grupo")
+
+        # Imprimir los códigos de los estudiantes recibidos
+        print("Estudiantes recibidos:")
+        for code in student_codes:
+            print("Código de estudiante:", code)
+
+        group = Group.objects.create(**validated_data)
+        students = []
+        for code in student_codes:
+            try:
+                student = Student.objects.get(user__code=code)
+                students.append(student)
+            except Student.DoesNotExist:
+                # Manejar el caso en que el estudiante no existe
+                pass
+
+        if not students:
+            raise serializers.ValidationError("No se encontraron estudiantes con los códigos proporcionados")
+
+        group.students.set(students)
         return group
-            
+
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
@@ -212,6 +263,14 @@ class InfoRubricSerializer(serializers.ModelSerializer):
         model = Rubric
         fields = ['name', 'scale', 'standards', 'courses']
 
+class EvaluationSerializerE(serializers.ModelSerializer):
+    course = CourseSerializer()
+    rubric = serializers.PrimaryKeyRelatedField(queryset=Rubric.objects.all())
+
+    class Meta: 
+        model = Evaluation
+        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
+        
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Note
