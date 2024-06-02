@@ -269,6 +269,7 @@ class Evaluation(models.Model):
     date_start = models.DateTimeField(auto_now_add=False)
     date_end = models.DateTimeField(auto_now_add=False)
     name = models.CharField(max_length=60)
+    comment = models.TextField(max_length=100)
     #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones
     rubric = models.ForeignKey(
         Rubric, on_delete=models.CASCADE, related_name="evaluations"
@@ -295,8 +296,8 @@ class Rating(models.Model):
     #average = models.DecimalField(max_digits=10, decimal_places=3) # Creo que este atributo iria en evaluation
     qualification= models.BigIntegerField(null=False) #esta da la nota del criterio
     
-    standard = models.OneToOneField(
-        Standard, null=False, on_delete=models.PROTECT, primary_key=True
+    standard = models.ForeignKey(
+        Standard, null=True, on_delete=models.PROTECT, related_name="rating"
     )
     evaluation = models.ForeignKey(
         Evaluation, null=True, on_delete=models.PROTECT, related_name="rating"

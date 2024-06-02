@@ -171,7 +171,7 @@ class RubricDetailSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ('standard', 'evaluation', 'score')
+        fields = ('standard', 'evaluation', 'qualification')
 
 class EvaluationSerializer(serializers.ModelSerializer):
     class Meta: 
