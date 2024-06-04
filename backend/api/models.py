@@ -301,9 +301,6 @@ class Rating(models.Model):
     evaluation = models.ForeignKey(
         Evaluation, null=True, on_delete=models.PROTECT, related_name="rating"
     )
-    
-    
-    
 
 
 class Group(models.Model):
@@ -313,8 +310,6 @@ class Group(models.Model):
         Course, null=True, on_delete=models.PROTECT, related_name="groups"
     )
     students = models.ManyToManyField(Student, related_name="students")
-
-
 
 class Resourse(models.Model):
     name = models.CharField(max_length=100)

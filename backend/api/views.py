@@ -26,6 +26,7 @@ from .serializers import (
     EvaluationSerializer,
     EvaluationSerializerE,
     TeacherSerializerUpdate,
+    AdminSerializerUpdate,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -95,11 +96,15 @@ def update_student(request, student_id):
 #Editar profesor
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_teacher(request, teacher_id):
+def update_user(request, user_code):
+    # Verificar si el usuario que realiza la solicitud es un administrador
+    if not request.user.is_superuser:
+        return Response({"error": "No tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
+    
     try:
-        teacher = Teacher.objects.get(pk=teacher_id)
-        user = teacher.user
-
+        # Buscar al usuario por código
+        user = User.objects.get(code=user_code)
+        
         # Actualizar los datos del usuario
         user_data = {
             'name': request.data.get('name', user.name),
@@ -110,19 +115,28 @@ def update_teacher(request, teacher_id):
         user_serializer = TeacherSerializer(user, data=user_data, partial=True)
         if user_serializer.is_valid():
             user_serializer.save()
-
-            # Actualizar los datos del profesor
-            teacher_serializer = TeacherSerializerUpdate(teacher, data=request.data, partial=True)
-            if teacher_serializer.is_valid():
-                teacher_serializer.save()
-                return Response(teacher_serializer.data)
-            else:
-                return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Verificar y actualizar datos específicos del profesor o administrador
+            if hasattr(user, 'teacher'):
+                teacher = user.teacher
+                teacher_serializer = TeacherSerializerUpdate(teacher, data=request.data, partial=True)
+                if teacher_serializer.is_valid():
+                    teacher_serializer.save()
+                else:
+                    return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            elif hasattr(user, 'admi'):
+                admin = user.admi
+                admin_serializer = AdminSerializerUpdate(admin, data=request.data, partial=True)
+                if admin_serializer.is_valid():
+                    admin_serializer.save()
+                else:
+                    return Response(admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+            return Response(user_serializer.data)
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Teacher.DoesNotExist:
-        return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
+    except User.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     
 #Luisa
 #Informacion profesor
