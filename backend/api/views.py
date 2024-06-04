@@ -27,6 +27,7 @@ from .serializers import (
     EvaluationSerializerE,
     TeacherSerializerUpdate,
     AdminSerializerUpdate,
+    StudentSerializerUpdate,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -75,23 +76,21 @@ def student_courses(request):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_student(request, student_id):
+def update_student(request, student_code):
     try:
-        student = models.Student.objects.get(pk=student_id).user
+        # Buscar al estudiante por su código y obtener el objeto Student asociado
+        student = Student.objects.get(user__code=student_code)
 
-        # Verificar que el usuario que hace la solicitud sea el mismo que el estudiante que se va a actualizar
-        if request.user != student:
-            return Response({"error": "You are not authorized to update this student"}, status=status.HTTP_403_FORBIDDEN)
-
-        serializer = StudentSerializer(student.student, data=request.data, partial=True)
+        # Actualizar los datos del estudiante
+        serializer = StudentSerializerUpdate(student, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response({"message": "Los datos del estudiante han sido actualizados exitosamente"}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except models.Student.DoesNotExist:
-        return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    except Student.DoesNotExist:
+        return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
 #Luisa
 #Editar profesor
 @api_view(["PUT"])

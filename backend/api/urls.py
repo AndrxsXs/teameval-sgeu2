@@ -48,11 +48,13 @@ urlpatterns = [
 
     #Muestra al estudiante las evaluaciones finalizadas
     path('completed_evaluations/<str:student_code>/', views.completed_evaluations, name='completed_evaluations'), #Luisa
-    
+
     #Editar user (profesor o admin)
     path('update_user/<str:user_code>/', views.update_user, name='update_user'), #Luisa
 
-    path('update_student/<int:student_id>/', views.update_student, name='update_student'), #Luisa no funciona aun
+    #Editar estudiante
+    path('update_student/<int:student_code>/', views.update_student, name='update_student'), #Luisa
+
     path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa no funciona aun
     #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no funciona aun
     #path('list_user_teachers/', views.list_user_teachers, name='list_user_teachers'), #Luisa no importante
