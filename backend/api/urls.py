@@ -89,6 +89,10 @@ urlpatterns = [
     path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
     #crea la evaluacion que van a usar los estudiantes
     path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
+    #deshabilita admin y profesor
+    path('disable_user/<str:user_code>/', views.disable_user, name='disable_user'),
+    #habilita admin y profesor
+    path('enable_user/<str:user_code>/', views.enable_user, name='enable_user'),
 
     
 

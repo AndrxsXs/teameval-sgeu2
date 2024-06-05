@@ -1441,6 +1441,36 @@ def create_course(request):
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#deshabilita profe y admin
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def disable_user(request, user_code):
+    try:
+        user = User.search(user_code) 
+        if user:
+            user.status = False
+            user.save()
+            return Response({'message': 'Usuario deshabilitado correctamente.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f'Error al deshabilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#habilita admin y profesor 
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def enable_user(request, user_code):
+    try:
+        user = User.search(user_code) 
+        if user:
+            user.status = True
+            user.save()
+            return Response({'message': 'Usuario habilitado correctamente.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f'Error al habilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # def create_course(request):
 #     data = {
