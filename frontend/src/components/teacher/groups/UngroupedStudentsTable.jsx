@@ -1,29 +1,29 @@
 /* eslint-disable react/prop-types */
-import { Fragment, useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 
 import api from "../../../api";
+import { ACCESS_TOKEN } from "../../../constants";
+import { userStatus } from "../../../utils/userStatus";
 
 import { getComparator } from "../../../utils/getComparator";
 import { stableSort } from "../../../utils/stableSort";
 
 import EnhancedTableHead from "../../EnhacedTableHead";
-import EditUser from "../../EditUser";
-import DisableUser from "../../DisableUser";
 
-// import Checkbox from "@mui/joy/Checkbox";
-import Sheet from "@mui/joy/Sheet";
 import Table from "@mui/joy/Table";
+import Sheet from "@mui/joy/Sheet";
+import Typography from "@mui/joy/Typography";
 import Box from "@mui/joy/Box";
 import CircularProgress from "@mui/joy/CircularProgress";
-import Typography from "@mui/joy/Typography";
+import Checkbox from "@mui/joy/Checkbox";
 
 const headCells = [
-  //   {
-  //     id: "code",
-  //     numeric: false,
-  //     disablePadding: true,
-  //     label: "Nombre clave",
-  //   },
+  {
+    id: "code",
+    numeric: false,
+    disablePadding: true,
+    label: "Código",
+  },
   {
     id: "name",
     numeric: false,
@@ -31,45 +31,25 @@ const headCells = [
     label: "Nombre",
   },
   {
-    id: "project",
+    id: "email",
     numeric: false,
     disablePadding: false,
-    label: "Proyecto asignado",
+    label: "Correo electrónico",
   },
-  {
-    id: "studentCount",
-    numeric: false,
-    disablePadding: false,
-    label: "Número de estudiantes",
-  },
-//   {
-//     id: "actions",
-//     numeric: false,
-//     disablePadding: false,
-//     label: "Acciones",
-//   },
 ];
 
-function RowMenu(props) {
-  const { user } = props;
-
-  return (
-    <Box
-      // size='sm'
-      sx={{ display: "flex", gap: 1 }}
-    >
-      <EditUser user={user} />
-      <DisableUser user={user} />
-    </Box>
-  );
-}
-
-export default function GroupsTable({ course }) {
+export default function UngroupedStudentsTable({
+  course,
+  onSelectedStudentsChange,
+}) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("code");
-  //   const [selected, setSelected] = useState([]);
+//   const [selected,setSelected] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const course_code = course;
+
+  const [selectedStudents, setSelectedStudents] = useState([]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -106,31 +86,73 @@ export default function GroupsTable({ course }) {
   //     setSelected(newSelected);
   //   };
 
-  //   const isSelected = (name) => selected.indexOf(name) !== -1;
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelectedStudents = rows.map((n) => n.code);
+      setSelectedStudents(newSelectedStudents);
+      onSelectedStudentsChange(newSelectedStudents);
+      return;
+    }
+    setSelectedStudents([]);
+    onSelectedStudentsChange([]);
+  };
+
+  const handleClick = (event, code) => {
+    const selectedIndex = selectedStudents.indexOf(code);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedStudents, code);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedStudents.slice(1));
+    } else if (selectedIndex === selectedStudents.length - 1) {
+      newSelected = newSelected.concat(selectedStudents.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedStudents.slice(0, selectedIndex),
+        selectedStudents.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelectedStudents(newSelected);
+    onSelectedStudentsChange(newSelected);
+  };
+
+//   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   useEffect(() => {
-    const fetchGroups = async () => {
+    const fetchData = () => {
       setLoading(true);
-      const token = localStorage.getItem("ACCESS_TOKEN");
-      await api
-        .get(`api/group_list/${course}/`, {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+
+      api
+        .get(`api/ungrouped_students/${course_code}/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
-        .then((response) => {
-          setRows(response.data);
-          //   console.log(rows);
+        .then((userList) => {
+          const users = userList.data.map((user) => {
+            return {
+              code: user.code,
+              name: user.name,
+              last_name: user.last_name,
+              email: user.email,
+              status: userStatus(user.status),
+            };
+          });
+          setRows(users);
         })
         .catch((error) => {
-          console.error(error);
+          console.log(error);
         })
         .finally(() => {
           setLoading(false);
         });
     };
-    fetchGroups();
-  }, [course]);
+
+    fetchData();
+  }, [course_code]);
 
   return (
     <Fragment>
@@ -147,22 +169,23 @@ export default function GroupsTable({ course }) {
           borderRadius: "sm",
           flexShrink: 1,
           minHeight: 0,
+          maxHeight: "calc(100vh - 300px)",
           boxShadow: "sm",
           overflow: "auto",
           background: (theme) =>
             `linear-gradient(to right, ${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
-        linear-gradient(to right, rgba(255, 255, 255, 0), ${theme.vars.palette.background.surface} 70%) 0 100%,
-        radial-gradient(
-          farthest-side at 0 50%,
-          rgba(0, 0, 0, 0.12),
-          rgba(0, 0, 0, 0)
-        ),
-        radial-gradient(
-            farthest-side at 100% 50%,
-            rgba(0, 0, 0, 0.12),
-            rgba(0, 0, 0, 0)
-          )
-          0 100%`,
+            linear-gradient(to right, rgba(255, 255, 255, 0), ${theme.vars.palette.background.surface} 70%) 0 100%,
+            radial-gradient(
+              farthest-side at 0 50%,
+              rgba(0, 0, 0, 0.12),
+              rgba(0, 0, 0, 0)
+            ),
+            radial-gradient(
+                farthest-side at 100% 50%,
+                rgba(0, 0, 0, 0.12),
+                rgba(0, 0, 0, 0)
+              )
+              0 100%`,
           backgroundSize:
             "40px calc(100% - var(--TableCell-height)), 40px calc(100% - var(--TableCell-height)), 14px calc(100% - var(--TableCell-height)), 14px calc(100% - var(--TableCell-height))",
           backgroundRepeat: "no-repeat",
@@ -174,7 +197,7 @@ export default function GroupsTable({ course }) {
         }}
       >
         <Table
-          aria-labelledby="Tabla de administradores"
+          aria-labelledby="Tabla de estudiantes sin grupo asignado"
           stickyHeader
           hoverRow
           sx={{
@@ -189,52 +212,51 @@ export default function GroupsTable({ course }) {
             "& thead th": {
               paddingY: "12px",
             },
-            "& thead th:nth-of-type(1)": { width: "15%" },
+            "& thead th:nth-of-type(1)": { width: "10%" },
             "& thead th:nth-of-type(2)": { width: "20%" },
             "& thead th:nth-of-type(3)": { width: "25%" },
-            "& thead th:last-of-type": { width: "20%" },
+            // "& thead th:last-of-type": { width: "10%" },
 
             "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
           }}
         >
           <EnhancedTableHead
-            // numSelected={selected.length}
+            numSelected={selectedStudents.length}
             order={order}
             orderBy={orderBy}
-            // onSelectAllClick={handleSelectAllClick}
+            onSelectAllClick={handleSelectAllClick}
             onRequestSort={handleRequestSort}
             rowCount={rows.length}
             headCells={headCells}
-            showActions
-            // showEmptyColumn
+            showCheckbox
           />
           <tbody>
             {stableSort(rows, getComparator(order, orderBy)).map(
               (row, index) => {
-                // const isItemSelected =
-                //   selected.indexOf(row.code) !== -1;
-                // const labelId = `enhanced-table-checkbox-${index}`;
+                const isItemSelected =
+                  selectedStudents.indexOf(row.code) !== -1;
+                const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <tr
-                    // onClick={(event) => handleClick(event, row.code)}
-                    // role="checkbox"
-                    // aria-checked={isItemSelected}
-                    // tabIndex={-1}
+                    onClick={(event) => handleClick(event, row.code)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
                     key={row.name}
                     // selected={isItemSelected}
-                    // style={
-                    //   isItemSelected
-                    //     ? {
-                    //         "--TableCell-dataBackground":
-                    //           "var(--TableCell-selectedBackground)",
-                    //         "--TableCell-headBackground":
-                    //           "var(--TableCell-selectedBackground)",
-                    //       }
-                    //     : {}
-                    // }
+                    style={
+                      isItemSelected
+                        ? {
+                            "--TableCell-dataBackground":
+                              "var(--TableCell-selectedBackground)",
+                            "--TableCell-headBackground":
+                              "var(--TableCell-selectedBackground)",
+                          }
+                        : {}
+                    }
                   >
-                    {/* <th scope="row">
+                    <th scope="row">
                       <Checkbox
                         checked={isItemSelected}
                         slotProps={{
@@ -244,13 +266,12 @@ export default function GroupsTable({ course }) {
                         }}
                         sx={{ verticalAlign: "top" }}
                       />
-                    </th> */}
-                    <td>{row.name}</td>
-                    <td>{row.assigned_project}</td>
-                    <td>{row.student_count}</td>
+                    </th>
+                    <td>{row.code}</td>
                     <td>
-                      <RowMenu user={row} />
+                      {row.name} {""} {row.last_name}
                     </td>
+                    <td>{row.email}</td>
                   </tr>
                 );
               }
@@ -304,10 +325,3 @@ export default function GroupsTable({ course }) {
     </Fragment>
   );
 }
-
-// {
-//     id: 1,
-//     name: 'Grupo tal',
-//     assigned_project: 'Proyecto predeterminado',
-//     student_count: 4
-//   }

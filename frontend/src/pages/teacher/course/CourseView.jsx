@@ -1,28 +1,40 @@
 /* eslint-disable react/prop-types */
-import { Outlet, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+import { Outlet, useParams, useLocation } from "react-router-dom";
 
 import api from "../../../api";
 
-import { Box } from "@mui/joy";
-import { CssVarsProvider } from "@mui/joy/styles";
+import Box from "@mui/joy/Box";
 import CssBaseline from "@mui/joy/CssBaseline";
 import TeacherSidebar from "../../../components/teacher/TeacherSidebar";
-import { useEffect } from "react";
+import TeacherBreadcrumbs from "../../../components/teacher/TeacherBreadcrumbs";
+import { CssVarsProvider } from "@mui/joy/styles";
 
 function CourseView({ userData }) {
+  const location = useLocation();
   const { courseId } = useParams();
+  const [courseData, setCourseData] = useState({});
+  const route = `${location.pathname.split("/")[1]}`;
+  const [loading, setLoading] = useState(false);
+  // console.log(route);
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem("ACCESS_TOKEN");
         const response = await api.get(`api/course_info/${courseId}/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = response.data;
-        console.log(data);
+        if (response.status === 200) {
+          setCourseData(response.data);
+          setLoading(false);
+        }
+        // const data = response.data;
+        // console.log(data);
       } catch (error) {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
@@ -32,6 +44,7 @@ function CourseView({ userData }) {
             },
           })
         );
+        setLoading(false);
       }
     };
     fetchCourse();
@@ -63,6 +76,11 @@ function CourseView({ userData }) {
               gap: 1,
             }}
           >
+            <TeacherBreadcrumbs
+              HomeRoute={route}
+              CourseLabel={courseData.name}
+              loading={loading}
+            />
             <Outlet context={{ courseId }} />
           </Box>
         </Box>

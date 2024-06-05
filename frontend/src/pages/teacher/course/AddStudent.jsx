@@ -1,14 +1,49 @@
-import { Box, Typography } from "@mui/joy";
+import Box from "@mui/joy/Box";
+import Typography from "@mui/joy/Typography";
+import Skeleton from "@mui/joy/Skeleton";
 import CreateStudent from "../../../components/teacher/CreateStudent";
-import BodyAddStudent from "../../../components/teacher/BodyAddStudent";
-import { useState } from "react";
-import ImportStudent from "../../../components/teacher/ImportStudent";
+import StudentTable from "../../../components/teacher/StudentTable";
+import { useEffect, useState } from "react";
+
+import api from "../../../api";
+
+import { useParams } from "react-router";
+import ImportStudentModal from "../../../components/teacher/ImportStudentModal";
 
 export default function AddStudent() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { courseId } = useParams();
+  const [course, setCourse] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("ACCESS_TOKEN");
+        const response = await api.get(`api/course_info/${courseId}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.status === 200) {
+          setCourse(response.data);
+          // console.log(response.data);
+          setLoading(false);
+        }
+      } catch (error) {
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${error.response.status} ${error.response.statusText}`,
+              severity: "danger",
+            },
+          })
+        );
+        setLoading(false);
+      }
+    };
+    fetchCourse();
+  }, [courseId]);
 
   return (
     <>
@@ -26,9 +61,25 @@ export default function AddStudent() {
           width: "100%",
         }}
       >
-        <Typography level="h2" component="h1">
-          Nombre del curso
-        </Typography>
+        {!loading ? (
+          <Typography level="h2" component="h1">
+              {course.name}
+          </Typography>
+        ) : (
+          <Skeleton
+            variant="text"
+            level="h1"
+            animation="wave"
+            loading
+            width={400}
+            height={40}
+          />
+        )}
+        {/* <Typography level="h2" component="h1">
+          <Skeleton animation="wave" loading={loading}>
+            {course.name ? course.name : "Nombre del curso"}
+          </Skeleton>
+        </Typography> */}
         <Box
           sx={{
             display: "flex",
@@ -36,11 +87,11 @@ export default function AddStudent() {
             flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <CreateStudent />
-          <ImportStudent />
+          <CreateStudent course={courseId} />
+          <ImportStudentModal courseId={courseId} />
         </Box>
       </Box>
-      <BodyAddStudent />
+      <StudentTable course={courseId} />
     </>
   );
 }

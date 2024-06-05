@@ -1,16 +1,26 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 
-import ModalFrame from "../../ModalFrame";
+import api from "../../../api";
 
-import { Button, Box, Stack, FormControl, FormLabel, Input } from "@mui/joy";
+import ModalFrame from "../../ModalFrame";
+import UngroupedStudentsTable from "./UngroupedStudentsTable";
+
+import Button from "@mui/joy/Button";
+import Box from "@mui/joy/Box";
+import Stack from "@mui/joy/Stack";
+import FormControl from "@mui/joy/FormControl";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
 
 import Add from "@mui/icons-material/Add";
 
-export default function CreateGroup() {
+export default function CreateGroup({ course }) {
+  const [selectedStudents, setSelectedStudents] = useState([]);
+
   const [formData, setFormData] = useState({
     name: "",
     code: "",
-    user_teacher: "",
   });
 
   const [open, setOpen] = useState(false);
@@ -24,20 +34,66 @@ export default function CreateGroup() {
     setOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    // setLoading(true);
-    // axios.post('/api/groups', formData)
-    //     .then(response => {
-    //         console.log(response.data);
-    //         setLoading(false);
-    //         setOpen(false);
-    //     })
-    //     .catch(error => {
-    //         console.error(error);
-    //         setLoading(false);
-    //     });
+    // console.log(formData);
+    setLoading(true);
+
+    const token = localStorage.getItem("ACCESS_TOKEN");
+
+    const groupData = {
+      ...formData,
+      // students: selectedStudents,
+      assigned_project: "Proyecto predeterminado", // Puedes asignar un valor predeterminado o dejarlo vacío
+      student_codes: selectedStudents, // Asegúrate de que selectedStudents sea un array de códigos de estudiantes
+    };
+    // console.log(groupData);
+    try {
+      const response = await api.post(
+        `api/create_group/${course}/`,
+        groupData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // console.log(response);
+      if (response.status === 201) {
+        const data = await response.data;
+
+        setFormData({
+          name: "",
+          code: "",
+        });
+
+        window.dispatchEvent(new Event("groupCreated"));
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${data.message}`,
+              severity: "success",
+            },
+          })
+        );
+        setLoading(false);
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+      window.dispatchEvent(
+        new CustomEvent("responseEvent", {
+          detail: {
+            message: `${error.response.data.message ?? error.message}`,
+            severity: "danger",
+          },
+        })
+      );
+    }
+  };
+
+  const handleSelectedStudentsChange = (selectedStudents) => {
+    setSelectedStudents(selectedStudents);
   };
 
   return (
@@ -45,12 +101,12 @@ export default function CreateGroup() {
       <Button
         color="primary"
         startDecorator={<Add />}
-        size="sm"
+        // size="sm"
         onClick={handleOpen}
       >
         Nuevo grupo
       </Button>
-      <ModalFrame ModalTitle="Crear grupo" open={open} onClose={handleClose}>
+      <ModalFrame ModalTitle="Nuevo grupo" open={open} onClose={handleClose}>
         <form onSubmit={handleSubmit}>
           <Box
             component="article"
@@ -60,6 +116,7 @@ export default function CreateGroup() {
               gap: 2,
               alignItems: "flex-start",
               minWidth: "500px",
+              maxWidth: "700px",
             }}
           >
             <Stack
@@ -108,7 +165,7 @@ export default function CreateGroup() {
                     <FormLabel>Nombre clave</FormLabel>
                     <Input
                       size="sm"
-                      placeholder="Nombre clave del equipo"
+                      placeholder="Nombre clave del grupo"
                       value={formData.code}
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
@@ -120,66 +177,18 @@ export default function CreateGroup() {
                 </Stack>
                 <Stack
                   component="section"
-                  direction="row"
+                  direction="column"
                   gap={2}
-                  alignItems="flex-end"
+                  alignItems="center"
                   justifyContent="space-between"
                   sx={{
                     width: "100%",
                   }}
-
-                  // sx={{
-                  //     display: 'grid',
-                  //     gridTemplateColumns: '1fr 1fr',
-                  //     // flexDirection: 'row',
-                  //     gap: 2,
-                  //     maxWidth: '100%', justifyContent: 'center'
-                  // }}
                 >
-                  <FormControl
-                    sx={{ width: "48%", justifyContent: "space-between" }}
-                  >
-                    <FormLabel>Docente asignado</FormLabel>
-                    {/* <Input size="sm" placeholder="Ingrese el código"
-                                            value={formData.code}
-                                            onChange={e => setFormData({ ...formData, code: e.target.value })}
-                                            type='number' required /> */}
-                    {/* <Select
-                                            size="sm"
-                                            placeholder="Seleccione un docente"
-                                        >
-                                            <Option value="1">Docente 1</Option>
-                                        </Select> */}
-
-              
-                  </FormControl>
-                  <Box
-                    sx={{
-                      width: "49%",
-                    }}
-                  >
-                    <FormLabel
-                      sx={{
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Periodo académico
-                    </FormLabel>
-                    {/* <Input size="sm" placeholder="Ingrese el teléfono"
-                                            value={formData.phone}
-                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                            type="tel" /> */}
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 1,
-                        maxWidth: "100%",
-                      }}
-                    >
-                      
-                    </Box>
-                  </Box>
+                  <UngroupedStudentsTable
+                    course={course}
+                    onSelectedStudentsChange={handleSelectedStudentsChange}
+                  />
                 </Stack>
               </Stack>
             </Stack>
