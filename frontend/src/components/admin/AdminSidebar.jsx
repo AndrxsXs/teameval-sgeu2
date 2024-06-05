@@ -11,22 +11,22 @@ export default function AdminSidebar({ userData }) {
     const menuItems = [
         {
             text: 'Administradores',
-            route: '/admin/manage',
+            route: './manage',
             icon: <SupervisorAccountRoundedIcon key="admin" />,
         },
         {
             text: 'Docentes',
-            route: '/admin/manage/teachers',
+            route: './manage/teachers',
             icon: <PersonRoundedIcon key="teachers" />,
         },
         {
             text: 'Cursos',
-            route: '/admin/manage/courses',
+            route: './manage/courses',
             icon: <AutoStoriesRoundedIcon key="courses" />,
         },
         {
             text: 'Escalas y criterios',
-            route: '/admin/manage/scales',
+            route: './manage/scales',
             icon: <EditNoteRoundedIcon key="scales" />,
         },
     ];
