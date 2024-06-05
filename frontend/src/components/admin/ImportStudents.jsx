@@ -1,16 +1,15 @@
+/* eslint-disable react/prop-types */
 import { Fragment, useState, useEffect } from "react";
 import { readString } from "react-papaparse";
 
-import {
-  Button,
-  styled,
-  Typography,
-  Stack,
-  Table,
-  Chip,
-  ChipDelete,
-  Sheet,
-} from "@mui/joy";
+import Button from "@mui/joy/Button";
+import Typography from "@mui/joy/Typography";
+import Stack from "@mui/joy/Stack";
+import Table from "@mui/joy/Table";
+import Chip from "@mui/joy/Chip";
+import ChipDelete from "@mui/joy/ChipDelete";
+import Sheet from "@mui/joy/Sheet";
+import { styled } from "@mui/joy";
 
 import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
@@ -27,13 +26,15 @@ const VisuallyHiddenInput = styled("input")`
   width: 1px;
 `;
 
-export default function ImportStudents() {
+export default function ImportStudents({ onFileChange }) {
   const [csvData, setCsvData] = useState([]);
 
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    onFileChange(file); // Llama a la función de devolución de llamada con el archivo seleccionado
   };
 
   useEffect(() => {
