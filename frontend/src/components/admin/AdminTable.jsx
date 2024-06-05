@@ -8,10 +8,13 @@ export default function AdminTable() {
         "Cédula", "Nombre", "Correo electrónico", "Estado", "Acciones"
     ]
 
+const disableAdminRoute = "api/disable_user/";
+
     return (
         <UserTable
             role={3}
             columns={columns}
+            disableUserRoute={disableAdminRoute}
         />
     )
 }

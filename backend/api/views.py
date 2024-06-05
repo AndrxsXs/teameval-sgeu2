@@ -271,7 +271,7 @@ def update_course(request, course_id):
 @permission_classes([IsAuthenticated])
 def unregister_student(request, course_code):
     data = request.data
-    student_code = data.get("code")
+    student_code = data.get("user_code")
     
     # Obtiene el estudiante usando el código del estudiante proporcionado
     student = get_object_or_404(Student, user__code=student_code)
@@ -1490,9 +1490,9 @@ def create_course(request):
 #deshabilita profe y admin
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def disable_user(request, user_code):
+def disable_user(request):
     try:
-        user = User.search(user_code) 
+        user = User.search(request.GET.get("user_code"))
         if user:
             user.status = False
             user.save()

@@ -13,11 +13,53 @@ import Stack from "@mui/joy/Stack";
 import { Link, useParams } from "react-router-dom";
 
 function RubricCard({ rubric }) {
+  // console.log(rubric);
   return (
-    <Link to={`/rubric/${rubric.id}`}>
-      <Card>
+    <Link
+      // to={`./rubric/${rubric.id}`}
+    to="#"
+      style={{
+        textDecoration: "none",
+        color: "inherit",
+      }}
+    >
+      <Card
+        sx={{
+          width: 300,
+          height: 150,
+          borderRadius: "sm",
+          boxShadow: "sm",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: 2,
+          transition: "box-shadow 0.3s",
+          "&:hover": {
+            boxShadow: "md",
+          },
+          overflow: "hidden",
+        }}
+      >
         <CardContent>
-          <Typography>{rubric.name}</Typography>
+          <Typography level="title-md">{rubric.name}</Typography>
+          <Typography level="body-xs" color="textSecondary">
+            Escala: 1 - {rubric.scale.length}
+          </Typography>
+          <Typography level="body-xs" color="textSecondary">
+            {rubric.standards.length}{" "}
+            {rubric.standards.length === 1 ? "criterio:" : "criterios:"}
+          </Typography>
+          <Typography>
+            {rubric.standards.map((standard, index) => (
+              <Typography
+                key={index}
+                level="body-xs"
+                color="textSecondary"
+              >
+                {standard.description}
+              </Typography>
+            ))}
+          </Typography>
         </CardContent>
       </Card>
     </Link>

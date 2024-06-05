@@ -24,19 +24,19 @@ import { ACCESS_TOKEN } from "../../constants";
 import { userStatus } from "../../utils/userStatus";
 
 import SearchField from "../admin/SearchField";
-import EditUser from "../../components/EditUser";
+// import EditUser from "../../components/EditUser";
 import DisableUser from "../../components/DisableUser";
 
 function RowMenu(props) {
-  const { user } = props;
+  const { user, route } = props;
 
   return (
     <Box
       // size='sm'
       sx={{ display: "flex", gap: 1, justifyContent: "center" }}
     >
-      <EditUser user={user} />
-      <DisableUser user={user} />
+      {/* <EditUser user={user} /> */}
+      <DisableUser endpoint={route} user={user} />
     </Box>
   );
 }
@@ -45,6 +45,8 @@ export default function StudentTable(props) {
   const { course } = props;
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const disableStudentEndpoint = `api/unregister_student/${course}/`;
 
   useEffect(() => {
     const fetchData = () => {
@@ -87,9 +89,11 @@ export default function StudentTable(props) {
     };
 
     window.addEventListener("userCreated", handleUserCreated);
+    window.addEventListener("user-disabled", fetchData);
 
     return () => {
       window.removeEventListener("userCreated", handleUserCreated);
+      window.removeEventListener("user-disabled", fetchData);
     };
   }, [course]);
 
@@ -220,7 +224,7 @@ export default function StudentTable(props) {
                   )}
                 </td>
                 <td style={{ paddingInline: "16px" }}>
-                  <RowMenu user={row} />
+                  <RowMenu user={row} route={disableStudentEndpoint} />
                 </td>
               </tr>
             ))}

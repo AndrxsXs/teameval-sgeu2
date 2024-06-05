@@ -5,8 +5,10 @@ import { Button, Box, Typography } from "@mui/joy";
 
 import ModalFrame from "../components/ModalFrame";
 
+import api from "../api";
+
 export default function DisableUser(props) {
-  const { user } = props;
+  const { user, endpoint } = props;
 
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +20,47 @@ export default function DisableUser(props) {
   const handleCloseModal = (value) => {
     setIsModalOpen(value);
   };
+
+  const handleDisableUser = async () => {
+    const token = localStorage.getItem("ACCESS_TOKEN");
+
+    await api
+      .post(
+        endpoint,
+        { user_code: user.code },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${response.data.message}`,
+              severity: "success",
+            },
+          })
+        );
+        setLoading(false);
+        handleCloseModal(false);
+        window.dispatchEvent(new Event("user-disabled"));
+      })
+      .catch((error) => {
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${error.message}`,
+              severity: "danger",
+            },
+          })
+        );
+        setLoading(false);
+        handleCloseModal(false);
+      });
+  };
+
   return (
     <Fragment>
       <Button
@@ -72,6 +115,7 @@ export default function DisableUser(props) {
             onClick={() => {
               handleOpenModal;
               setLoading(true);
+              handleDisableUser();
             }}
           >
             Deshabilitar

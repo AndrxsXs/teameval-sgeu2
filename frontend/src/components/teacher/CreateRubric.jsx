@@ -10,6 +10,9 @@ import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Textarea from "@mui/joy/Textarea";
 
+import api from "../../api";
+import { useParams } from "react-router-dom";
+
 import Sheet from "@mui/joy/Sheet";
 import Table from "@mui/joy/Table";
 import { Fragment } from "react";
@@ -34,13 +37,24 @@ const headCells = [
     id: "scale",
     numeric: false,
     disablePadding: false,
-    label: "Descripción de la escala (Opcional)",
+    label: "Descripción de la escala",
   },
 ];
 
 function CriteriaTable(props) {
-  const { rows, headCells } = props;
+  const { rows, headCells, onStandardsChange } = props;
 
+  const handleDescriptionChange = (index, value) => {
+    const updatedStandards = [...rows];
+    updatedStandards[index].description = value;
+    onStandardsChange(updatedStandards);
+  };
+
+  const handleScaleDescriptionChange = (index, value) => {
+    const updatedStandards = [...rows];
+    updatedStandards[index].scale_description = value;
+    onStandardsChange(updatedStandards);
+  };
   return (
     <Fragment>
       <Sheet
@@ -99,17 +113,22 @@ function CriteriaTable(props) {
                     variant="plain"
                     minRows={3}
                     maxRows={5}
-                    onChange={(e, value) => (row.description = value)}
+                    onChange={(e) =>
+                      handleDescriptionChange(index, e.target.value)
+                    }
                     placeholder="Descripción del criterio"
                   />
                 </td>
                 <td>
                   <Textarea
+                  required
                     size="sm"
                     variant="plain"
                     minRows={3}
                     maxRows={5}
-                    onChange={(e, value) => (row.scale_description = value)}
+                    onChange={(e) =>
+                      handleScaleDescriptionChange(index, e.target.value)
+                    }
                     placeholder="1. El integrante del grupo no cumple con..."
                   />
                 </td>
@@ -123,6 +142,8 @@ function CriteriaTable(props) {
 }
 
 export default function CreateRubric() {
+  const courseId = useParams().courseId;
+  // console.log(courseId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const action = React.useRef(null);
   const [rubric, setRubric] = useState({
@@ -139,12 +160,50 @@ export default function CreateRubric() {
     },
   });
 
+  const handleStandardsChange = (updatedStandards) => {
+    setRubric((prevRubric) => ({
+      ...prevRubric,
+      standards: updatedStandards,
+    }));
+  };
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
   const handleCloseModal = (value) => {
     setIsModalOpen(value);
+  };
+
+  const handleCreateRubric = (e) => {
+    e.preventDefault();
+    console.log(rubric);
+    api
+      .post(`api/create_rubric/${courseId}/`, rubric)
+      .then((response) => {
+        // console.log(response);
+        setIsModalOpen(false);
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${response.message}`,
+              severity: "success",
+            },
+          })
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+        setIsModalOpen(false);
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${error.message}`,
+              severity: "danger",
+            },
+          })
+        );
+      });
   };
 
   return (
@@ -162,7 +221,7 @@ export default function CreateRubric() {
         onClose={handleCloseModal}
         ModalTitle="Crear rubrica"
       >
-        <form>
+        <form onSubmit={handleCreateRubric}>
           <Stack
             component="article"
             direction="column"
@@ -261,16 +320,6 @@ export default function CreateRubric() {
                         {index + 2}
                       </Option>
                     ))}
-
-                    {/* <Option value="2">2</Option>
-                    <Option value="3">3</Option>
-                    <Option value="4">4</Option>
-                    <Option value="5">5</Option>
-                    <Option value="6">6</Option>
-                    <Option value="7">7</Option>
-                    <Option value="8">8</Option>
-                    <Option value="9">9</Option>
-                    <Option value="10">10</Option> */}
                   </Select>
                   <FormHelperText>
                     Seleccione el límite superior de la escala de la rúbrica.
@@ -313,7 +362,11 @@ export default function CreateRubric() {
                 </FormControl> */}
               </Stack>
 
-              <CriteriaTable rows={rubric.standards} headCells={headCells} />
+              <CriteriaTable
+                rows={rubric.standards}
+                headCells={headCells}
+                onStandardsChange={handleStandardsChange}
+              />
             </Stack>
             <Box
               sx={{

@@ -69,7 +69,8 @@ urlpatterns = [
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
     # el profesor crea una rubrica para ese curso
-    path('create_rubric/<str:course_code>/<int:scale_id>/', views.create_rubric, name='create_rubric'), #karol
+    # path('create_rubric/<str:course_code>/<int:scale_id>/', views.create_rubric, name='create_rubric'), #karol
+    path('create_rubric/<str:course_code>/', views.create_rubric, name='create_rubric'),
     path('courses/<str:course_code>/register_student/', views.register_student, name='register_student'), #karol
     path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
     #muestra la lista de todos los grupos que hay en un curso
@@ -90,7 +91,7 @@ urlpatterns = [
     #crea la evaluacion que van a usar los estudiantes
     path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
     #deshabilita admin y profesor
-    path('disable_user/<str:user_code>/', views.disable_user, name='disable_user'),
+    path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
     path('enable_user/<str:user_code>/', views.enable_user, name='enable_user'),
 
