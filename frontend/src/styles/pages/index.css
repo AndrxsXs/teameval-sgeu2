@@ -14,3 +14,8 @@ body {
     flex-direction: column;
     align-items: center;
 }
+
+main {
+    justify-self: center;
+    max-width: 1200px;
+}
