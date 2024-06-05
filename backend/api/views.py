@@ -12,6 +12,7 @@ from . import models
 from rest_framework import generics, status 
 from rest_framework.response import Response
 from .serializers import (
+    ScaleSerialiazer,
     UserSerializer,
     StudentSerializer,
     TeacherSerializer,
@@ -401,7 +402,7 @@ def completed_evaluations(request, student_code):
 @permission_classes([IsAuthenticated])
 def import_student(request):
     csv_file = request.FILES["csv_file"]  # El nombre del campo en el formulario debe ser "csv_file"
-    course_code = request.data.get("course_code")  # Obtener el código del curso
+    course_code = request.GET.get("course_code")  # Obtener el código del curso
     if not course_code:
         return Response({"message": "El código del curso es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -412,7 +413,7 @@ def import_student(request):
 
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=";", quotechar="|")
+    reader = csv.reader(io_string, delimiter=",")
     next(reader)  # Saltar la cabecera del CSV debido a que "email" no tiene el formato que es, entonces toca saltarlo
 
     omitted_students = []
@@ -683,22 +684,27 @@ def create_rubric1(request, course_id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric(request, course_code, scale_id):
+def create_rubric(request, course_code):
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
         return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Asegúrate de que la escala exista
-    try:
-        scale = Scale.objects.get(id=scale_id)
-    except Scale.DoesNotExist:
-        return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    rubric_data = request.data
 
-    # Crear los estándares primero
-    standards_data = request.data.get('standards')
+    # Crear la escala primero
+    scale_data = rubric_data.get('scale')
+    scale_serializer = ScaleSerialiazer(data=scale_data)
+    if scale_serializer.is_valid():
+        scale = scale_serializer.save()
+    else:
+        return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear los estándares (criterios)
+    standards_data = rubric_data.get('standards')
     standards = []
     for standard_data in standards_data:
+        standard_data['rubric'] = scale.id  # Asociar la escala a cada estándar
         standard_serializer = StandardSerializer(data=standard_data)
         if standard_serializer.is_valid():
             standard = standard_serializer.save()
@@ -706,9 +712,9 @@ def create_rubric(request, course_code, scale_id):
         else:
             return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Crear la rúbrica y asociar los estándares a ella
+    # Crear la rúbrica y asociar la escala y los estándares
     rubric_data = {
-        'name': request.data.get('name'),
+        'name': rubric_data.get('name'),
         'scale': scale.id,
         'courses': [course.id],
         'standards': [standard.id for standard in standards]
@@ -716,9 +722,48 @@ def create_rubric(request, course_code, scale_id):
     rubric_serializer = RubricSerializer(data=rubric_data)
     if rubric_serializer.is_valid():
         rubric_serializer.save()
-        return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+        return Response({'message': f'Rúbrica, escala y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def create_rubric(request, course_code, scale_id):
+#     try:
+#         course = Course.objects.get(code=course_code)
+#     except Course.DoesNotExist:
+#         return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+#     # Asegúrate de que la escala exista
+#     try:
+#         scale = Scale.objects.get(id=scale_id)
+#     except Scale.DoesNotExist:
+#         return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+#     # Crear los estándares primero
+#     standard_data = request.data.get('standard')
+#     standard = []
+#     for standard_data in standard_data:
+#         standard_serializer = StandardSerializer(data=standard_data)
+#         if standard_serializer.is_valid():
+#             standard = standard_serializer.save()
+#             standard.append(standard)
+#         else:
+#             return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     # Crear la rúbrica y asociar los estándares a ella
+#     rubric_data = {
+#         'name': request.data.get('name'),
+#         'scale': scale.id,
+#         'courses': [course.id],
+#         'standard': [standard.id for standard in standard]
+#     }
+#     rubric_serializer = RubricSerializer(data=rubric_data)
+#     if rubric_serializer.is_valid():
+#         rubric_serializer.save()
+#         return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+#     else:
+#         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #crea la evaluacion que se realiza a los estudiantes
 @api_view(["POST"])
@@ -1056,8 +1101,9 @@ def create_group(request, course_code):
         print("Curso no encontrado")
         return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
-    student_codes = request.data.get("students", [])  # Obtener los códigos de estudiante de la solicitud POST
-
+    student_codes = request.data.get("student_codes", [])  # Obtener los códigos de estudiante de la solicitud POST
+    request.data["students"] = student_codes
+    
     print("Estudiantes recibidos:")
     for code in student_codes:
         print("Código de estudiante:", code)
