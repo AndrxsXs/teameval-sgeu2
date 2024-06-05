@@ -179,7 +179,7 @@ class Course(models.Model):
     name = models.CharField(max_length=60)
     code = models.CharField(max_length=40)
     academic_period = models.CharField(max_length=10)
-    student_status = models.BooleanField(default=False)
+    student_status = models.BooleanField(default=True)
     course_status = models.BooleanField(default=False)
     #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
 

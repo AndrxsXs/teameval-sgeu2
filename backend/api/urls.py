@@ -53,9 +53,14 @@ urlpatterns = [
     path('update_user/<str:user_code>/', views.update_user, name='update_user'), #Luisa
 
     #Editar estudiante
-    path('update_student/<int:student_code>/', views.update_student, name='update_student'), #Luisa
+    path('update_student/<str:student_code>/', views.update_student, name='update_student'), #Luisa
 
-    path('courses/<int:course_id>/unregister/', views.unregister_student, name='unregister_student'), #Luisa no funciona aun
+    #Deshabilitar estudiante del curso y grupo
+    path('unregister_student/<str:course_code>/', views.unregister_student, name='unregister_student'), #Luisa 
+
+    #Habilita estudiante al curso
+    path('enable_student/<str:course_code>/', views.enable_student, name='enable_student'), #Luisa
+
     #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no funciona aun
     #path('list_user_teachers/', views.list_user_teachers, name='list_user_teachers'), #Luisa no importante
 

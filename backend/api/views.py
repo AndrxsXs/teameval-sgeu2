@@ -268,15 +268,15 @@ def update_course(request, course_id):
 #Deshabilitar estudiante de un curso
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def unregister_student(request, course_id):
+def unregister_student(request, course_code):
     data = request.data
     student_code = data.get("code")
     
     # Obtiene el estudiante usando el código del estudiante proporcionado
     student = get_object_or_404(Student, user__code=student_code)
 
-    # Obtiene el curso usando el ID del curso proporcionado
-    course = get_object_or_404(Course, id=course_id)
+    # Obtiene el curso usando el código del curso proporcionado
+    course = get_object_or_404(Course, code=course_code)
 
     # Verifica si el estudiante está inscrito en el curso
     if course not in student.courses_user_student.all():
@@ -293,6 +293,27 @@ def unregister_student(request, course_id):
             group.students.remove(student)
 
     return Response({"message": "Estudiante deshabilitado del curso y grupos correctamente"}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def enable_student(request, course_code):
+    data = request.data
+    student_code = data.get("code")
+
+    # Obtiene el estudiante usando el código del estudiante proporcionado
+    student = get_object_or_404(Student, user__code=student_code)
+
+    # Obtiene el curso usando el código del curso proporcionado
+    course = get_object_or_404(Course, code=course_code)
+
+    # Verifica si el estudiante ya está inscrito en el curso
+    if course in student.courses_user_student.all():
+        return Response({"message": "El estudiante ya está inscrito en este curso"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Vuelve a habilitar al estudiante para el curso
+    student.courses_user_student.add(course)
+
+    return Response({"message": "Estudiante habilitado en el curso correctamente"}, status=status.HTTP_200_OK)
 
 #Luisa
 #informacion completa de la rubrica
