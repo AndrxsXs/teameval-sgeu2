@@ -19,6 +19,7 @@ urlpatterns = [
     
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
+
     #Muestra los cursos del estudiante 
     path('student_courses/', views.student_courses, name='student_courses'), #Luisa
 
@@ -61,8 +62,8 @@ urlpatterns = [
     #Habilita estudiante al curso
     path('enable_student/<str:course_code>/', views.enable_student, name='enable_student'), #Luisa
 
-    #path('update_course/<int:course_id>/', views.update_course, name='update_course'), #Luisa no funciona aun
-    #path('list_user_teachers/', views.list_user_teachers, name='list_user_teachers'), #Luisa no importante
+    #Editar curso
+    path('update_course/<str:course_code>/', views.update_course, name='update_course'),
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
 

@@ -1460,6 +1460,33 @@ def search_user(request):
         ]
     return Response(user_data)
 
+#Luisa
+#Editar curso
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_course(request, course_code):
+    data = request.data
+    
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response({"error": "El curso con el código proporcionado no existe."}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Actualiza el campo 'user_teacher' si está presente
+    user_teacher_code = data.get("user_teacher")
+    if user_teacher_code:
+        try:
+            user = User.objects.get(code=user_teacher_code)
+            data["user_teacher"] = user.id
+        except User.DoesNotExist:
+            return Response({"error": "El código de usuario proporcionado no es válido."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer_course = CourseSerializer(course, data=data, partial=True)
+    if serializer_course.is_valid():
+        serializer_course.save()
+        return Response(serializer_course.data, status=status.HTTP_200_OK)
+    
+    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

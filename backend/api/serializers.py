@@ -300,6 +300,17 @@ class CourseSerializer(serializers.ModelSerializer):
         
         # Devolver la instancia creada
         return instance
+    
+    def update(self, instance, validated_data):
+        # Actualizar la instancia existente con los datos validados
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Guardar la instancia actualizada en la base de datos
+        instance.save()
+        
+        # Devolver la instancia actualizada
+        return instance
 
 class InfoRubricSerializer(serializers.ModelSerializer):
     scale = ScaleSerialiazer()
