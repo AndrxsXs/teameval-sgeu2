@@ -246,6 +246,7 @@ class RubricSerializer(serializers.ModelSerializer):
             for standard_data in standards_data:
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
+        
 
 class GroupSerializer(serializers.ModelSerializer):
     student_codes = serializers.ListField(child=serializers.CharField())

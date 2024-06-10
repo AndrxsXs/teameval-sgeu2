@@ -65,10 +65,13 @@ urlpatterns = [
     path('enable_student/<str:course_code>/', views.enable_student, name='enable_student'), #Luisa
 
     #Editar curso
-    path('update_course/<str:course_code>/', views.update_course, name='update_course'),
+    path('update_course/<str:course_code>/', views.update_course, name='update_course'), #Luisa
+
+    #Editar rubrica
+    path('update_rubric/<int:rubric_id>/', views.update_rubric, name='update-rubric'), #Luisa
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
-
+    
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
     # el profesor crea una rubrica para ese curso
