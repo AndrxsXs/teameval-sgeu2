@@ -96,7 +96,8 @@ def update_student(request, student_code):
 #Editar profesor
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_user(request, user_code):
+def update_user(request):
+    user_code = request.query_params.get('user_code')
     # Verificar si el usuario que realiza la solicitud es un administrador
     if not request.user.is_superuser:
         return Response({"error": "No tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
@@ -132,7 +133,7 @@ def update_user(request, user_code):
                 else:
                     return Response(admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 
-            return Response(user_serializer.data)
+            return Response({"message": "Los datos del usuario han sido actualizados exitosamente"}, status=status.HTTP_200_OK)
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
@@ -270,8 +271,7 @@ def update_course(request, course_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def unregister_student(request, course_code):
-    data = request.data
-    student_code = data.get("user_code")
+    student_code = request.query_params.get("user_code")
     
     # Obtiene el estudiante usando el código del estudiante proporcionado
     student = get_object_or_404(Student, user__code=student_code)
@@ -468,7 +468,7 @@ def import_teacher(request):
     csv_file = request.FILES["csv_file"]
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=";", quotechar="|")
+    reader = csv.reader(io_string, delimiter=",")
     next(reader)
     for row in reader:
         try:
@@ -1483,7 +1483,7 @@ def create_course(request):
     serializer_course = CourseSerializer(data=course_data)
     if serializer_course.is_valid():
         serializer_course.save()
-        return Response(serializer_course.data, status=status.HTTP_201_CREATED)
+        return Response({"message": "Curso creado con éxito."}, status=status.HTTP_201_CREATED)
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1505,9 +1505,9 @@ def disable_user(request):
 #habilita admin y profesor 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
-def enable_user(request, user_code):
+def enable_user(request):
     try:
-        user = User.search(user_code) 
+        user = User.search(request.GET.get("user_code")) 
         if user:
             user.status = True
             user.save()

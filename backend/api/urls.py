@@ -50,10 +50,12 @@ urlpatterns = [
     path('completed_evaluations/<str:student_code>/', views.completed_evaluations, name='completed_evaluations'), #Luisa
 
     #Editar user (profesor o admin)
-    path('update_user/<str:user_code>/', views.update_user, name='update_user'), #Luisa
+    # path('update_user/<str:user_code>/', views.update_user, name='update_user'), #Luisa
+    path('update_user', views.update_user, name='update_user'), #Luisa
 
     #Editar estudiante
-    path('update_student/<str:student_code>/', views.update_student, name='update_student'), #Luisa
+    # path('update_student/<str:student_code>/', views.update_student, name='update_student'), #Luisa
+    path('update_student', views.update_student, name='update_student'), #Luisa
 
     #Deshabilitar estudiante del curso y grupo
     path('unregister_student/<str:course_code>/', views.unregister_student, name='unregister_student'), #Luisa 
@@ -93,7 +95,7 @@ urlpatterns = [
     #deshabilita admin y profesor
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
-    path('enable_user/<str:user_code>/', views.enable_user, name='enable_user'),
+    path('enable_user/', views.enable_user, name='enable_user'),
 
     
 
