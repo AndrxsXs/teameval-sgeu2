@@ -1560,6 +1560,33 @@ def update_course(request, course_code):
     
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Luisa
+#Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def disable_course(request, course_code):
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "El curso no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Verificar si el curso tiene evaluaciones en estado 'INITIATED'
+    evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+    if evaluations.exists():
+        return Response(
+            {"error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Si no tiene evaluaciones en estado 'INITIATED', deshabilitar el curso
+    course.course_status = False
+    course.save()
+
+    serializer = CourseSerializer(course)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_course(request):
