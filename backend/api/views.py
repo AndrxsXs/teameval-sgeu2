@@ -610,12 +610,12 @@ def register_student(request, course_code):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_student_params(request):    
-    course_id = request.GET.get("course")
+def register_student_params(request):   
+    data = request.data 
+    course_id = data.get("course")
     if not course_id:
         return Response({'error': 'ID del curso no proporcionado.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    data = request.data
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
     )
@@ -1696,6 +1696,27 @@ def singin(request):
         else:
             login(request, user)
             return redirect(home)
+        
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])     
+def main_report(request):
+    
+    data= request.data
+    evaluations= Evaluation.objects.filter(course__code=data.get("course_code"))
+    
+    evaluation_data = [
+        {
+            "estado": evaluation.estado,
+            "date_start":evaluation.date_start,
+            "date_end": evaluation.date_end,
+            "name": evaluation.name
+        }
+        for evaluation in evaluations
+    ] 
+    
+    return Response(evaluation_data)
+    
+        
 
 
 def home(request):
