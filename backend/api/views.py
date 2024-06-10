@@ -1618,16 +1618,25 @@ def create_course(request):
 @permission_classes([IsAuthenticated])
 def disable_user(request):
     try:
-        user = User.search(request.GET.get("user_code"))
+        user_code = request.GET.get("user_code")
+        user = User.search(user_code)
+        
         if user:
+            # Verificar si el usuario es un profesor y está asignado a algún curso
+            if user.role == User.TEACHER and Course.objects.filter(user_teacher=user).exists():
+                return Response(
+                    {'error': 'El usuario no puede ser deshabilitado porque está asignado a un curso.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             user.status = False
             user.save()
             return Response({'message': 'Usuario deshabilitado correctamente.'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    
     except Exception as e:
         return Response({'error': f'Error al deshabilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 #habilita admin y profesor 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
