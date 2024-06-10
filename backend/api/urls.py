@@ -80,6 +80,8 @@ urlpatterns = [
     path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
     #crea la evaluacion que van a usar los estudiantes
     path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
+    
+    path('reports_course/', views.main_report, name= 'main_report') # Muestra informacion general de la evaluacion
 
     
 
