@@ -8,7 +8,7 @@ export default function CardCurso(props) {
   const { img, name } = props;
 
   return (
-    <Card sx={{ minHeight: "280px", width: 320 }}>
+    <Card sx={{ minHeight: "280px", width: 320, boxShadow: "lg" }}>
       <CardCover>
         <img
           src={img}

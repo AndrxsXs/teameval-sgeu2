@@ -179,7 +179,7 @@ class Course(models.Model):
     name = models.CharField(max_length=60)
     code = models.CharField(max_length=40)
     academic_period = models.CharField(max_length=10)
-    student_status = models.BooleanField(default=False)
+    student_status = models.BooleanField(default=True)
     course_status = models.BooleanField(default=False)
     #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
 
@@ -233,7 +233,7 @@ class Standard(models.Model):
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
-    scale_description = models.TextField(default=False) # describe la escala
+    scale_description = models.TextField(default=False, null=True) # describe la escala
 
  #   nota = models.PositiveIntegerField(default=False) #no va aqui, sino en rating
 
@@ -302,9 +302,6 @@ class Rating(models.Model):
     evaluation = models.ForeignKey(
         Evaluation, null=True, on_delete=models.PROTECT, related_name="rating"
     )
-    
-    
-    
 
 
 class Group(models.Model):
@@ -314,8 +311,6 @@ class Group(models.Model):
         Course, null=True, on_delete=models.PROTECT, related_name="groups"
     )
     students = models.ManyToManyField(Student, related_name="students")
-
-
 
 class Resourse(models.Model):
     name = models.CharField(max_length=100)

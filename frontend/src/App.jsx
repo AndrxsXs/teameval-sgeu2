@@ -23,7 +23,6 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 // import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 
 import { CssVarsProvider } from "@mui/joy/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 // import Login from './pages/auth/Login';
@@ -39,8 +38,8 @@ import StudentPage from "./pages/StudentPage";
 // import ManageScales from "./pages/admin/ManageScales";
 
 import MainTeacherView from "./pages/teacher/MainTeacherView";
-
 import Grades from "./pages/student/Grades";
+
 import Result from "./pages/student/Result";
 import Feedback from "./pages/student/Feedback";
 import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
@@ -51,6 +50,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import CodePassword from "./components/CodePassword";
 import LoginPage from "./pages/auth/LoginPage";
 import CreatePasswordPage from "./pages/auth/CreatePasswordPage";
+import { CssBaseline } from '@mui/material';
 // import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {

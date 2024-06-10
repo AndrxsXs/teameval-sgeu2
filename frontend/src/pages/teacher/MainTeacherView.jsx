@@ -2,34 +2,22 @@
 import { Link } from "react-router-dom";
 import CardCurso from "../../components/teacher/CardCurso";
 import TopNavbar from "../../components/TopNavbar";
-import Box from "@mui/material/Box";
+import { Box, Stack, Typography } from "@mui/joy";
 import "../../styles/pages/teacher/MainTeacherView.css";
 // import fondo from '../../assets/Fondo.png'
 import fondoCard from "../../assets/FondoCardDefecto.png";
 // import fondoCiber from '../../assets/FondoCiber.png'
-import { Button } from "@mui/joy";
+
+import SignoutButton from "../../components/teacher/SignoutButton";
 
 import api from "../../api";
 
-import { Fragment, useState, useEffect } from "react";
-import { Typography } from "@mui/joy";
-
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import ModalFrame from "../../components/ModalFrame";
+import { useState, useEffect } from "react";
 
 export default function MainTeacherView(props) {
   const { userData } = props;
-  const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [courses, setCourses] = useState([]);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = (value) => {
-    setIsModalOpen(value);
-  };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -101,14 +89,21 @@ export default function MainTeacherView(props) {
           alignItems: "flex-start", // Alinea a la izquierda
         }}
       >
-        <Typography
-          level="h2"
-          component="h1"
-          sx={{ marginBottom: "30px", marginTop: "20px" }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ width: "100%" }}
         >
-          Mis cursos
-        </Typography>
-
+          <Typography
+            level="h2"
+            component="h1"
+            sx={{ marginBottom: "30px", marginTop: "20px" }}
+          >
+            Mis cursos
+          </Typography>
+          <SignoutButton />
+        </Stack>
         <Box
           className="contenedor-curso"
           sx={{
@@ -128,69 +123,6 @@ export default function MainTeacherView(props) {
             </Link>
           ))}
         </Box>
-
-        <Fragment>
-          <Button
-            className="cerrar-sesión-button"
-            variant="plain"
-            color="neutral"
-            onClick={handleOpenModal}
-            startDecorator={<LogoutRoundedIcon />}
-            sx={{
-              position: "absolute",
-              bottom: "16px",
-              right: "16px",
-            }}
-          >
-            Cerrar sesión
-          </Button>
-
-          <ModalFrame
-            open={isModalOpen}
-            onClose={handleCloseModal}
-            ModalTitle="Cerrar sesión"
-          >
-            <Typography
-              id="nested-modal-description"
-              textColor="text.tertiary"
-              sx={{
-                minWidth: "500px",
-              }}
-            >
-              Está a punto de cerrar sesión.
-            </Typography>
-            <Box
-              sx={{
-                mt: 1,
-                display: "flex",
-                gap: 1,
-                flexDirection: { xs: "column", sm: "row-reverse" },
-              }}
-            >
-              <Button
-                variant="solid"
-                color="danger"
-                component="a"
-                href="/logout"
-                loading={loading}
-                onClick={() => {
-                  handleOpenModal;
-                  setLoading(true);
-                }}
-              >
-                Salir
-              </Button>
-
-              <Button
-                variant="outlined"
-                color="neutral"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancelar
-              </Button>
-            </Box>
-          </ModalFrame>
-        </Fragment>
       </Box>
     </Box>
   );

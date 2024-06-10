@@ -3,8 +3,8 @@ import { CssVarsProvider } from "@mui/joy/styles"
 import CssBaseline from "@mui/joy/CssBaseline"
 import { Outlet } from 'react-router-dom'
 import StudentSidebar from "../components/student/StudentSidebar"
-import Box from '@mui/material/Box'
 import "../styles/pages/student/StudentPage.css"
+import { Box } from '@mui/material';
 // import Breadcrumbs from '@mui/joy/Breadcrumbs';
 // import Link from '@mui/joy/Link';
 // import Typography from '@mui/joy/Typography';

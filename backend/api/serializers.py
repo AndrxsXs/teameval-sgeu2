@@ -98,6 +98,30 @@ class TeacherSerializer(serializers.ModelSerializer):
         teacher = Teacher.objects.create(user=user, **validated_data)
         return teacher
     
+class StudentSerializerUpdate(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+
+    class Meta:
+        model = Student
+        fields = ["name", "last_name", "code", "email"]
+
+    def update(self, instance, validated_data):
+        # Extraer y actualizar los datos del usuario
+        user_data = validated_data.pop('user', {})
+        for attr, value in user_data.items():
+            setattr(instance.user, attr, value)
+        instance.user.save()
+
+        # Actualizar los datos del estudiante
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+    
 class TeacherSerializerUpdate(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
     last_name = serializers.CharField(source='user.last_name')
@@ -107,7 +131,7 @@ class TeacherSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = ["name", "last_name", "code", "email", "phone"]
-        
+
     def update(self, instance, validated_data):
         # Extraer y actualizar los datos del usuario
         user_data = validated_data.pop('user', {})
@@ -119,9 +143,32 @@ class TeacherSerializerUpdate(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
+
         return instance
 
+class AdminSerializerUpdate(serializers.ModelSerializer):
+    name = serializers.CharField(source='user.name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    code = serializers.CharField(source='user.code')
+
+    class Meta:
+        model = Admi
+        fields = ["name", "last_name", "code", "email", "phone"]
+
+    def update(self, instance, validated_data):
+        # Extraer y actualizar los datos del usuario
+        user_data = validated_data.pop('user', {})
+        for attr, value in user_data.items():
+            setattr(instance.user, attr, value)
+        instance.user.save()
+
+        # Actualizar los datos del admin
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
 class AdminSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
     last_name = serializers.CharField(source='user.last_name')
@@ -252,6 +299,17 @@ class CourseSerializer(serializers.ModelSerializer):
         instance.save()
         
         # Devolver la instancia creada
+        return instance
+    
+    def update(self, instance, validated_data):
+        # Actualizar la instancia existente con los datos validados
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Guardar la instancia actualizada en la base de datos
+        instance.save()
+        
+        # Devolver la instancia actualizada
         return instance
 
 class InfoRubricSerializer(serializers.ModelSerializer):

@@ -13,12 +13,12 @@ import { useEffect } from "react";
 
 import AdminSidebar from "../components/admin/AdminSidebar"
 import "../styles/pages/admin/AdminPage.css"
-import Box from '@mui/material/Box'
 import ManageAdmin from "./admin/ManageAdmin";
 import ManageTeachers from "../pages/admin/ManageTeachers"
 import ManageCourses from "./admin/ManageCourses";
 import ManageScales from "./admin/ManageScales";
 import CourseDetailed from "../components/admin/CourseDetailed";
+import { Box } from '@mui/material';
 
 function AdminPage({ userData }) {
 

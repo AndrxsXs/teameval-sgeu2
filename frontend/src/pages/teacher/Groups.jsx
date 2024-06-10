@@ -1,12 +1,12 @@
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { Box } from "@mui/joy";
-import { Typography } from "@mui/joy";
-import { Button } from "@mui/joy";
-import Add from "@mui/icons-material/Add";
+import { useParams } from "react-router";
+
+import Box from "@mui/joy/Box";
+import Typography from "@mui/joy/Typography";
 import GroupsTable from "../../components/teacher/groups/GroupsTable";
 import CreateGroup from "../../components/teacher/groups/CreateGroup";
 
 export default function Groups() {
+  const { courseId } = useParams();
   return (
     <>
       <Box
@@ -34,10 +34,10 @@ export default function Groups() {
             flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <CreateGroup />
+          <CreateGroup course={courseId} />
         </Box>
-        <GroupsTable />
       </Box>
+      <GroupsTable course={courseId} />
     </>
   );
 }
