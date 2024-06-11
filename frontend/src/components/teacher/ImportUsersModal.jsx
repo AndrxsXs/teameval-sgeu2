@@ -8,9 +8,9 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 
 import api from "../../api";
 
-export default function ImportStudentModal({ courseId }) {
+export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const route = isStudent ? "import_student" : "import_teacher";
   const course_code = courseId;
   // console.log(course_code);
 
@@ -30,7 +30,7 @@ export default function ImportStudentModal({ courseId }) {
     setSelectedFile(file);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmitStudent = async () => {
     setLoading(true);
     const token = localStorage.getItem("ACCESS_TOKEN");
 
@@ -39,7 +39,7 @@ export default function ImportStudentModal({ courseId }) {
       formData.append("csv_file", selectedFile);
 
       try {
-        const response = await api.post("/api/import_student/", formData, {
+        const response = await api.post(`/api/${route}/`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -74,19 +74,65 @@ export default function ImportStudentModal({ courseId }) {
     }
   };
 
+  const handleSubmitTeacher = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("ACCESS_TOKEN");
+
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("csv_file", selectedFile);
+
+      await api
+        .post(`/api/${route}/`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setIsModalOpen(false);
+          window.dispatchEvent(
+            new CustomEvent("responseEvent", {
+              detail: {
+                message: response.data.message,
+                severity: "success",
+              },
+            })
+          );
+          setLoading(false);
+        })
+        .catch((error) => {
+          // console.log(error.response.data);
+          window.dispatchEvent(
+            new CustomEvent("responseEvent", {
+              detail: {
+                message: error.response.data.message,
+                severity: "danger",
+              },
+            })
+          );
+          setLoading(false);
+        });
+    }
+  };
+
   return (
     <>
-      <Button startDecorator={<FileUploadIcon />} onClick={handleOpenModal}>
-        Importar estudiantes
+      <Button
+        startDecorator={<FileUploadIcon />}
+        onClick={handleOpenModal}
+        {...styles}
+      >
+        Importar {isStudent ? "estudiantes" : "docentes"}
       </Button>
       <ModalFrame
         onClose={handleCloseModal}
         open={isModalOpen}
-        ModalTitle="Importar estudiantes"
+        ModalTitle={`Importar ${isStudent ? "estudiantes" : "docentes"}`}
       >
         <Box>
           <Typography level="body-sm">
-            Suba un archivo CSV con los datos de los estudiantes a importar.
+            Suba un archivo CSV con los datos de los{" "}
+            {isStudent ? "estudiantes" : "docentes"} que desea importar.
           </Typography>
           {/* <Typography level="body-md">
             El archivo debe contener las columnas: nombre, apellido, email, y número de documento. ???????
@@ -101,7 +147,11 @@ export default function ImportStudentModal({ courseId }) {
                 gap: 2,
               }}
             >
-              <ImportStudents onFileChange={handleFileChange} />
+              <ImportStudents
+                onFileChange={handleFileChange}
+                isStudent={isStudent}
+                variant="soft"
+              />
               {/* <Typography level="body-xs" sx={{ textAlign: 'center' }}>
                 <u>Revise los datos</u> antes de enviar el archivo ya que <Typography color="danger" variant="soft">no se podrá deshacer la acción</Typography>.
               </Typography> */}
@@ -121,7 +171,7 @@ export default function ImportStudentModal({ courseId }) {
           <Button
             sx={{ alignSelf: "center", color: "white" }}
             type="submit"
-            onClick={handleSubmit}
+            onClick={isStudent ? handleSubmitStudent : handleSubmitTeacher}
             loading={loading}
           >
             Subir

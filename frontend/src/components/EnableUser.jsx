@@ -1,15 +1,14 @@
 /* eslint-disable react/prop-types */
 import { Fragment, useState } from "react";
 
-import { ACCESS_TOKEN } from "../constants";
-
 import { Button, Box, Typography } from "@mui/joy";
 
 import ModalFrame from "../components/ModalFrame";
 
 import api from "../api";
+import { ACCESS_TOKEN } from "../constants";
 
-export default function DisableUser(props) {
+export default function EnableUser(props) {
   const { user, endpoint } = props;
 
   const [loading, setLoading] = useState(false);
@@ -23,7 +22,7 @@ export default function DisableUser(props) {
     setIsModalOpen(value);
   };
 
-  const handleDisableUser = async () => {
+  const handleEnableUser = async () => {
     const token = localStorage.getItem(ACCESS_TOKEN);
     // console.log(user.code);
     // console.log(endpoint);
@@ -72,10 +71,10 @@ export default function DisableUser(props) {
         // disabled
         size="sm"
         variant="plain"
-        color="danger"
+        color="success"
         onClick={handleOpenModal}
       >
-        Deshabilitar
+        Habilitar
       </Button>
       <ModalFrame
         open={isModalOpen}
@@ -90,7 +89,7 @@ export default function DisableUser(props) {
             minHeight: "50px",
           }}
         >
-          Está a punto de deshabilitar a{" "}
+          Está a punto de habilitar a{" "}
           <strong>
             {user.name} {user.last_name}
           </strong>
@@ -115,15 +114,15 @@ export default function DisableUser(props) {
         >
           <Button
             variant="solid"
-            color="danger"
+            color="success"
             loading={loading}
             onClick={() => {
               handleOpenModal;
               setLoading(true);
-              handleDisableUser();
+              handleEnableUser();
             }}
           >
-            Deshabilitar
+            Habilitar
           </Button>
 
           <Button

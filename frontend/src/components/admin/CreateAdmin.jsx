@@ -54,7 +54,7 @@ export default function CreateAdmin() {
                     phone: undefined
                 });
                 // Emitir el evento 'userCreated' después de crear un nuevo usuario
-                window.dispatchEvent(new Event('userCreated'));
+                window.dispatchEvent(new Event('user-created'));
                 window.dispatchEvent(
                     new CustomEvent('responseEvent', {
                         detail: {

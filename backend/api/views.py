@@ -728,6 +728,78 @@ def create_rubric(request, course_code):
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Luisa
+#Editar rubrica
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_rubric(request, rubric_id):
+    print("Rubric ID:", rubric_id)  # Punto de control 1: Antes de la obtención de la rúbrica
+    try:
+        rubric = Rubric.objects.get(id=rubric_id)
+    except Rubric.DoesNotExist:
+        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    print("Rubric:", rubric)  # Punto de control 2: Después de obtener la rúbrica
+
+    # Verificar que ninguna evaluación asociada a la rúbrica haya iniciado
+    evaluations = Evaluation.objects.filter(rubric=rubric)
+    print("Evaluations:", evaluations)  # Punto de control 3: Después de verificar si hay evaluaciones iniciadas
+
+    current_time = timezone.now()
+
+    for evaluation in evaluations:
+        if evaluation.estado == Evaluation.INITIATED or evaluation.estado == Evaluation.FINISHED:
+            return Response({'error': 'No se puede editar la rúbrica porque hay evaluaciones que ya han iniciado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    rubric_data = request.data
+
+    # Actualizar la escala
+    scale_data = rubric_data.get('scale')
+    print("Scale data:", scale_data)  # Punto de control 4: Antes de actualizar la escala
+    if scale_data:
+        try:
+            scale = Scale.objects.get(id=scale_data.get('id'))
+            scale_serializer = ScaleSerialiazer(scale, data=scale_data, partial=True)
+            if scale_serializer.is_valid():
+                scale_serializer.save()
+            else:
+                return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Scale.DoesNotExist:
+            return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    print("Updated scale:", scale)  # Punto de control 5: Después de actualizar la escala
+
+    # Actualizar los estándares
+    standards_data = rubric_data.get('standards')
+    print("Standards data:", standards_data)  # Punto de control 6: Antes de actualizar los estándares
+    if standards_data:
+        for standard_data in standards_data:
+            try:
+                standard = Standard.objects.get(id=standard_data.get('id'))
+                standard_serializer = StandardSerializer(standard, data=standard_data, partial=True)
+                if standard_serializer.is_valid():
+                    standard_serializer.save()
+                else:
+                    return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Standard.DoesNotExist:
+                return Response({'error': 'Estándar no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+            print("Updated standard:", standard)  # Punto de control 7: Después de actualizar cada estándar
+
+    # Actualizar la rúbrica con las claves primarias de escala y estándares
+    rubric_data['scale'] = scale.id  # Asignar la clave primaria de la escala
+    rubric_data['standards'] = [standard.id for standard in rubric.standards.all()]  # Asignar las claves primarias de los estándares
+
+    print("Rubric data:", rubric_data)  # Punto de control 8: Antes de actualizar la rúbrica
+
+    # Actualizar la rúbrica
+    rubric_serializer = RubricSerializer(rubric, data=rubric_data, partial=True)
+    if rubric_serializer.is_valid():
+        rubric_serializer.save()
+        print("Updated rubric:", rubric)  # Punto de control 9: Después de actualizar la rúbrica
+        return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
+    else:
+        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 # def create_rubric(request, course_code, scale_id):
@@ -1498,6 +1570,33 @@ def update_course(request, course_code):
     
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Luisa
+#Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def disable_course(request, course_code):
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "El curso no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Verificar si el curso tiene evaluaciones en estado 'INITIATED'
+    evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+    if evaluations.exists():
+        return Response(
+            {"error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Si no tiene evaluaciones en estado 'INITIATED', deshabilitar el curso
+    course.course_status = False
+    course.save()
+
+    serializer = CourseSerializer(course)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_course(request):
@@ -1550,16 +1649,25 @@ def create_course(request):
 @permission_classes([IsAuthenticated])
 def disable_user(request):
     try:
-        user = User.search(request.GET.get("user_code"))
+        user_code = request.GET.get("user_code")
+        user = User.search(user_code)
+        
         if user:
+            # Verificar si el usuario es un profesor y está asignado a algún curso
+            if user.role == User.TEACHER and Course.objects.filter(user_teacher=user).exists():
+                return Response(
+                    {'error': 'El usuario no puede ser deshabilitado porque está asignado a un curso.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             user.status = False
             user.save()
             return Response({'message': 'Usuario deshabilitado correctamente.'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+    
     except Exception as e:
         return Response({'error': f'Error al deshabilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 #habilita admin y profesor 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
