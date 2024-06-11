@@ -28,7 +28,7 @@ export default function EnhancedTableHead(props) {
     <thead>
       <tr>
         {showEmptyColumn ? (
-          <th style={{ width: 40 }} aria-label="empty" />
+          <th style={{ width: "40px" }} aria-label="empty" />
         ) : null}
         {showCheckbox ? (
           <th>
