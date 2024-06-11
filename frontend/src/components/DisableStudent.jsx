@@ -89,22 +89,14 @@ export default function DisableStudent(props) {
           sx={{
             minWidth: "500px",
             minHeight: "50px",
+            maxWidth: "300px",
           }}
         >
           Está a punto de deshabilitar a{" "}
           <strong>
             {user.name} {user.last_name}
           </strong>
-          .
-          {/* <br />
-                    El usuario no podrá acceder a su cuenta.
-                    <br />
-                    Se puede {' '}<strong>
-                    <Typography color='success'>
-                        habilitar
-                    </Typography>
-                    </strong> {' '}
-                    nuevamente en cualquier momento. */}
+          . El usuario no podrá acceder a su cuenta y desaparecerá de este curso y de algún grupo en el que esté.
         </Typography>
         <Box
           sx={{
