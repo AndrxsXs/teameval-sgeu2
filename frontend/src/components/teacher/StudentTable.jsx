@@ -3,21 +3,12 @@ import React, { useEffect, useState, Fragment } from "react";
 
 import api from "../../api";
 
-import {
-  Table,
-  Sheet,
-  Typography,
-  Box,
-  Chip,
-  CircularProgress,
-  // ButtonGroup
-} from "@mui/joy";
-
-import // Cloud,
-// Check,
-// Cancel,
-
-"@mui/icons-material";
+import Table from "@mui/joy/Table";
+import Sheet from "@mui/joy/Sheet";
+import Typography from "@mui/joy/Typography";
+import Box from "@mui/joy/Box";
+import Chip from "@mui/joy/Chip";
+import CircularProgress from "@mui/joy/CircularProgress";
 
 import { ACCESS_TOKEN } from "../../constants";
 
@@ -25,10 +16,10 @@ import { userStatus } from "../../utils/userStatus";
 
 import SearchField from "../admin/SearchField";
 // import EditUser from "../../components/EditUser";
-import DisableUser from "../../components/DisableUser";
+import DisableStudent from "../../components/DisableStudent";
 
 function RowMenu(props) {
-  const { user, route } = props;
+  const { user, endpoint } = props;
 
   return (
     <Box
@@ -36,7 +27,7 @@ function RowMenu(props) {
       sx={{ display: "flex", gap: 1, justifyContent: "center" }}
     >
       {/* <EditUser user={user} /> */}
-      <DisableUser endpoint={route} user={user} />
+      <DisableStudent endpoint={endpoint} user={user} />
     </Box>
   );
 }
@@ -88,11 +79,11 @@ export default function StudentTable(props) {
       fetchData();
     };
 
-    window.addEventListener("userCreated", handleUserCreated);
+    window.addEventListener("user-created", handleUserCreated);
     window.addEventListener("user-disabled", fetchData);
 
     return () => {
-      window.removeEventListener("userCreated", handleUserCreated);
+      window.removeEventListener("user-created", handleUserCreated);
       window.removeEventListener("user-disabled", fetchData);
     };
   }, [course]);
@@ -114,6 +105,10 @@ export default function StudentTable(props) {
           flexShrink: 1,
           minHeight: 0,
           boxShadow: "sm",
+          "&:hover": {
+            boxShadow: "none",
+          },
+          transition: "box-shadow 0.3s",
           overflow: "auto",
           background: (theme) =>
             `linear-gradient(to right, ${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
@@ -224,7 +219,7 @@ export default function StudentTable(props) {
                   )}
                 </td>
                 <td style={{ paddingInline: "16px" }}>
-                  <RowMenu user={row} route={disableStudentEndpoint} />
+                  <RowMenu user={row} endpoint={disableStudentEndpoint} />
                 </td>
               </tr>
             ))}

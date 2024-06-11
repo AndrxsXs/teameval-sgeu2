@@ -34,8 +34,7 @@ export default function ManageScales() {
           </Typography>
 
           <Typography level="body-md">
-            Agregue y edite las escalas y criterios predeterminados que se
-            usarán en las evaluaciones
+            Agregue y edite los criterios predeterminados para las escalas de evaluación.
           </Typography>
         </Stack>
 
