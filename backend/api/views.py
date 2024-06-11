@@ -39,6 +39,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.mail import EmailMultiAlternatives
 from backend import settings
 import pytz
+import random
+import string
 
 # Create your views here.
 
@@ -813,8 +815,20 @@ def create_evaluation(request, course_code):
 
     serializer = EvaluationSerializer(data=evaluation_data)
     if serializer.is_valid():
-        evaluation = serializer.save()
         
+        serializer.save()
+        
+        return Response({'message': 'Evaluación creada con éxito.'}, status=status.HTTP_201_CREATED)
+    
+    else:
+        
+         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
+        
+'''     
         # Asignar la evaluación a cada estudiante del curso
         for student in course.user_students.all():
             Evaluation.objects.create(
@@ -829,10 +843,7 @@ def create_evaluation(request, course_code):
                 evaluated=student,
                 evaluator=student  # Esto puede variar si el evaluador es otro estudiante
             )
-        
-        return Response({'message': 'Evaluación creada con éxito.'}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''        
     
     
 @api_view(["POST"])
@@ -1438,7 +1449,6 @@ def main_teacher(request):
             {"status": "El docente actualmente no tiene cursos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def search_user(request):
@@ -1491,7 +1501,23 @@ def update_course(request, course_code):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_course(request):
+    
+    codigo= request.data.get("code")
+    print(codigo)
+    try:
+        course= Course.objects.get(code= codigo)
+    except Course.DoesNotExist:
+        course= None
+    
+    if course is not None:
+            return Response(
+            {"error": "Ya existe un curso con este codigo"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    
     data = request.data
+    
     try:
         user = models.User.objects.get(code=data.get("user_teacher"))
     except User.DoesNotExist:
@@ -1510,6 +1536,11 @@ def create_course(request):
     serializer_course = CourseSerializer(data=course_data)
     if serializer_course.is_valid():
         serializer_course.save()
+
+        if Rubric.objects.filter(name= 'Rubrica Predeterminada').exists: 
+            rubric= Rubric.objects.get(name= 'Rubrica Predeterminada')
+            rubric.courses.add(Course.objects.get(code= data.get("code")))
+        
         return Response({"message": "Curso creado con éxito."}, status=status.HTTP_201_CREATED)
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1544,33 +1575,32 @@ def enable_user(request):
     except Exception as e:
         return Response({'error': f'Error al habilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# def create_course(request):
-#     data = {
-#         "name": request.data.get("name"),
-#         "code": request.data.get("code"),
-#         "academic_period": request.data.get("academic_period"),
-#         "teacher": request.data.get("teacher"),
-#     }
-#     serializer_course = CourseSerializer(data)
-#     if serializer_course.is_valid():
-#         serializer_course.save()
-#         return Response(serializer_course.data, status=status.HTTP_201_CREATED)
-#     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_mail(request):
-    q = request.POST.get("user_mail", "")
+def restore_password(request):
+    q = request.data.get("mail", "")
     subject = "Restablecer contraseña"
+    
+    longitud_codigo = 6  # Puedes cambiar la longitud del código aquí
+    codigo_aleatorio = generar_codigo_alfanumerico(longitud_codigo)
+    print("Código alfanumérico aleatorio:", codigo_aleatorio)
+    
+    usuario= models.User.objects.get(email=q)
+    
+    usuario.set_password(codigo_aleatorio)
+    
+    usuario.first_login = True
+    
+    usuario.save()
+    
+    
     if models.User.objects.filter(email__icontains=q).exists():
         message = EmailMultiAlternatives(
             subject,  # Titulo
-            "Hola, para restablecer su contraseña ingrese al siguiente link ....",
+            "Hola, su contraseña temporal es %s " %codigo_aleatorio ,
             settings.EMAIL_HOST_USER,  # Remitente
             [q],
-        )  # Destinatario
+        )  # Destinatario 
         message.send()
         return Response(
             {"message": "Correo enviado correctamente"}, status=status.HTTP_200_OK
@@ -1580,50 +1610,13 @@ def create_mail(request):
             {"error": "No existe un usuario con esta direccion de correo electronico"},
             status=status.HTTP_400_BAD_REQUEST,
         )
+        
+        
 
-#Boceto idea metodo para realizar evaluacion
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def evaluar(request):
-#     data= request.data
-#     user= request.user
-#     evaluator= models.Student.objects.get(user_code =  user.code)
-    
-#     try:
-#         evaluated= models.Student.objects.get(user_code =  data.get("evaluated"))
-#         #user = models.User.objects.get(code=data.get("user_teacher"))
-#     except User.DoesNotExist:
-#         return Response(
-#             {"error": "El código de usuario proporcionado no es válido."},
-#             status=status.HTTP_400_BAD_REQUEST,
-#         )
-    
-#     number_standars= models.Standard.objects.filter(rubric_id= data.get("")).count
-    
-#     for calificacion in range(0, number_standars):
-#         models.Evaluation.objects.create(qualification= data.get(calificacion), standar= )
-    
-    
-#     course_data = {
-#         "evaluated": evaluated.id,
-#         "evaluator": evaluator.id,
-#     }
-    
-# Vista para hacer pruebas backend
-def singin(request):
-    if request.method == "GET":
-        return render(request, "singin.html")
-    else:
-        user = authenticate(
-            request, code=request.POST["code"], password=request.POST["password"]
-        )
-
-        if user is None:
-            return render(request, "singin.html")
-
-        else:
-            login(request, user)
-            return redirect(home)
+def generar_codigo_alfanumerico(longitud):
+    caracteres = string.ascii_letters + string.digits
+    codigo = ''.join(random.choice(caracteres) for _ in range(longitud))
+    return codigo
         
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])     
@@ -1643,24 +1636,3 @@ def main_report(request):
     ] 
     
     return Response(evaluation_data)
-    
-        
-
-
-def home(request):
-    return render(request, "home.html")
-
-
-def prueba(request):
-    curso = models.Course.objects.get(id=2)
-    return render(
-        request,
-        "prueba.html",
-        {
-            "name": curso.name,
-            "code": curso.code,
-            "teacher": curso.user_teacher.name + " " + curso.user_teacher.last_name,
-        },
-    )
-
-
