@@ -30,7 +30,7 @@ urlpatterns = [
     path('student_courses/', views.student_courses, name='student_courses'), #Luisa
 
     #Obtener estudiantes de mi grupo
-    path('group_members/', views.group_members, name='group_members'), #Luisa
+    path('group_members', views.group_members, name='group_members'),
 
     #Muestra la informacion de una rubrica
     path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
@@ -38,7 +38,7 @@ urlpatterns = [
     #Muestra la informacion completa del administrador
     path('admin_info/<str:admin_code>/', views.admin_info, name='admin_info'), #Luisa
 
-    #Muestra la informacion completra del profesor
+    #Muestra la informacion completa del profesor
     path('teacher_info/<str:teacher_code>/', views.teacher_info, name='teacher_info'), #Luisa
 
     #Muestra la informacion completa del curso, profesor y estudiantes que pertenecen al curso
@@ -71,13 +71,13 @@ urlpatterns = [
     path('enable_student/<str:course_code>/', views.enable_student, name='enable_student'), #Luisa
 
     #Editar curso
-    path('update_course/<str:course_code>/', views.update_course, name='update_course'), #Luisa
+    path('update_course', views.update_course, name='update_course'), #Luisa
 
     #Editar rubrica
-    path('update_rubric/<int:rubric_id>/', views.update_rubric, name='update-rubric'), #Luisa
+    path('update_rubric', views.update_rubric, name='update-rubric'), #Luisa
 
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
-    path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'),
+    path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa
     
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
