@@ -88,8 +88,8 @@ export default function EnhancedTableHead(props) {
                 {active ? (
                   <Box component="span" sx={visuallyHidden}>
                     {order === "desc"
-                      ? "sorted descending"
-                      : "sorted ascending"}
+                      ? "ordenado de forma descendente"
+                      : "ordenado de forma ascendente"}
                   </Box>
                 ) : null}
               </Link>

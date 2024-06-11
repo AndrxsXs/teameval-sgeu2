@@ -3,33 +3,28 @@ import React, { useEffect, useState, Fragment } from "react";
 
 import api from "../api";
 
-import {
-  Table,
-  Sheet,
-  Typography,
-  Box,
-  // Button,
-  Chip,
-  CircularProgress,
-  // ButtonGroup
-} from "@mui/joy";
+import { stableSort } from "../utils/stableSort";
+import { getComparator } from "../utils/getComparator";
 
-import // Cloud,
-// Check,
-// Cancel,
-
-"@mui/icons-material";
+import Table from "@mui/joy/Table";
+import Sheet from "@mui/joy/Sheet";
+import Typography from "@mui/joy/Typography";
+import Box from "@mui/joy/Box";
+import Chip from "@mui/joy/Chip";
+import CircularProgress from "@mui/joy/CircularProgress";
 
 import { ACCESS_TOKEN } from "../constants";
 
 import { userStatus } from "../utils/userStatus";
 
-import SearchField from "./admin/SearchField";
+// import SearchField from "./admin/SearchField";
 import EditUser from "../components/EditUser";
 import DisableUser from "../components/DisableUser";
+import EnableUser from "../components/EnableUser";
+import EnhancedTableHead from "./EnhacedTableHead";
 
 function RowMenu(props) {
-  const { user, disableRoute } = props;
+  const { user, disableRoute, enableRoute } = props;
 
   return (
     <Box
@@ -37,84 +32,58 @@ function RowMenu(props) {
       sx={{ display: "flex", gap: 1 }}
     >
       <EditUser user={user} />
-      <DisableUser user={user} endpoint={disableRoute} />
+      {user.status === "Habilitado" ? (
+        <DisableUser user={user} endpoint={disableRoute} />
+      ) : (
+        <EnableUser user={user} endpoint={enableRoute} />
+      )}
     </Box>
   );
 }
 
 export default function UserTable(props) {
-  const { role, columns, disableUserRoute } = props;
-  console.log("Ruta para deshabilitar usuario: ", disableUserRoute);
+  const { role, columns, disableUserRoute, enableUserRoute, searchTerm } =
+    props;
+
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("code");
+  const [selected, setSelected] = useState([]);
   const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [filters, setFilters] = useState({
-    name: null,
-    last_name: null,
-    email: null,
-    status: null,
-  });
+  const [loading, setLoading] = useState(false);
 
-  const handleSearchChange = (searchQuery) => {
-    // Lógica de filtrado basada en la consulta de búsqueda
-    const fetchData = () => {
-      setLoading(true);
-      const token = localStorage.getItem(ACCESS_TOKEN);
+  const filteredRows = searchTerm
+    ? rows.filter(
+        (row) =>
+          row.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : rows;
 
-      api
-        .get("api/user_list/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            role: role,
-            name: filters.name,
-            last_name: filters.last_name,
-            email: filters.email,
-            status: filters.status,
-          },
-        })
-        .then((userList) => {
-          const filteredRows = userList.data.filter((user) => {
-            const { code, name, last_name, email, status } = user;
-            const searchableFields =
-              `${code} ${name} ${last_name} ${email} ${status}`.toLowerCase();
-            return searchableFields.includes(searchQuery.toLowerCase());
-          });
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
-          const sortedRows = filteredRows
-            .map((user) => {
-              return {
-                code: user.code,
-                name: user.name,
-                last_name: user.last_name,
-                email: user.email,
-                status: userStatus(user.status),
-              };
-            })
-            .sort((a, b) =>
-              sortOrder === "asc" ? a.code - b.code : b.code - a.code
-            );
-          setRows(sortedRows);
-        })
-        .catch((error) => {
-          console.log(error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    };
-
-    fetchData();
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelected = rows.map((n) => n.name);
+      setSelected(newSelected);
+      return;
+    }
+    setSelected([]);
   };
 
   useEffect(() => {
-    const fetchData = () => {
+    const fetchData = async () => {
       setLoading(true);
       const token = localStorage.getItem(ACCESS_TOKEN);
 
-      api
-        .get("api/user_list/", {
+      await api
+        .get(`api/user_list/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -123,41 +92,17 @@ export default function UserTable(props) {
           },
         })
         .then((userList) => {
-          const filteredRows = userList.data.filter((user) => {
-            const { code, name, last_name, email, status } = user;
-            const searchableFields = `${code} ${name} ${last_name} ${email} ${
-              status ? "true" : "false"
-            }`.toLowerCase();
-
-            const matchesFilters =
-              (!filters.name ||
-                name.toLowerCase().includes(filters.name.toLowerCase())) &&
-              (!filters.last_name ||
-                last_name
-                  .toLowerCase()
-                  .includes(filters.last_name.toLowerCase())) &&
-              (!filters.email ||
-                email.toLowerCase().includes(filters.email.toLowerCase())) &&
-              (!filters.status ||
-                (status ? "true" : "false") === filters.status);
-
-            return matchesFilters;
+          const users = userList.data.map((user) => {
+            return {
+              code: user.code,
+              name: user.name,
+              last_name: user.last_name,
+              email: user.email,
+              phone: user.phone,
+              status: userStatus(user.status),
+            };
           });
-
-          const sortedRows = filteredRows
-            .map((user) => {
-              return {
-                code: user.code,
-                name: user.name,
-                last_name: user.last_name,
-                email: user.email,
-                status: userStatus(user.status),
-              };
-            })
-            .sort((a, b) =>
-              sortOrder === "asc" ? a.code - b.code : b.code - a.code
-            );
-          setRows(sortedRows);
+          setRows(users);
         })
         .catch((error) => {
           console.log(error);
@@ -167,35 +112,17 @@ export default function UserTable(props) {
         });
     };
 
+    window.addEventListener("user-disabled", fetchData);
+    window.addEventListener("user-enabled", fetchData);
+    window.addEventListener("user-updated", fetchData);
+    window.addEventListener("user-created", fetchData);
+
     fetchData();
-
-    const handleUserCreated = () => {
-      fetchData();
-    };
-
-    window.addEventListener("userCreated", handleUserCreated);
-
-    return () => {
-      window.removeEventListener("userCreated", handleUserCreated);
-    };
-  }, [role, sortOrder, filters]);
-
-  const handleFilterChange = (event) => {
-    const { name, value } = event.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
-  };
-
-  // console.log(rows);
-
-  // const [user, setUser] = React.useState("desc")
-  // const [selected, setSelected] = React.useState([])
+  }, [role]);
 
   return (
     <React.Fragment>
-      <SearchField onSearchChange={handleSearchChange} />
+      {/* <SearchField onSearchChange={handleSearchChange} /> */}
       <Sheet
         className="TableContainer"
         variant="outlined"
@@ -210,6 +137,11 @@ export default function UserTable(props) {
           flexShrink: 1,
           overflow: "auto",
           minHeight: 0,
+          boxShadow: "sm",
+          "&:hover": {
+            boxShadow: "none",
+          },
+          transition: "box-shadow 0.3s",
         }}
       >
         <Table
@@ -223,74 +155,65 @@ export default function UserTable(props) {
             "--TableRow-hoverBackground":
               "var(--joy-palette-background-level1)",
             "--TableCell-paddingY": "4px",
-            "--TableCell-paddingX": "8px",
+            "--TableHeader-paddingY": "12px",
+            "--TableCell-paddingX": "16px",
+            "& thead th": {
+              paddingY: "12px",
+            },
+            "& thead th:nth-of-type(1)": { width: "10%" },
+            "& thead th:nth-of-type(2)": { width: "20%" },
+            "& thead th:nth-of-type(3)": { width: "25%" },
+            // "& thead th:nth-last-of-type(2)": { width: "10%" },
           }}
         >
-          <thead>
-            <tr>
-              {columns &&
-                columns.map((column, index) => (
-                  <th
-                    key={index}
-                    style={{
-                      padding: "12px 16px",
-                      width: "200px",
-                      maxWidth:
-                        column === "Cédula"
-                          ? "55px"
-                          : column === "Código"
-                          ? "55px"
-                          : column === "Estado"
-                          ? "70px"
-                          : column === "Correo electrónico"
-                          ? "150px"
-                          : "140px",
-                    }}
-                  >
-                    {column}
-                  </th>
-                ))}
-            </tr>
-          </thead>
+          <EnhancedTableHead
+            numSelected={selected.length}
+            order={order}
+            orderBy={orderBy}
+            onSelectAllClick={handleSelectAllClick}
+            onRequestSort={handleRequestSort}
+            rowCount={rows.length}
+            headCells={columns}
+            showActions
+          />
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.code}>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">{row.code}</Typography>
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">
-                    {row.name} {""} {row.last_name}
-                  </Typography>
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">{row.email}</Typography>
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  {/* <Typography level="body-xs">{row.status}</Typography> */}
-                  {row.status === "Habilitado" ? (
-                    <Chip
-                      color="success"
-                      size="sm"
-                      // startDecorator={<Check />}
-                    >
-                      {row.status}
-                    </Chip>
-                  ) : (
-                    <Chip
-                      color="danger"
-                      size="sm"
-                      // startDecorator={<Cancel />}
-                    >
-                      {row.status}
-                    </Chip>
-                  )}
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <RowMenu user={row} disableRoute={disableUserRoute} />
-                </td>
-              </tr>
-            ))}
+            {stableSort(filteredRows, getComparator(order, orderBy)).map(
+              (row) => {
+                return (
+                  <tr key={row.code}>
+                    <td>
+                      <Typography level="body-xs">{row.code}</Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-xs">
+                        {row.name} {""} {row.last_name}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-xs">{row.email}</Typography>
+                    </td>
+                    <td>
+                      <Chip
+                        size="sm"
+                        variant="soft"
+                        color={
+                          row.status === "Habilitado" ? "success" : "danger"
+                        }
+                      >
+                        {row.status}
+                      </Chip>
+                    </td>
+                    <td>
+                      <RowMenu
+                        user={row}
+                        disableRoute={disableUserRoute}
+                        enableRoute={enableUserRoute}
+                      />
+                    </td>
+                  </tr>
+                );
+              }
+            )}
           </tbody>
         </Table>
 
@@ -305,7 +228,10 @@ export default function UserTable(props) {
               width: "100%",
               height: "100%",
               minHeight: "41px",
-              borderTop: rows && rows.length < 1 ? "transparent" : "1px solid",
+              borderTop:
+                filteredRows && filteredRows.length < 1
+                  ? "transparent"
+                  : "1px solid",
               borderTopColor: "divider",
             }}
           >

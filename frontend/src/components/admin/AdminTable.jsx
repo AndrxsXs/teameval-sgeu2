@@ -1,20 +1,44 @@
 /* eslint-disable react/prop-types */
 
-import UserTable from '../UserTable';
+import UserTable from "../UserTable";
 
-export default function AdminTable() {
+export default function AdminTable(props) {
+  const { searchTerm } = props;
 
-    const columns = [
-        "Cédula", "Nombre", "Correo electrónico", "Estado", "Acciones"
-    ]
+  const headCells = [
+    {
+      id: "code",
+      numeric: false,
+      disablePadding: true,
+      label: "Cédula",
+    },
+    {
+      id: "name",
+      numeric: false,
+      disablePadding: false,
+      label: "Nombre",
+    },
+    {
+      id: "email",
+      numeric: false,
+      disablePadding: false,
+      label: "Correo electrónico",
+    },
+    {
+      id: "status",
+      numeric: false,
+      disablePadding: false,
+      label: "Estado",
+    },
+  ];
 
-const disableAdminRoute = "api/disable_user/";
-
-    return (
-        <UserTable
-            role={3}
-            columns={columns}
-            disableUserRoute={disableAdminRoute}
-        />
-    )
+  return (
+    <UserTable
+      searchTerm={searchTerm}
+      role={3}
+      columns={headCells}
+      disableUserRoute="api/disable_user/"
+      enableUserRoute="api/enable_user/"
+    />
+  );
 }
