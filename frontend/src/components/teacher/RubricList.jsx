@@ -111,7 +111,7 @@ export default function RubricList() {
           flexWrap: "wrap",
           gap: 2,
           overflow: "auto",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           alignContent: "start",
         }}
       >
