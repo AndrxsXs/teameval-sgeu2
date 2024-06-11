@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 # from django.contrib.auth.models import User
-from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation, Teacher
+from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation, Teacher, EvaluationCompleted, Rating
 from .models import User
 from . import models
 from rest_framework import generics, status 
@@ -800,6 +800,7 @@ def update_rubric(request, rubric_id):
         return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 # def create_rubric(request, course_code, scale_id):
@@ -842,7 +843,7 @@ def update_rubric(request, rubric_id):
 #crea la evaluacion que se realiza a los estudiantes
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_evaluation(request, course_code):
+def  create_evaluation(request, course_code):
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -1208,21 +1209,30 @@ def create_group(request, course_code):
 #evalua a un estudiante
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def evaluate_student(request, student_code, rubric_id):
-    student = get_object_or_404(Student, user__code=student_code)
-    rubric = get_object_or_404(Rubric, id=rubric_id)
-    
+def evaluate_student(request):
+    data= request.data
     try:
-        evaluation = Evaluation.objects.get(evaluated=student, rubric=rubric, completed=False)
+        evaluation = Evaluation.objects.get(id= data.get("id_evaluation"))
     except Evaluation.DoesNotExist:
-        return Response({'message': 'No se encontró una evaluación pendiente para este estudiante y rúbrica.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'No se encontró una evaluación pendiente.'}, status=status.HTTP_404_NOT_FOUND)
     
-    standards = rubric.standards.all()
+    standards = evaluation.rubric.standards.all()
+    
+    #user= request.user
+    
+    evaluation_completed= EvaluationCompleted(
+        evaluated= get_object_or_404(Student, user__code= data.get("evaluated")),
+        evaluator= get_object_or_404(Student, user__code= data.get("evaluator")),
+        evaluation= evaluation
+        
+    )
+    
+    evaluation_completed.save()
     
     for standard in standards:
         score = request.data.get(f"standard_{standard.id}")
         if score is not None:
-            rating_data = {'standard': standard.id, 'evaluation': evaluation.id, 'qualification': int(score)}
+            rating_data = {'standard': standard.id, 'evaluationCompleted': evaluation_completed.id, 'qualification': int(score)}
             rating_serializer = RatingSerializer(data=rating_data)
             if rating_serializer.is_valid():
                 rating_serializer.save()
@@ -1232,10 +1242,15 @@ def evaluate_student(request, student_code, rubric_id):
     # Guardar el comentario general de la evaluación
     comment = request.data.get("comment")
     if comment:
-        evaluation.comment = comment
+        evaluation_completed.comment = comment
     
-    evaluation.completed = True
-    evaluation.save()
+    evaluation_completed.completed = True
+    
+    evaluation_completed.evaluated = get_object_or_404(Student, user__code= data.get("evaluated"))
+    
+    evaluation_completed.evaluator = get_object_or_404(Student, user__code= data.get("evaluator"))
+    
+    evaluation_completed.save()
         
     return Response({'message': 'Evaluación completada con éxito.'}, status=status.HTTP_200_OK)
 
@@ -1602,7 +1617,7 @@ def disable_course(request, course_code):
 def create_course(request):
     
     codigo= request.data.get("code")
-    print(codigo)
+    
     try:
         course= Course.objects.get(code= codigo)
     except Course.DoesNotExist:
@@ -1636,9 +1651,9 @@ def create_course(request):
     if serializer_course.is_valid():
         serializer_course.save()
 
-        if Rubric.objects.filter(name= 'Rubrica Predeterminada').exists: 
-            rubric= Rubric.objects.get(name= 'Rubrica Predeterminada')
-            rubric.courses.add(Course.objects.get(code= data.get("code")))
+        #if Rubric.objects.filter(name= 'Rubrica Predeterminada').exists: 
+            #rubric= Rubric.objects.get(name= 'Rubrica Predeterminada')
+            #rubric.courses.add(Course.objects.get(code= data.get("code")))
         
         return Response({"message": "Curso creado con éxito."}, status=status.HTTP_201_CREATED)
 
@@ -1733,6 +1748,7 @@ def main_report(request):
     data= request.data
     evaluations= Evaluation.objects.filter(course__code=data.get("course_code"))
     
+           
     evaluation_data = [
         {
             "estado": evaluation.estado,
@@ -1744,3 +1760,36 @@ def main_report(request):
     ] 
     
     return Response(evaluation_data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated]) 
+def view_notas(request):
+    
+    data= request.data
+    
+    evaluations= EvaluationCompleted.objects.filter(evaluation__id= data.get("id_evaluation"))
+    
+    print(evaluations)
+    
+    report_data = []
+    
+    for evaluation in evaluations:
+    
+        ratings= Rating.objects.filter(evaluationCompleted = evaluation.id)
+        #ratings= Rating.objects.all()
+        #print(ratings)
+        
+     
+        
+    
+        report_data.append(
+            {
+            "evaluated": rating.evaluationCompleted.evaluated.user.name,
+            "standard": rating.standard.description,
+            "qualification": rating.qualification
+            }
+            for rating in ratings
+        )
+    
+    return Response(report_data)

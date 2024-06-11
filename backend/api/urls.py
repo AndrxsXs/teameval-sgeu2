@@ -19,6 +19,10 @@ urlpatterns = [
     
     path('restore_password/', views.restore_password, name='restore_password'), #Enviar correo para restablecer contraseña
     
+    path('view_notas/', views.view_notas , name='view_notas'), #Boceto informes
+    
+    
+    path('main_report/', views.main_report, name='main_report'), #Boceto main informes
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
 
@@ -99,17 +103,13 @@ urlpatterns = [
     #obtener la lista de rubricas con cuerpo
     path('list_rubric/<str:course_code>/', views.list_rubric, name='list_rubric'),
     #realiza la evaluacion el estudiante
-    path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
+    path('evaluate_student/', views.evaluate_student, name='evaluate_student'),
     #crea la evaluacion que van a usar los estudiantes
     path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
     #deshabilita admin y profesor
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
     path('enable_user/', views.enable_user, name='enable_user'),
-
-    
-
-    
 
     
 ]
