@@ -78,12 +78,33 @@ def student_courses(request):
     else:
         return Response({"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST)
 
+def validate_name(name):
+    """
+    Valida que el nombre solo contenga letras.
+    """
+    return bool(re.fullmatch(r'[A-Za-z]+', name))
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_student(request, student_code):
+def update_student(request):
+    student_code = request.query_params.get('student_code')
+    
+    if not student_code:
+        return Response({"error": "El código del estudiante es requerido"}, status=status.HTTP_400_BAD_REQUEST)
+    
     try:
         # Buscar al estudiante por su código y obtener el objeto Student asociado
         student = Student.objects.get(user__code=student_code)
+
+        # Obtener los datos a actualizar del request
+        name = request.data.get('name', student.user.name)
+        last_name = request.data.get('last_name', student.user.last_name)
+        
+        # Validar los campos name y last_name
+        if name and not validate_name(name):
+            return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+        if last_name and not validate_name(last_name):
+            return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Actualizar los datos del estudiante
         serializer = StudentSerializerUpdate(student, data=request.data, partial=True)
@@ -94,12 +115,6 @@ def update_student(request, student_code):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Student.DoesNotExist:
         return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
-def validate_name(name):
-    """
-    Valida que el nombre solo contenga letras.
-    """
-    return bool(re.fullmatch(r'[A-Za-z]+', name))
  
     
 #Luisa
