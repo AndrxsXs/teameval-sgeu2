@@ -26,7 +26,7 @@ const VisuallyHiddenInput = styled("input")`
   width: 1px;
 `;
 
-export default function ImportStudents({ onFileChange }) {
+export default function ImportStudents({ onFileChange, isStudent }) {
   const [csvData, setCsvData] = useState([]);
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -64,9 +64,10 @@ export default function ImportStudents({ onFileChange }) {
           // size="sm"
           variant="soft"
           startDecorator={<FileUploadRoundedIcon />}
+          onClick={() => setSelectedFile(null)}
           onChange={handleFileChange}
         >
-          Importar estudiantes
+          Importar {isStudent ? "estudiantes" : "docentes"}
           <VisuallyHiddenInput type="file" accept=".csv" />
         </Button>
 
@@ -129,6 +130,10 @@ export default function ImportStudents({ onFileChange }) {
                   "var(--joy-palette-background-level1)",
                 "--TableCell-paddingY": "4px",
                 "--TableCell-paddingX": "8px",
+                "& thead th:nth-of-type(1)": { width: "15%" },
+                "& thead th:nth-of-type(2)": { width: "20%" },
+                "& thead th:nth-of-type(3)": { width: "15%" },
+                // "& thead th:nth-last-of-type(2)": { width: "10%" },
               }}
             >
               <thead>
@@ -160,7 +165,7 @@ export default function ImportStudents({ onFileChange }) {
               <tfoot>
                 <tr>
                   <td colSpan={Object.keys(csvData[0]).length}>
-                    {csvData.length} personas
+                    {csvData.length - 1} personas
                   </td>
                 </tr>
               </tfoot>

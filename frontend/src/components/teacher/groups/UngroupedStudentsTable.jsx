@@ -44,7 +44,7 @@ export default function UngroupedStudentsTable({
 }) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("code");
-//   const [selected,setSelected] = useState([]);
+  //   const [selected,setSelected] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const course_code = course;
@@ -118,7 +118,7 @@ export default function UngroupedStudentsTable({
     onSelectedStudentsChange(newSelected);
   };
 
-//   const isSelected = (name) => selected.indexOf(name) !== -1;
+  //   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   useEffect(() => {
     const fetchData = () => {
@@ -171,6 +171,10 @@ export default function UngroupedStudentsTable({
           minHeight: 0,
           maxHeight: "calc(100vh - 300px)",
           boxShadow: "sm",
+          transition: "box-shadow 0.3s",
+          "&:hover": {
+            boxShadow: "none",
+          },
           overflow: "auto",
           background: (theme) =>
             `linear-gradient(to right, ${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
@@ -236,24 +240,27 @@ export default function UngroupedStudentsTable({
                 const isItemSelected =
                   selectedStudents.indexOf(row.code) !== -1;
                 const labelId = `enhanced-table-checkbox-${index}`;
-
+                const id = crypto.randomUUID();
                 return (
                   <tr
                     onClick={(event) => handleClick(event, row.code)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.name}
+                    key={id}
                     // selected={isItemSelected}
                     style={
-                      isItemSelected
+                      (isItemSelected
                         ? {
                             "--TableCell-dataBackground":
                               "var(--TableCell-selectedBackground)",
                             "--TableCell-headBackground":
                               "var(--TableCell-selectedBackground)",
                           }
-                        : {}
+                        : {},
+                      {
+                        cursor: "pointer",
+                      })
                     }
                   >
                     <th scope="row">
@@ -267,11 +274,17 @@ export default function UngroupedStudentsTable({
                         sx={{ verticalAlign: "top" }}
                       />
                     </th>
-                    <td>{row.code}</td>
                     <td>
-                      {row.name} {""} {row.last_name}
+                      <Typography level="body-xs">{row.code}</Typography>
                     </td>
-                    <td>{row.email}</td>
+                    <td>
+                      <Typography level="body-xs">
+                        {row.name} {row.last_name}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-xs">{row.email}</Typography>
+                    </td>
                   </tr>
                 );
               }

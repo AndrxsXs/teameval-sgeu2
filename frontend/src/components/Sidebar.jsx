@@ -56,6 +56,7 @@ export default function Sidebar(props) {
   const location = useLocation();
   const teacherRouteMatch = useMatch("/profesor/curso/:courseId/*");
   const adminRouteMatch = useMatch("admin/*");
+  const studentRouteMatch = useMatch("estudiante/*");
 
   return (
     <Sheet
@@ -63,6 +64,10 @@ export default function Sidebar(props) {
       className="Sidebar"
       sx={{
         boxShadow: "md",
+        "&:hover": {
+          boxShadow: "none",
+        },
+        transition: "box-shadow 0.3s",
         position: "sticky",
         height: "100dvh",
         // width: 'var(--Sidebar-width)',
@@ -138,6 +143,16 @@ export default function Sidebar(props) {
                 isSelected = matchPath(
                   {
                     path: `${adminRouteMatch.pathnameBase}${
+                      route.split(".")[1]
+                    }`,
+                    end: true,
+                  },
+                  location.pathname
+                );
+              } else if (studentRouteMatch) {
+                isSelected = matchPath(
+                  {
+                    path: `${studentRouteMatch.pathnameBase}${
                       route.split(".")[1]
                     }`,
                     end: true,

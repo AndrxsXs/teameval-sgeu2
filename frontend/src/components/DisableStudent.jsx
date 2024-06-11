@@ -5,11 +5,11 @@ import { ACCESS_TOKEN } from "../constants";
 
 import { Button, Box, Typography } from "@mui/joy";
 
-import ModalFrame from "../components/ModalFrame";
+import ModalFrame from "./ModalFrame";
 
 import api from "../api";
 
-export default function DisableUser(props) {
+export default function DisableStudent(props) {
   const { user, endpoint } = props;
 
   const [loading, setLoading] = useState(false);
@@ -25,15 +25,16 @@ export default function DisableUser(props) {
 
   const handleDisableUser = async () => {
     const token = localStorage.getItem(ACCESS_TOKEN);
-    // console.log(user.code);
-    // console.log(endpoint);
     await api
-      .patch(
-        `${endpoint}?user_code=${user.code}`,
+      .post(
+        `${endpoint}`,
         {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          params: {
+            user_code: user.code,
           },
         }
       )
@@ -48,15 +49,15 @@ export default function DisableUser(props) {
           })
         );
         setLoading(false);
-        handleCloseModal(false);
         window.dispatchEvent(new Event("user-disabled"));
+        handleCloseModal(false);
       })
       .catch((error) => {
         // console.log("Error: ", error.response.data.error);
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.response.data.error}`,
+              message: `${error.response.data.message}`,
               severity: "danger",
             },
           })
@@ -88,22 +89,14 @@ export default function DisableUser(props) {
           sx={{
             minWidth: "500px",
             minHeight: "50px",
+            maxWidth: "300px",
           }}
         >
           Está a punto de deshabilitar a{" "}
           <strong>
             {user.name} {user.last_name}
           </strong>
-          .
-          {/* <br />
-                    El usuario no podrá acceder a su cuenta.
-                    <br />
-                    Se puede {' '}<strong>
-                    <Typography color='success'>
-                        habilitar
-                    </Typography>
-                    </strong> {' '}
-                    nuevamente en cualquier momento. */}
+          . El usuario no podrá acceder a su cuenta y desaparecerá de este curso y de algún grupo en el que esté.
         </Typography>
         <Box
           sx={{

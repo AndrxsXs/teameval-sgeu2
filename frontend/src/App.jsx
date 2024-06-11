@@ -134,11 +134,11 @@ function App() {
           errorElement={<NotFound />}
         >
           <Route index element={<Grades />} />
-          <Route path="curso" element={<ViewCursoStudent />} />
-          <Route path="curso/rubrica" element={<ViewRubric />} />
+          <Route path="evaluar/:curso" element={<ViewCursoStudent />} />
+          <Route path="./rubrica" element={<ViewRubric />} />
 
           <Route path="resultados" element={<Result />} />
-          <Route path="resultados/calificación" element={<RubricResult />} />
+          <Route path="resultados/:calificación" element={<RubricResult />} />
 
           <Route path="retroalimentacion" element={<Feedback />} />
           <Route path="retroalimentacion/feedback" element={<ViewFeedback />} />

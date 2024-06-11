@@ -42,7 +42,7 @@ export default function CreateStudent(props) {
       // console.log(response);
       switch (response.status) {
         case 201:
-          window.dispatchEvent(new Event("userCreated"));
+          window.dispatchEvent(new Event("user-created"));
           window.dispatchEvent(
             new CustomEvent("responseEvent", {
               detail: {

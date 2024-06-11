@@ -35,7 +35,7 @@ function RubricCard({ rubric }) {
           padding: 2,
           transition: "box-shadow 0.3s",
           "&:hover": {
-            boxShadow: "md",
+            boxShadow: "none",
           },
           overflow: "hidden",
         }}
@@ -111,7 +111,7 @@ export default function RubricList() {
           flexWrap: "wrap",
           gap: 2,
           overflow: "auto",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           alignContent: "start",
         }}
       >
