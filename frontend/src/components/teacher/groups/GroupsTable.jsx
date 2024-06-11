@@ -17,13 +17,12 @@ import Box from "@mui/joy/Box";
 import CircularProgress from "@mui/joy/CircularProgress";
 import Typography from "@mui/joy/Typography";
 
+import IconButton from "@mui/joy/IconButton";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useParams } from "react-router";
+
 const headCells = [
-  //   {
-  //     id: "code",
-  //     numeric: false,
-  //     disablePadding: true,
-  //     label: "Nombre clave",
-  //   },
   {
     id: "name",
     numeric: false,
@@ -51,23 +50,142 @@ const headCells = [
 ];
 
 function RowMenu(props) {
-  const { user } = props;
+  const { target } = props;
 
   return (
     <Box
       // size='sm'
       sx={{ display: "flex", gap: 1 }}
     >
-      <EditUser user={user} />
-      <DisableUser user={user} />
+      <EditUser user={target} />
+      <DisableUser user={target} />
     </Box>
+  );
+}
+
+function Row(props) {
+  const { row } = props;
+  const [students, setStudents] = useState([]);
+  const [open, setOpen] = useState(props.initialOpen || false);
+  const { courseId } = useParams();
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      await api
+        .get(`api/group_detail/${courseId}/${row.id}/`)
+        .then((response) => {
+          // console.log(response.data.students);
+          setStudents(response.data.students);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+
+    if (open) {
+      fetchStudents();
+    }
+  }, [open, courseId, row.id]);
+
+  return (
+    <Fragment>
+      <tr>
+        <td
+          onClick={() => setOpen(!open)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <IconButton
+            aria-label="expand row"
+            variant="plain"
+            color="neutral"
+            size="sm"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </td>
+        <td
+          onClick={() => setOpen(!open)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <Typography level="body-xs">{row.name}</Typography>
+        </td>
+        <td
+          onClick={() => setOpen(!open)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <Typography level="body-xs">{row.assigned_project}</Typography>
+        </td>
+        <td
+          onClick={() => setOpen(!open)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <Typography level="body-xs">{row.student_count}</Typography>
+        </td>
+        <td>
+          <RowMenu target={row} />
+        </td>
+      </tr>
+      <tr>
+        <td style={{ height: 0, padding: 0 }} colSpan={5}>
+          {open && (
+            <Sheet
+              variant="soft"
+              sx={{
+                p: 1,
+                pl: 6,
+                boxShadow: "inset 0 3px 6px 0 rgba(0 0 0 / 0.08)",
+              }}
+            >
+              <Typography level="title-md">
+                Estudiantes del grupo {row.name}
+              </Typography>
+              <Table
+                borderAxis="bothBetween"
+                size="sm"
+                aria-label="Estudiantes del grupo"
+                sx={{
+                  "--TableCell-paddingX": "0.5rem",
+                  "& > thead th:nth-of-type(1)": {
+                    width: "20%",
+                  },
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((row) => (
+                    <tr key={row.student_code}>
+                      <th scope="row">{row.student_code}</th>
+                      <td>{row.student_name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Sheet>
+          )}
+        </td>
+      </tr>
+    </Fragment>
   );
 }
 
 export default function GroupsTable({ course }) {
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("code");
-  //   const [selected, setSelected] = useState([]);
+  const [orderBy, setOrderBy] = useState("name");
+  const [selected, setSelected] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -77,36 +195,14 @@ export default function GroupsTable({ course }) {
     setOrderBy(property);
   };
 
-  //   const handleSelectAllClick = (event) => {
-  //     if (event.target.checked) {
-  //       const newSelected = rows.map((n) => n.name);
-  //       setSelected(newSelected);
-  //       return;
-  //     }
-  //     setSelected([]);
-  //   };
-
-  //   const handleClick = (event, name) => {
-  //     const selectedIndex = selected.indexOf(name);
-  //     let newSelected = [];
-
-  //     if (selectedIndex === -1) {
-  //       newSelected = newSelected.concat(selected, name);
-  //     } else if (selectedIndex === 0) {
-  //       newSelected = newSelected.concat(selected.slice(1));
-  //     } else if (selectedIndex === selected.length - 1) {
-  //       newSelected = newSelected.concat(selected.slice(0, -1));
-  //     } else if (selectedIndex > 0) {
-  //       newSelected = newSelected.concat(
-  //         selected.slice(0, selectedIndex),
-  //         selected.slice(selectedIndex + 1)
-  //       );
-  //     }
-
-  //     setSelected(newSelected);
-  //   };
-
-  //   const isSelected = (name) => selected.indexOf(name) !== -1;
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelected = rows.map((n) => n.name);
+      setSelected(newSelected);
+      return;
+    }
+    setSelected([]);
+  };
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -120,7 +216,7 @@ export default function GroupsTable({ course }) {
         })
         .then((response) => {
           setRows(response.data);
-          //   console.log(rows);
+          // console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
@@ -134,7 +230,6 @@ export default function GroupsTable({ course }) {
     window.addEventListener("group-created", fetchGroups);
     window.addEventListener("group-updated", fetchGroups);
     window.addEventListener("group-deleted", fetchGroups);
-
   }, [course]);
 
   return (
@@ -198,72 +293,25 @@ export default function GroupsTable({ course }) {
             "& thead th": {
               paddingY: "12px",
             },
-            "& thead th:nth-of-type(1)": { width: "15%" },
-            "& thead th:nth-of-type(2)": { width: "20%" },
-            "& thead th:nth-of-type(3)": { width: "25%" },
-            "& thead th:last-of-type": { width: "20%" },
 
             "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
           }}
         >
           <EnhancedTableHead
-            // numSelected={selected.length}
+            numSelected={selected.length}
             order={order}
             orderBy={orderBy}
-            // onSelectAllClick={handleSelectAllClick}
+            onSelectAllClick={handleSelectAllClick}
             onRequestSort={handleRequestSort}
             rowCount={rows.length}
             headCells={headCells}
             showActions
-            // showEmptyColumn
+            showEmptyColumn
           />
           <tbody>
-            {stableSort(rows, getComparator(order, orderBy)).map(
-              (row, index) => {
-                // const isItemSelected =
-                //   selected.indexOf(row.code) !== -1;
-                // const labelId = `enhanced-table-checkbox-${index}`;
-
-                return (
-                  <tr
-                    // onClick={(event) => handleClick(event, row.code)}
-                    // role="checkbox"
-                    // aria-checked={isItemSelected}
-                    // tabIndex={-1}
-                    key={row.name}
-                    // selected={isItemSelected}
-                    // style={
-                    //   isItemSelected
-                    //     ? {
-                    //         "--TableCell-dataBackground":
-                    //           "var(--TableCell-selectedBackground)",
-                    //         "--TableCell-headBackground":
-                    //           "var(--TableCell-selectedBackground)",
-                    //       }
-                    //     : {}
-                    // }
-                  >
-                    {/* <th scope="row">
-                      <Checkbox
-                        checked={isItemSelected}
-                        slotProps={{
-                          input: {
-                            "aria-labelledby": labelId,
-                          },
-                        }}
-                        sx={{ verticalAlign: "top" }}
-                      />
-                    </th> */}
-                    <td>{row.name}</td>
-                    <td>{row.assigned_project}</td>
-                    <td>{row.student_count}</td>
-                    <td>
-                      <RowMenu user={row} />
-                    </td>
-                  </tr>
-                );
-              }
-            )}
+            {stableSort(rows, getComparator(order, orderBy)).map((row) => {
+              return <Row key={row.id} row={row} />;
+            })}
           </tbody>
         </Table>
         {loading ? (
