@@ -84,6 +84,12 @@ def validate_name(name):
     """
     return bool(re.fullmatch(r'[A-Za-z]+', name))
 
+def validate_code(code):
+    """
+    Valida que el código solo contenga letras y números.
+    """
+    return bool(re.fullmatch(r'[A-Za-z0-9]+', code))
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_student(request):
@@ -99,23 +105,32 @@ def update_student(request):
         # Obtener los datos a actualizar del request
         name = request.data.get('name', student.user.name)
         last_name = request.data.get('last_name', student.user.last_name)
-        
-        # Validar los campos name y last_name
+        code = request.data.get('code', student.user.code)
+
+        # Validar los campos name, last_name y code
         if name and not validate_name(name):
             return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
         if last_name and not validate_name(last_name):
             return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+        if code and not validate_code(code):
+            return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Actualizar los datos del estudiante
-        serializer = StudentSerializerUpdate(student, data=request.data, partial=True)
+        student_data = {
+            'user': {
+                'name': name,
+                'last_name': last_name,
+                'code': code
+            }
+        }
+        serializer = StudentSerializerUpdate(student, data=student_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Los datos del estudiante han sido actualizados exitosamente"}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Student.DoesNotExist:
-        return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
- 
+        return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND) 
     
 #Luisa
 #Editar profesor y administrador
@@ -138,11 +153,13 @@ def update_user(request):
         email = request.data.get('email', user.email)
         code = request.data.get('code', user.code)
         
-        # Validar los campos name y last_name
-        if not validate_name(name):
+        # Validar los campos name, last_name y code
+        if name and not validate_name(name):
             return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
-        if not validate_name(last_name):
+        if last_name and not validate_name(last_name):
             return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+        if code and not validate_code(code):
+            return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Actualizar los datos del usuario
         user_data = {
@@ -175,8 +192,7 @@ def update_user(request):
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
-        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)    
-
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 #Luisa
 #Informacion profesor
 @api_view(["GET"])
@@ -264,45 +280,6 @@ def list_user_teachers(request):
     teachers = User.objects.filter(role=User.TEACHER)
     serializer = UserSerializer(teachers, many=True)
     return Response(serializer.data)
-
-#Luisa
-#editar los datos del curso
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def update_course(request, course_id):
-    data = request.data
-    print("Datos recibidos:", data)  # Depuración: imprimir datos recibidos
-
-    try:
-        course = Course.objects.get(id=course_id)
-    except Course.DoesNotExist:
-        return Response(
-            {"error": "El curso con el ID proporcionado no existe."},
-            status=status.HTTP_404_NOT_FOUND,
-        )
-
-    if "user_teacher" in data:
-        try:
-            user_teacher = User.objects.get(code=data.get("user_teacher"))
-            print("Usuario encontrado:", user_teacher)  # Depuración: imprimir usuario encontrado
-            course.user_teacher = user_teacher
-        except User.DoesNotExist:
-            print("Código de usuario no encontrado:", data.get("user_teacher"))  # Depuración: imprimir código no encontrado
-            return Response(
-                {"error": "El código de usuario proporcionado no es válido."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    course.name = data.get("name", course.name)
-    course.code = data.get("code", course.code)
-    course.academic_period = data.get("academic_period", course.academic_period)
-
-    serializer_course = CourseSerializer(course, data=request.data, partial=True)
-    if serializer_course.is_valid():
-        serializer_course.save()
-        return Response(serializer_course.data, status=status.HTTP_200_OK)
-    
-    return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Luisa
 #Deshabilitar estudiante de un curso
