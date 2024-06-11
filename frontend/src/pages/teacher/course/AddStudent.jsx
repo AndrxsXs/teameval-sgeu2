@@ -9,11 +9,17 @@ import api from "../../../api";
 
 import { useParams } from "react-router";
 import ImportUsersModal from "../../../components/teacher/ImportUsersModal";
+import SearchField from "../../../components/admin/SearchField";
 
 export default function AddStudent() {
   const { courseId } = useParams();
   const [course, setCourse] = useState({});
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -63,7 +69,7 @@ export default function AddStudent() {
       >
         {!loading ? (
           <Typography level="h2" component="h1">
-              {course.name}
+            {course.name}
           </Typography>
         ) : (
           <Skeleton
@@ -91,7 +97,8 @@ export default function AddStudent() {
           <ImportUsersModal courseId={courseId} isStudent />
         </Box>
       </Box>
-      <StudentTable course={courseId} />
+      <SearchField onSearchChange={handleSearchChange} />
+      <StudentTable searchTerm={searchTerm} course={courseId} />
     </>
   );
 }
