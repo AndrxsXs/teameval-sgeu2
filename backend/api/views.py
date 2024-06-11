@@ -416,11 +416,11 @@ def completed_evaluations(request, student_code):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def import_student(request):
-    csv_file = request.FILES["csv_file"]  # El nombre del campo en el formulario debe ser "csv_file"
-    course_code = request.GET.get("course_code")  # Obtener el código del curso
+    csv_file = request.FILES["csv_file"]
+    course_code = request.GET.get("course_code")
     if not course_code:
         return Response({"message": "El código del curso es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -428,8 +428,14 @@ def import_student(request):
 
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=",")
-    next(reader)  # Saltar la cabecera del CSV debido a que "email" no tiene el formato que es, entonces toca saltarlo
+    
+    # Detectar el delimitador utilizado en el archivo CSV
+    sniffer = csv.Sniffer()
+    dialect = sniffer.sniff(io_string.read(1024))
+    io_string.seek(0)
+
+    reader = csv.reader(io_string, delimiter=dialect.delimiter)
+    next(reader)  # Saltar la cabecera del CSV
 
     omitted_students = []
 
@@ -446,11 +452,10 @@ def import_student(request):
                 {"message": "El archivo CSV tiene un formato incorrecto"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         try:
             student = Student.objects.get(user__code=student_data["code"])
         except Student.DoesNotExist:
-            # Crear un nuevo estudiante si no existe
             password = User.default_password(student_data["name"], student_data["code"], student_data["last_name"])
             user_data = student_data.copy()
             user_data["role"] = User.STUDENT
@@ -461,30 +466,38 @@ def import_student(request):
                 student = Student.objects.create(user=user)
             else:
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Agregar el estudiante al curso si no está ya inscrito
+
         if course not in student.courses_user_student.all():
             student.courses_user_student.add(course)
         else:
-            omitted_students.append(f"{student_data['name']} {student_data['last_name']}") #ignora los estudiantes ya agregados al curso
+            omitted_students.append(f"{student_data['name']} {student_data['last_name']}")
 
     message = "Estudiantes importados exitosamente."
     if omitted_students:
-        message += f" Sin embargo, estos estudiantes fueron omitidos porque ya están en el curso: {', '.join(omitted_students)}."
+        message += " Sin embargo, se han omitido estudiantes repetidos."
 
     return Response(
         {"message": message},
         status=status.HTTP_201_CREATED,
     )
-    
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_teacher(request):
     csv_file = request.FILES["csv_file"]
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    reader = csv.reader(io_string, delimiter=",")
-    next(reader)
+    
+    # Detectar el delimitador utilizado en el archivo CSV
+    sniffer = csv.Sniffer()
+    dialect = sniffer.sniff(io_string.read(1024))
+    io_string.seek(0)
+    
+    reader = csv.reader(io_string, delimiter=dialect.delimiter)
+    next(reader)  # Saltar la cabecera del CSV
+
+    omitted_teachers = []
+
     for row in reader:
         try:
             teacher_data = {
@@ -492,30 +505,41 @@ def import_teacher(request):
                 "last_name": row[1],
                 "code": row[2],
                 "email": row[3],
-                "phone": row[4],
+                "phone": row[4] if len(row) > 4 else None,  # phone es opcional
             }
         except IndexError:
             return Response(
                 {"message": "El archivo CSV tiene un formato incorrecto"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer_teacher = TeacherSerializer(data=teacher_data)
-        if serializer_teacher.is_valid():
-            try:
-                serializer_teacher.save()
-            except:
-                return Response(
-                    {"message": f"El usuario con el código {row[2]} ya existe"},
-                    status=status.HTTP_409_CONFLICT,
-                )
-        else:
-            return Response(
-                serializer_teacher.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+        
+        if not teacher_data["phone"]:  # Si el campo phone está vacío, establecerlo como None
+            teacher_data["phone"] = None
+        
+        try:
+            user = User.objects.get(code=teacher_data["code"])
+            omitted_teachers.append(f"{teacher_data['name']} {teacher_data['last_name']}")
+        except User.DoesNotExist:
+            user_data = teacher_data.copy()
+            user_data["role"] = User.TEACHER
+            user_data["password"] = User.default_password(teacher_data["name"], teacher_data["code"], teacher_data["last_name"])
+            user_serializer = UserSerializer(data=user_data)
+            
+            if user_serializer.is_valid():
+                user = user_serializer.save()
+                Teacher.objects.create(user=user, phone=teacher_data["phone"])
+            else:
+                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    message = "Profesores importados exitosamente."
+    if omitted_teachers:
+        message += " Sin embargo, se han omitido profesores repetidos."
+
     return Response(
-        {"message": "Profesores importados exitosamente"},
+        {"message": message},
         status=status.HTTP_201_CREATED,
     )
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
