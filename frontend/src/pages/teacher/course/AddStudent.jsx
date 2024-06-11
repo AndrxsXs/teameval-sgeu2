@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import api from "../../../api";
 
 import { useParams } from "react-router";
-import ImportStudentModal from "../../../components/teacher/ImportStudentModal";
+import ImportUsersModal from "../../../components/teacher/ImportUsersModal";
 
 export default function AddStudent() {
   const { courseId } = useParams();
@@ -88,7 +88,7 @@ export default function AddStudent() {
           }}
         >
           <CreateStudent course={courseId} />
-          <ImportStudentModal courseId={courseId} />
+          <ImportUsersModal courseId={courseId} isStudent />
         </Box>
       </Box>
       <StudentTable course={courseId} />
