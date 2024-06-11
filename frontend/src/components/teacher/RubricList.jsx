@@ -35,7 +35,7 @@ function RubricCard({ rubric }) {
           padding: 2,
           transition: "box-shadow 0.3s",
           "&:hover": {
-            boxShadow: "md",
+            boxShadow: "none",
           },
           overflow: "hidden",
         }}

@@ -42,12 +42,12 @@ const headCells = [
     disablePadding: false,
     label: "Número de estudiantes",
   },
-//   {
-//     id: "actions",
-//     numeric: false,
-//     disablePadding: false,
-//     label: "Acciones",
-//   },
+  //   {
+  //     id: "actions",
+  //     numeric: false,
+  //     disablePadding: false,
+  //     label: "Acciones",
+  //   },
 ];
 
 function RowMenu(props) {
@@ -130,6 +130,11 @@ export default function GroupsTable({ course }) {
         });
     };
     fetchGroups();
+
+    window.addEventListener("group-created", fetchGroups);
+    window.addEventListener("group-updated", fetchGroups);
+    window.addEventListener("group-deleted", fetchGroups);
+
   }, [course]);
 
   return (
@@ -148,6 +153,10 @@ export default function GroupsTable({ course }) {
           flexShrink: 1,
           minHeight: 0,
           boxShadow: "sm",
+          "&:hover": {
+            boxShadow: "none",
+          },
+          transition: "box-shadow 0.3s",
           overflow: "auto",
           background: (theme) =>
             `linear-gradient(to right, ${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
