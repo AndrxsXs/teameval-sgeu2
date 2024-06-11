@@ -122,7 +122,6 @@ export default function UserTable(props) {
 
   return (
     <React.Fragment>
-      {/* <SearchField onSearchChange={handleSearchChange} /> */}
       <Sheet
         className="TableContainer"
         variant="outlined"
