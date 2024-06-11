@@ -7,16 +7,38 @@ import Table from "@mui/joy/Table";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Box from "@mui/joy/Box";
-import Chip from "@mui/joy/Chip";
 import CircularProgress from "@mui/joy/CircularProgress";
 
 import { ACCESS_TOKEN } from "../../constants";
 
 import { userStatus } from "../../utils/userStatus";
+import { stableSort } from "../../utils/stableSort";
+import { getComparator } from "../../utils/getComparator";
 
-import SearchField from "../admin/SearchField";
+import EnhancedTableHead from "../EnhacedTableHead";
 // import EditUser from "../../components/EditUser";
 import DisableStudent from "../../components/DisableStudent";
+
+const columns = [
+  {
+    id: "code",
+    numeric: false,
+    disablePadding: true,
+    label: "Código",
+  },
+  {
+    id: "name",
+    numeric: false,
+    disablePadding: false,
+    label: "Nombre",
+  },
+  {
+    id: "email",
+    numeric: false,
+    disablePadding: false,
+    label: "Correo electrónico",
+  },
+];
 
 function RowMenu(props) {
   const { user, endpoint } = props;
@@ -33,11 +55,40 @@ function RowMenu(props) {
 }
 
 export default function StudentTable(props) {
-  const { course } = props;
+  const { course, searchTerm } = props;
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("code");
+  const [selected, setSelected] = useState([]);
 
   const disableStudentEndpoint = `api/unregister_student/${course}/`;
+
+  const filteredRows = searchTerm
+    ? rows.filter(
+        (row) =>
+          row.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : rows;
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelected = rows.map((n) => n.name);
+      setSelected(newSelected);
+      return;
+    }
+    setSelected([]);
+  };
 
   useEffect(() => {
     const fetchData = () => {
@@ -81,16 +132,17 @@ export default function StudentTable(props) {
 
     window.addEventListener("user-created", handleUserCreated);
     window.addEventListener("user-disabled", fetchData);
+    window.addEventListener("user-edited", fetchData);
 
     return () => {
       window.removeEventListener("user-created", handleUserCreated);
       window.removeEventListener("user-disabled", fetchData);
+      window.removeEventListener("user-edited", fetchData);
     };
   }, [course]);
 
   return (
     <React.Fragment>
-      <SearchField />
       <Sheet
         className="TableContainer"
         variant="outlined"
@@ -103,35 +155,13 @@ export default function StudentTable(props) {
           height: "100%",
           borderRadius: "sm",
           flexShrink: 1,
+          overflow: "auto",
           minHeight: 0,
           boxShadow: "sm",
           "&:hover": {
             boxShadow: "none",
           },
           transition: "box-shadow 0.3s",
-          overflow: "auto",
-          background: (theme) =>
-            `linear-gradient(to right, ${theme.vars.palette.background.surface} 30%, rgba(255, 255, 255, 0)),
-            linear-gradient(to right, rgba(255, 255, 255, 0), ${theme.vars.palette.background.surface} 70%) 0 100%,
-            radial-gradient(
-              farthest-side at 0 50%,
-              rgba(0, 0, 0, 0.12),
-              rgba(0, 0, 0, 0)
-            ),
-            radial-gradient(
-                farthest-side at 100% 50%,
-                rgba(0, 0, 0, 0.12),
-                rgba(0, 0, 0, 0)
-              )
-              0 100%`,
-          backgroundSize:
-            "40px calc(100% - var(--TableCell-height)), 40px calc(100% - var(--TableCell-height)), 14px calc(100% - var(--TableCell-height)), 14px calc(100% - var(--TableCell-height))",
-          backgroundRepeat: "no-repeat",
-          backgroundAttachment: "local, local, scroll, scroll",
-          backgroundPosition:
-            "var(--Table-firstColumnWidth) var(--TableCell-height), calc(100% - var(--Table-lastColumnWidth)) var(--TableCell-height), var(--Table-firstColumnWidth) var(--TableCell-height), calc(100% - var(--Table-lastColumnWidth)) var(--TableCell-height)",
-          backgroundColor: "background.surface",
-          "--Table-lastColumnWidth": "20%",
         }}
       >
         <Table
@@ -151,78 +181,52 @@ export default function StudentTable(props) {
               paddingY: "12px",
             },
             "& thead th:nth-of-type(1)": { width: "10%" },
-            "& thead th:nth-of-type(2)": { width: "20%" },
-            "& thead th:nth-of-type(3)": { width: "30%" },
-            "& thead th:nth-last-of-type(2)": { width: "15%" },
-            "& tr > *:last-of-type": {
-              position: "sticky",
-              right: 0,
-              bgcolor: "var(--joy-palette-background-level1)",
+            "& thead th:nth-of-type(2)": { width: "25%" },
+            "& thead th:nth-of-type(3)": { width: "25%" },
+            // "& thead th:nth-last-of-type(2)": { width: "10%" },
+            "& thead th:nth-last-of-type(1)": {
+              width: "20%",
               textAlign: "center",
-              width: "var(--Table-lastColumnWidth)",
             },
-
-            "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
           }}
         >
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Correo electrónico</th>
-              <th>Estado</th>
-              <th
-                aria-label="Acciones"
-                style={{
-                  width: "var(--Table-lastColumnWidth)",
-                  maxWidth: "fit-content",
-                }}
-              >
-                Acciones
-              </th>
-            </tr>
-          </thead>
+          <EnhancedTableHead
+            numSelected={selected.length}
+            order={order}
+            orderBy={orderBy}
+            onSelectAllClick={handleSelectAllClick}
+            onRequestSort={handleRequestSort}
+            rowCount={rows.length}
+            headCells={columns}
+            showActions
+          />
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.code}>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">{row.code}</Typography>
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">
-                    {row.name} {""} {row.last_name}
-                  </Typography>
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <Typography level="body-xs">{row.email}</Typography>
-                </td>
-                <td
-                // style={{ paddingInline: "16px" }}
-                >
-                  {/* <Typography level="body-xs">{row.status}</Typography> */}
-                  {row.status === "Habilitado" ? (
-                    <Chip
-                      color="success"
-                      size="sm"
-                      // startDecorator={<Check />}
-                    >
-                      {row.status}
-                    </Chip>
-                  ) : (
-                    <Chip
-                      color="danger"
-                      size="sm"
-                      // startDecorator={<Cancel />}
-                    >
-                      {row.status}
-                    </Chip>
-                  )}
-                </td>
-                <td style={{ paddingInline: "16px" }}>
-                  <RowMenu user={row} endpoint={disableStudentEndpoint} />
-                </td>
-              </tr>
-            ))}
+            {stableSort(filteredRows, getComparator(order, orderBy)).map(
+              (row) => {
+                return (
+                  <tr key={row.code}>
+                    <td>
+                      <Typography level="body-xs">{row.code}</Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-xs">
+                        {row.name} {""} {row.last_name}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography level="body-xs">{row.email}</Typography>
+                    </td>
+                    <td>
+                      <RowMenu
+                        user={row}
+                        endpoint={disableStudentEndpoint}
+                        enableRoute={disableStudentEndpoint}
+                      />
+                    </td>
+                  </tr>
+                );
+              }
+            )}
           </tbody>
         </Table>
 
@@ -237,7 +241,10 @@ export default function StudentTable(props) {
               width: "100%",
               height: "100%",
               minHeight: "41px",
-              borderTop: rows && rows.length < 1 ? "transparent" : "1px solid",
+              borderTop:
+                filteredRows && filteredRows.length < 1
+                  ? "transparent"
+                  : "1px solid",
               borderTopColor: "divider",
             }}
           >
