@@ -1,6 +1,7 @@
 import csv
 import io
 import re
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
@@ -303,6 +304,14 @@ def unregister_student(request, course_code):
     # Verifica si el estudiante está inscrito en el curso
     if course not in student.courses_user_student.all():
         return Response({"message": "El estudiante no está inscrito en este curso"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Verifica si el estudiante ha completado alguna evaluación en el curso
+    has_completed_evaluation = EvaluationCompleted.objects.filter(
+        Q(evaluated=student) & Q(evaluation__course=course) & Q(completed=True)
+    ).exists()
+    
+    if has_completed_evaluation:
+        return Response({"message": "El estudiante ya ha completado una evaluación en este curso y no puede deshabilitarse"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Elimina la relación entre el estudiante y el curso específico
     student.courses_user_student.remove(course)
@@ -806,12 +815,7 @@ def update_rubric(request):
         return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-<<<<<<< HEAD
-    
-=======
 
-        
->>>>>>> c5e1887d9cdc704be08dfc7de585df01216f3a41
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 # def create_rubric(request, course_code, scale_id):

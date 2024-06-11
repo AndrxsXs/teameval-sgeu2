@@ -281,7 +281,6 @@ class Evaluation(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
 
-    completed = models.BooleanField(default=False)
     
     #al que evaluo
 '''
