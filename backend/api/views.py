@@ -1,5 +1,6 @@
 import csv
 import io
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
@@ -91,13 +92,21 @@ def update_student(request, student_code):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Student.DoesNotExist:
         return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+def validate_name(name):
+    """
+    Valida que el nombre solo contenga letras.
+    """
+    return bool(re.fullmatch(r'[A-Za-z]+', name))
+ 
     
 #Luisa
-#Editar profesor
+#Editar profesor y administrador
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_user(request):
     user_code = request.query_params.get('user_code')
+    
     # Verificar si el usuario que realiza la solicitud es un administrador
     if not request.user.is_superuser:
         return Response({"error": "No tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
@@ -106,12 +115,24 @@ def update_user(request):
         # Buscar al usuario por código
         user = User.objects.get(code=user_code)
         
+        # Obtener los datos a actualizar del request
+        name = request.data.get('name', user.name)
+        last_name = request.data.get('last_name', user.last_name)
+        email = request.data.get('email', user.email)
+        code = request.data.get('code', user.code)
+        
+        # Validar los campos name y last_name
+        if not validate_name(name):
+            return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+        if not validate_name(last_name):
+            return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+        
         # Actualizar los datos del usuario
         user_data = {
-            'name': request.data.get('name', user.name),
-            'last_name': request.data.get('last_name', user.last_name),
-            'email': request.data.get('email', user.email),
-            'code': request.data.get('code', user.code),
+            'name': name,
+            'last_name': last_name,
+            'email': email,
+            'code': code,
         }
         user_serializer = TeacherSerializer(user, data=user_data, partial=True)
         if user_serializer.is_valid():
@@ -137,8 +158,8 @@ def update_user(request):
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
-        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)    
+
 #Luisa
 #Informacion profesor
 @api_view(["GET"])
