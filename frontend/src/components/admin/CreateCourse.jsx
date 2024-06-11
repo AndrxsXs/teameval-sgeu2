@@ -75,62 +75,18 @@ export default function CreateCourse() {
 
     const token = localStorage.getItem("ACCESS_TOKEN");
 
-    try {
-      if (selectedFile) {
-        const file = new FormData();
-        file.append("csv_file", selectedFile);
-        try {
-          const response = await api.post("/api/import_student/", file, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            params: {
-              course_code: formData.code,
-            },
-          });
-          const data = await response.data;
-          console.log(data);
-          if (response.status === 201) {
-            setIsModalOpen(false);
-            window.dispatchEvent(
-              new CustomEvent("responseEvent", {
-                detail: {
-                  message: response.data.message,
-                  severity: "success",
-                },
-              })
-            );
-            // setLoading(false);
-          }
-        } catch (error) {
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: error.response.data.message,
-                severity: "danger",
-              },
-            })
-          );
-          setLoading(false);
-        }
-      }
-
-      const response = await api.post(route, formData, {
+    api
+      .post(route, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-
-      if (response.status === 201) {
-        const data = await response.data;
-        console.log(data);
-
-        // Emitir el evento 'courseCreated' después de crear un nuevo usuario
-        window.dispatchEvent(new Event("courseCreated"));
+      })
+      .then((response) => {
+        window.dispatchEvent(new Event("course-created"));
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: "Curso creado correctamente",
+              message: `${response.data.message}`,
               severity: "success",
             },
           })
@@ -141,22 +97,61 @@ export default function CreateCourse() {
           academic_period: "",
           user_teacher: "",
         });
-      } else {
+        setLoading(false);
+      })
+      .catch((error) => {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${response.statusText}`,
+              message: `${error.response.data.message}`,
               severity: "danger",
             },
           })
         );
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
+        setLoading(false);
+      });
 
     setLoading(false);
     handleCloseModal(false);
+
+    if (selectedFile) {
+      const file = new FormData();
+      file.append("csv_file", selectedFile);
+
+      api
+        .post("/api/import_student/", file, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            course_code: formData.code,
+          },
+        })
+        .then((response) => {
+          window.dispatchEvent(
+            new CustomEvent("responseEvent", {
+              detail: {
+                message: response.data.message,
+                severity: "success",
+              },
+            })
+          );
+          window.dispatchEvent(new Event("course-created"));
+          setLoading(false);
+          setIsModalOpen(false);
+        })
+        .catch((error) => {
+          window.dispatchEvent(
+            new CustomEvent("responseEvent", {
+              detail: {
+                message: error.response.data.message,
+                severity: "danger",
+              },
+            })
+          );
+          setLoading(false);
+        });
+    }
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);

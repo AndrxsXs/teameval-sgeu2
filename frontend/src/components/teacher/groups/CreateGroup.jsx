@@ -21,6 +21,8 @@ export default function CreateGroup({ course }) {
   const [formData, setFormData] = useState({
     name: "",
     code: "",
+    assigned_project: "",
+    student_codes: [],
   });
 
   const [open, setOpen] = useState(false);
@@ -44,52 +46,41 @@ export default function CreateGroup({ course }) {
     const groupData = {
       ...formData,
       // students: selectedStudents,
-      assigned_project: "Proyecto predeterminado", // Puedes asignar un valor predeterminado o dejarlo vacío
       student_codes: selectedStudents, // Asegúrate de que selectedStudents sea un array de códigos de estudiantes
     };
     // console.log(groupData);
-    try {
-      const response = await api.post(
-        `api/create_group/${course}/`,
-        groupData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      // console.log(response);
-      if (response.status === 201) {
-        const data = await response.data;
 
-        setFormData({
-          name: "",
-          code: "",
-        });
-
-        window.dispatchEvent(new Event("groupCreated"));
+    await api
+      .post(`api/create_group/${course}/`, groupData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setFormData(response.data);
+        setLoading(false);
+        setOpen(false);
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${data.message}`,
+              message: "Grupo creado exitosamente",
               severity: "success",
             },
           })
         );
+        window.dispatchEvent(new CustomEvent("group-created"));
+      })
+      .catch((error) => {
         setLoading(false);
-        setOpen(false);
-      }
-    } catch (error) {
-      console.error(error);
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message: `${error.response.data.message ?? error.message}`,
-            severity: "danger",
-          },
-        })
-      );
-    }
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: `${error.response.data.message}`,
+              severity: "danger",
+            },
+          })
+        );
+      });
   };
 
   const handleSelectedStudentsChange = (selectedStudents) => {
@@ -162,13 +153,16 @@ export default function CreateGroup({ course }) {
                       width: "50%",
                     }}
                   >
-                    <FormLabel>Nombre clave</FormLabel>
+                    <FormLabel>Proyecto</FormLabel>
                     <Input
                       size="sm"
-                      placeholder="Nombre clave del grupo"
-                      value={formData.code}
+                      placeholder="Nombre del proyecto"
+                      value={formData.assigned_project}
                       onChange={(e) =>
-                        setFormData({ ...formData, code: e.target.value })
+                        setFormData({
+                          ...formData,
+                          assigned_project: e.target.value,
+                        })
                       }
                       type="text"
                       required
