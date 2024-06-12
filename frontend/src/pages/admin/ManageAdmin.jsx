@@ -61,7 +61,7 @@ export default function ManageAdmin() {
         </Typography>
         <CreateAdmin />
       </Box>
-      <SearchField onSearchChange={handleSearchChange} />
+      <SearchField onSearchChange={handleSearchChange} admin />
 
       <UserTable
         searchTerm={searchTerm}
@@ -69,6 +69,7 @@ export default function ManageAdmin() {
         columns={headCells}
         disableUserRoute="api/disable_user/"
         enableUserRoute="api/enable_user/"
+        admin
       />
     </>
   );
