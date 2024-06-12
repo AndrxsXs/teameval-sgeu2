@@ -1,156 +1,107 @@
+/* eslint-disable react/prop-types */
 import { Fragment, useState } from "react";
 
-import { Box, Sheet, Table, Typography, CircularProgress } from "@mui/joy";
+import Sheet from "@mui/joy/Sheet";
+import Table from "@mui/joy/Table";
+import Textarea from "@mui/joy/Textarea";
 
-export default function CriteriaTable() {
+export default function CriteriaTable(props) {
+  const { headCells } = props;
   const [loading, setLoading] = useState(false);
+  const [rows, setRows] = useState([]);
 
-  const criterios = [
-    {
-      nombre: "Respeto",
-      descripcion:
-        "Respeto a los demás y a las normas de convivencia del lugar",
-    },
-    {
-      nombre: "Responsabilidad",
-      descripcion: "Cumplimiento de las tareas y responsabilidades asignadas",
-    },
-    {
-      nombre: "Puntualidad",
-      descripcion: "Cumplimiento de horarios y fechas establecidas",
-    },
-    {
-      nombre: "Colaboración",
-      descripcion: "Disposición para ayudar y colaborar con los demás",
-    },
-    {
-      nombre: "Comunicación",
-      descripcion: "Capacidad para expresarse y escuchar a los demás",
-    },
-    {
-      nombre: "Trabajo en equipo",
-      descripcion:
-        "Capacidad para trabajar en equipo y alcanzar objetivos comunes",
-    },
-    {
-      nombre: "Creatividad",
-      descripcion: "Capacidad para proponer ideas y soluciones innovadoras",
-    },
-    {
-      nombre: "Iniciativa",
-      descripcion: "Capacidad para tomar decisiones y actuar por cuenta propia",
-    },
-    {
-      nombre: "Adaptabilidad",
-      descripcion: "Capacidad para adaptarse a nuevas situaciones y cambios",
-    },
-    {
-      nombre: "Liderazgo",
-      descripcion: "Capacidad para guiar y motivar a los demás",
-    },
-  ];
+  const handleDescriptionChange = (index, value) => {
+    const updatedStandards = [...rows];
+    updatedStandards[index].description = value;
+  };
+
+  // const handleScaleDescriptionChange = (index, value) => {
+  //   const updatedStandards = [...rows];
+  //   updatedStandards[index].scale_description = value;
+  // };
 
   return (
     <Fragment>
       <Sheet
-        component="section"
         className="TableContainer"
         variant="outlined"
         sx={{
-          display: { xs: "none", sm: "flex" },
-          flexFlow: "column",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          height: "100%",
           borderRadius: "sm",
-          flexShrink: 1,
-          overflow: "auto",
-          minHeight: 0,
+          boxShadow: "xs",
+          height: "100%",
         }}
       >
         <Table
-          aria-labelledby="Tabla de Criterios"
-          stickyHeader
-          hoverRow
           borderAxis="bothBetween"
+          aria-labelledby="Tabla de criterios predeterminados"
+          stickyHeader
           sx={{
             "--TableCell-headBackground":
               "var(--joy-palette-background-level1)",
             "--Table-headerUnderlineThickness": "1px",
             "--TableRow-hoverBackground":
               "var(--joy-palette-background-level1)",
-            "--TableCell-paddingY": "4px",
-            "--TableCell-paddingX": "24px",
-            "& thead th:nth-of-type(1)": { width: "20%" },
+            "--TableCell-paddingY": "0px",
+            "--TableHeader-paddingY": "12px",
+            "--TableCell-paddingX": "0px",
+            "& thead th": {
+              paddingY: "12px",
+              paddingX: "16px",
+            },
+            // "& thead th:nth-of-type(1)": { width: "10%" },
+
+            "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
           }}
         >
+          {/* <EnhancedTableHead
+              // numSelected={selected.length}
+              order={order}
+              orderBy={orderBy}
+              // onSelectAllClick={handleSelectAllClick}
+              onRequestSort={handleRequestSort}
+              rowCount={rows.length}
+              headCells={headCells}
+            /> */}
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Descripción</th>
+              {headCells.map((headCell) => (
+                <th key={headCell.id}>{headCell.label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {criterios.map((criterio) => (
-              <tr key={criterio.nombre}>
+            {rows.map((row, index) => (
+              <tr key={index}>
                 <td>
-                  <Typography level="body-sm">{criterio.nombre}</Typography>
+                  <Textarea
+                    required
+                    size="sm"
+                    variant="plain"
+                    minRows={3}
+                    maxRows={5}
+                    onChange={(e) =>
+                      handleDescriptionChange(index, e.target.value)
+                    }
+                    placeholder="Descripción del criterio"
+                  />
                 </td>
-                <td>
-                  <Typography level="body-xs">
-                    {criterio.descripcion}
-                  </Typography>
-                </td>
+                {/* <td>
+                  <Textarea
+                    required
+                    size="sm"
+                    variant="plain"
+                    minRows={3}
+                    maxRows={5}
+                    onChange={(e) =>
+                      handleScaleDescriptionChange(index, e.target.value)
+                    }
+                    placeholder="1. El integrante del grupo no cumple con..."
+                  />
+                </td> */}
               </tr>
             ))}
           </tbody>
         </Table>
-        {loading ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              minHeight: "41px",
-              borderTop:
-                criterios && criterios.length < 1 ? "transparent" : "1px solid",
-              borderTopColor: "divider",
-            }}
-          >
-            <CircularProgress size="md" />
-            <Typography level="body-xs" sx={{ userSelect: "none" }}>
-              <Fragment>Cargando datos...</Fragment>
-            </Typography>
-          </Box>
-        ) : (
-          <Typography
-            component="span"
-            level="body-xs"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              minHeight: "41px",
-              borderTop:
-                criterios && criterios.length < 1 ? "transparent" : "1px solid",
-              borderTopColor: "divider",
-              userSelect: "none",
-            }}
-          >
-            {criterios && criterios.length === 0 ? (
-              <Fragment>No hay criterios</Fragment>
-            ) : (
-              <Fragment>Nada más por aquí</Fragment>
-            )}
-          </Typography>
-        )}
       </Sheet>
     </Fragment>
   );
