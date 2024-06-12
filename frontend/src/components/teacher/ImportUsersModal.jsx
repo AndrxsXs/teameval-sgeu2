@@ -105,7 +105,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           window.dispatchEvent(
             new CustomEvent("responseEvent", {
               detail: {
-                message: error.response.data.message,
+                message: error.response.data.error,
                 severity: "danger",
               },
             })
