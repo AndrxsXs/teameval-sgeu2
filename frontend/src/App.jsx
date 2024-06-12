@@ -50,7 +50,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import CodePassword from "./components/CodePassword";
 import LoginPage from "./pages/auth/LoginPage";
 import CreatePasswordPage from "./pages/auth/CreatePasswordPage";
-import { CssBaseline } from '@mui/material';
+import { CssBaseline } from "@mui/material";
 // import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {
