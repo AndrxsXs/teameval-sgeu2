@@ -1685,16 +1685,6 @@ def update_course(request):
     except Course.DoesNotExist:
         return Response({"error": "El curso con el código proporcionado no existe."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Validar el campo 'name' si está presente
-    name = data.get('name')
-    if name and not validate_name(name):
-        return Response({"error": "El nombre solo puede contener letras y espacios"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Validar el campo 'code' si está presente
-    code = data.get('code')
-    if code and not validate_code(code):
-        return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales, y debe ser positivo si es numérico"}, status=status.HTTP_400_BAD_REQUEST)
-
     # Actualiza el campo 'user_teacher' si está presente
     user_teacher_code = data.get("user_teacher")
     if user_teacher_code:
@@ -1709,7 +1699,7 @@ def update_course(request):
     serializer_course = CourseSerializer(course, data=data, partial=True)
     if serializer_course.is_valid():
         serializer_course.save()
-        return Response(serializer_course.data, status=status.HTTP_200_OK)
+        return Response({"message": "Curso actualizado con éxito", "data": serializer_course.data}, status=status.HTTP_200_OK)
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
