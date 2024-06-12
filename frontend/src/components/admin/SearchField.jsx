@@ -23,8 +23,15 @@ function DebounceInput(props) {
 }
 
 export default function SearchField(props) {
-  const { onSearchChange } = props;
-  // const [searchValue, setSearchValue] = useState("");
+  const { onSearchChange, admin, teacher, student, course } = props;
+  const placeholder =
+    admin || teacher
+      ? "Cédula, nombre o correo electrónico"
+      : student
+      ? "Código, nombre o correo electrónico"
+      : course
+      ? "Código, nombre, docente o periodo académico"
+      : "";
 
   const handleDebounce = (value) => {
     // setSearchValue(value);
@@ -49,10 +56,21 @@ export default function SearchField(props) {
       }}
     >
       <FormControl sx={{ flex: 1 }} size="sm">
-        <FormLabel>Buscar usuario</FormLabel>
+        <FormLabel>
+          Buscar
+          {admin
+            ? " administrador"
+            : teacher
+            ? " docente"
+            : student
+            ? " rstudiante"
+            : course
+            ? " curso"
+            : ""}
+        </FormLabel>
         <DebounceInput
           size="sm"
-          placeholder="Cédula, nombre o correo electrónico"
+          placeholder={placeholder}
           startDecorator={<SearchIcon />}
           debounceTimeout={500}
           handleDebounce={handleDebounce}
