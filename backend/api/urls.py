@@ -112,6 +112,8 @@ urlpatterns = [
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
     path('enable_user/', views.enable_user, name='enable_user'),
+    #obtiene la nota del estudiante en anonimo
+    path('evaluation_results/', views.evaluation_results, name='evaluation_results'),
 
     
 ]
