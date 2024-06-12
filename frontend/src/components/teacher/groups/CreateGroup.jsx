@@ -75,7 +75,7 @@ export default function CreateGroup({ course }) {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.response.data.message}`,
+              message: `${error.response.data.error}`,
               severity: "danger",
             },
           })
