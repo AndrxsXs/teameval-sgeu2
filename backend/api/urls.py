@@ -19,6 +19,10 @@ urlpatterns = [
     
     path('restore_password/', views.restore_password, name='restore_password'), #Enviar correo para restablecer contraseña
     
+    path('view_notas/', views.view_notas , name='view_notas'), #Boceto informes
+    
+    
+    path('main_report/', views.main_report, name='main_report'), #Boceto main informes
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
 
@@ -26,7 +30,7 @@ urlpatterns = [
     path('student_courses/', views.student_courses, name='student_courses'), #Luisa
 
     #Obtener estudiantes de mi grupo
-    path('group_members/', views.group_members, name='group_members'), #Luisa
+    path('group_members', views.group_members, name='group_members'),
 
     #Muestra la informacion de una rubrica
     path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
@@ -34,7 +38,7 @@ urlpatterns = [
     #Muestra la informacion completa del administrador
     path('admin_info/<str:admin_code>/', views.admin_info, name='admin_info'), #Luisa
 
-    #Muestra la informacion completra del profesor
+    #Muestra la informacion completa del profesor
     path('teacher_info/<str:teacher_code>/', views.teacher_info, name='teacher_info'), #Luisa
 
     #Muestra la informacion completa del curso, profesor y estudiantes que pertenecen al curso
@@ -67,10 +71,10 @@ urlpatterns = [
     path('enable_student/<str:course_code>/', views.enable_student, name='enable_student'), #Luisa
 
     #Editar curso
-    path('update_course/<str:course_code>/', views.update_course, name='update_course'), #Luisa
+    path('update_course', views.update_course, name='update_course'), #Luisa
 
     #Editar rubrica
-    path('update_rubric/<int:rubric_id>/', views.update_rubric, name='update-rubric'), #Luisa
+    path('update_rubric', views.update_rubric, name='update-rubric'), #Luisa
 
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
     path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa
@@ -99,17 +103,13 @@ urlpatterns = [
     #obtener la lista de rubricas con cuerpo
     path('list_rubric/<str:course_code>/', views.list_rubric, name='list_rubric'),
     #realiza la evaluacion el estudiante
-    path('evaluate_student/<int:student_code>/<int:rubric_id>/', views.evaluate_student, name='evaluate_student'),
+    path('evaluate_student/', views.evaluate_student, name='evaluate_student'),
     #crea la evaluacion que van a usar los estudiantes
     path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
     #deshabilita admin y profesor
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
     path('enable_user/', views.enable_user, name='enable_user'),
-
-    
-
-    
 
     
 ]

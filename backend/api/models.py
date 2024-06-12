@@ -274,7 +274,16 @@ class Evaluation(models.Model):
     rubric = models.ForeignKey(
         Rubric, on_delete=models.CASCADE, related_name="evaluations"
     )
+    
+    report = models.ForeignKey(
+        Report, null=True, on_delete=models.PROTECT, related_name="evaluations"
+    )
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
+
+    
     #al que evaluo
+'''
     evaluated = models.ForeignKey( 
         Student, null=True, on_delete=models.PROTECT, related_name="evaluations_student"    #uno a muchos
     )
@@ -282,15 +291,25 @@ class Evaluation(models.Model):
     evaluator = models.ForeignKey(
         Student, null=True, on_delete=models.PROTECT, related_name="evaluations_user"   #uno a uno
     )
-
-    report = models.ForeignKey(
-        Report, null=True, on_delete=models.PROTECT, related_name="evaluations"
+'''
+    
+class EvaluationCompleted(models.Model):
+    
+    evaluated = models.ForeignKey( 
+        Student, null=True, on_delete=models.PROTECT, related_name="evaluations_student"    #uno a muchos
     )
 
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
+    evaluator = models.ForeignKey(
+        Student, null=True, on_delete=models.PROTECT, related_name="evaluations_user"   #uno a uno
+    )
+    
+    evaluation = models.ForeignKey(
+        Evaluation, null=True, on_delete=models.PROTECT, related_name="evaluation"
+    )
 
     completed = models.BooleanField(default=False)
-
+    
+    comment = models.TextField(max_length=100)
 
 class Rating(models.Model):
     #average = models.DecimalField(max_digits=10, decimal_places=3) # Creo que este atributo iria en evaluation
@@ -299,8 +318,8 @@ class Rating(models.Model):
     standard = models.ForeignKey(
         Standard, null=True, on_delete=models.PROTECT, related_name="rating"
     )
-    evaluation = models.ForeignKey(
-        Evaluation, null=True, on_delete=models.PROTECT, related_name="rating"
+    evaluationCompleted = models.ForeignKey(
+        EvaluationCompleted, null=True, on_delete=models.PROTECT, related_name="evaluationCompleted"
     )
 
 
