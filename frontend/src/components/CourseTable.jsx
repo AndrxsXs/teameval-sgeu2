@@ -9,8 +9,10 @@ import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Box from "@mui/joy/Box";
 import CircularProgress from "@mui/joy/CircularProgress";
+import Chip from "@mui/joy/Chip";
 
-import EditCourse from "./EditCourse";
+// import ManageCourse from "./admin/ManageCourse";
+// import EditCourse from "./EditCourse";
 // import DisableCourse from "./DisableCourse"
 
 import { stableSort } from "../utils/stableSort";
@@ -50,20 +52,20 @@ const headCells = [
     label: "Estudiantes",
   },
 ];
-function RowMenu(props) {
-  const { course } = props;
+// function RowMenu(props) {
+//   const { course } = props;
 
-  return (
-    <Box
-      // size='sm'
-      sx={{ display: "flex", gap: 1 }}
-    >
-      <EditCourse course={course} />
-      {/* <OpenDetails route={course.code} /> */}
-      {/* <DisableCourse course={course} /> */}
-    </Box>
-  );
-}
+//   return (
+//     <Box
+//       // size='sm'
+//       sx={{ display: "flex", gap: 1 }}
+//     >
+//       <ManageCourse editMode course={course} />
+//       {/* <OpenDetails route={course.code} /> */}
+//       {/* <DisableCourse course={course} /> */}
+//     </Box>
+//   );
+// }
 
 export default function CourseTable(props) {
   const { searchTerm } = props;
@@ -76,13 +78,15 @@ export default function CourseTable(props) {
   const navigate = useNavigate();
 
   const filteredRows = searchTerm
-  ? courses.filter(
-      (row) =>
-        row.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.academic_period.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.teacher.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  : courses;
+    ? courses.filter(
+        (row) =>
+          row.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.academic_period
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          row.teacher.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : courses;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -125,10 +129,11 @@ export default function CourseTable(props) {
     };
 
     window.addEventListener("course-created", handleCourseCreated);
-
+    window.addEventListener("course-updated", fetchCourses());
     // Limpiar el evento al desmontar el componente
     return () => {
       window.removeEventListener("course-created", handleCourseCreated);
+      window.removeEventListener("course-updated", fetchCourses());
     };
   }, []);
 
@@ -182,7 +187,7 @@ export default function CourseTable(props) {
             order={order}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
-            showActions
+            // showActions
           />
           <tbody>
             {stableSort(filteredRows, getComparator(order, orderBy)).map(
@@ -192,28 +197,30 @@ export default function CourseTable(props) {
                   style={{
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`./${row.code}`)}
                 >
-                  <td>
+                  <td onClick={() => navigate(`./${row.code}`)}>
                     <Typography level="body-xs">{row.code}</Typography>
                   </td>
                   <td>
                     <Typography level="body-xs">{row.name}</Typography>
                   </td>
-                  <td>
-                    <Typography level="body-xs">
+                  <td onClick={() => navigate(`./${row.code}`)}>
+                    {/* <Typography level="body-xs">
                       {row.academic_period}
-                    </Typography>
+                    </Typography> */}
+                    <Chip size="sm" color="primary">
+                      {row.academic_period}
+                    </Chip>
                   </td>
-                  <td>
+                  <td onClick={() => navigate(`./${row.code}`)}>
                     <Typography level="body-xs">{row.teacher}</Typography>
                   </td>
-                  <td>
+                  <td onClick={() => navigate(`./${row.code}`)}>
                     <Typography level="body-xs">{row.student_count}</Typography>
                   </td>
-                  <td>
+                  {/* <td>
                     <RowMenu course={row} />
-                  </td>
+                  </td> */}
                 </tr>
               )
             )}
