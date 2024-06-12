@@ -14,6 +14,7 @@ from . import models
 from rest_framework import generics, status 
 from rest_framework.response import Response
 from .serializers import (
+    GlobalRubricSerializer,
     ScaleSerialiazer,
     UserSerializer,
     StudentSerializer,
@@ -735,6 +736,49 @@ def create_rubric1(request, course_id):
         rubric = serializer.save()
         return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_global_rubric(request):
+    rubric_data = request.data
+
+    # Crear la escala primero
+    scale_serializer = ScaleSerialiazer(data=rubric_data.get('scale'))
+    if scale_serializer.is_valid():
+        scale = scale_serializer.save()
+    else:
+        return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear los estándares (criterios) asociados a la escala
+    standards_data = rubric_data.get('standards')
+    standards = []
+    for standard_data in standards_data:
+        standard_data['scale'] = scale.id  # Asociar la escala a cada estándar
+        standard_serializer = StandardSerializer(data=standard_data)
+        if standard_serializer.is_valid():
+            standard = standard_serializer.save()
+            standards.append(standard)
+        else:
+            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear la rúbrica global sin asociar cursos aún
+    rubric_data = {
+        'name': rubric_data.get('name'),
+        'scale': scale.id,
+        'standards': [standard.id for standard in standards]  # No olvides asociar los estándares
+    }
+    rubric_serializer = GlobalRubricSerializer(data=rubric_data)
+    if rubric_serializer.is_valid():
+        rubric = rubric_serializer.save()
+
+        # Asociar la rúbrica a todos los cursos
+        all_courses = Course.objects.all()
+        for course in all_courses:
+            course.rubrics.add(rubric)
+
+        return Response({'message': 'Rúbrica global creada y asignada a todos los cursos con éxito.'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1586,7 +1630,7 @@ def search_user(request):
     return Response(user_data)
 
 #Luisa
-#Editar curso
+#Editar curso ESTE ES
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_course(request):

@@ -49,7 +49,7 @@ urlpatterns = [
 
     #Lista de estudiantes sin grupo
     path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'), #Luisa
-
+    
     #Evaluaciones disponibles para que el estudiante realice
     path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
 
@@ -79,6 +79,8 @@ urlpatterns = [
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
     path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa
     
+    
+    path('create_global_rubric/', views.create_global_rubric, name='create_global_rubric'),
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
     
