@@ -14,6 +14,7 @@ from . import models
 from rest_framework import generics, status 
 from rest_framework.response import Response
 from .serializers import (
+    GlobalRubricSerializer,
     ScaleSerialiazer,
     UserSerializer,
     StudentSerializer,
@@ -738,6 +739,49 @@ def create_rubric1(request, course_id):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+def create_global_rubric(request):
+    rubric_data = request.data
+
+    # Crear la escala primero
+    scale_serializer = ScaleSerialiazer(data=rubric_data.get('scale'))
+    if scale_serializer.is_valid():
+        scale = scale_serializer.save()
+    else:
+        return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear los estándares (criterios) asociados a la escala
+    standards_data = rubric_data.get('standards')
+    standards = []
+    for standard_data in standards_data:
+        standard_data['scale'] = scale.id  # Asociar la escala a cada estándar
+        standard_serializer = StandardSerializer(data=standard_data)
+        if standard_serializer.is_valid():
+            standard = standard_serializer.save()
+            standards.append(standard)
+        else:
+            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Crear la rúbrica global sin asociar cursos aún
+    rubric_data = {
+        'name': rubric_data.get('name'),
+        'scale': scale.id,
+        'standards': [standard.id for standard in standards]  # No olvides asociar los estándares
+    }
+    rubric_serializer = GlobalRubricSerializer(data=rubric_data)
+    if rubric_serializer.is_valid():
+        rubric = rubric_serializer.save()
+
+        # Asociar la rúbrica a todos los cursos
+        all_courses = Course.objects.all()
+        for course in all_courses:
+            course.rubrics.add(rubric)
+
+        return Response({'message': 'Rúbrica global creada y asignada a todos los cursos con éxito.'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_rubric(request, course_code):
     try:
         course = Course.objects.get(code=course_code)
@@ -856,6 +900,7 @@ def update_rubric(request):
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #crea la evaluacion que se realiza a los estudiantes
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def  create_evaluation(request, course_code):
@@ -910,29 +955,8 @@ def  create_evaluation(request, course_code):
     
     else:
         
-         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-        
-        
-        
-'''     
-        # Asignar la evaluación a cada estudiante del curso
-        for student in course.user_students.all():
-            Evaluation.objects.create(
-                estado=estado,
-                date_start=date_start,
-                date_end=date_end,
-                name=name,
-                rubric=rubric,
-                course=course,
-                report=None,
-                completed=False,
-                evaluated=student,
-                evaluator=student  # Esto puede variar si el evaluador es otro estudiante
-            )
-'''        
-    
+         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+     
     
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1282,6 +1306,66 @@ def evaluate_student(request):
         
     return Response({'message': 'Evaluación completada con éxito.'}, status=status.HTTP_200_OK)
 
+#obtiene la nota definitiva de un estudiante en especifico y sus compañeros estan en anonimo
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def evaluation_results(request):
+    student_code = request.GET.get('student_code')
+    evaluation_id = request.GET.get('evaluation_id')
+
+    try:
+        student = Student.objects.get(user__code=student_code)
+        evaluation = Evaluation.objects.get(id=evaluation_id)
+    except (Student.DoesNotExist, Evaluation.DoesNotExist):
+        return Response({'error': 'Estudiante o evaluación no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    evaluation_completed_list = EvaluationCompleted.objects.filter(evaluated=student, evaluation=evaluation)
+    
+    if not evaluation_completed_list.exists():
+        return Response({'error': 'No hay evaluaciones completadas para este estudiante.'}, status=status.HTTP_404_NOT_FOUND)
+
+    results = []
+    total_score = 0
+    total_standards = 0
+    all_comments = []
+    group_students = evaluation.course.user_students.exclude(user__code=student_code)
+    num_group_students = group_students.count()
+
+    for standard in evaluation.rubric.standards.all():
+        ratings = Rating.objects.filter(evaluationCompleted__in=evaluation_completed_list, standard=standard)
+        num_ratings = ratings.count()
+        sum_ratings = sum(rating.qualification for rating in ratings)
+        average_rating = sum_ratings / num_ratings if num_ratings > 0 else 0
+        total_score += average_rating
+        total_standards += 1
+
+        individual_ratings = [rating.qualification for rating in ratings]
+        # Agregar ceros para los estudiantes que no calificaron
+        individual_ratings += [0] * (num_group_students - num_ratings)
+
+        results.append({
+            'standard_description': standard.description,
+            'average_rating': average_rating,
+            'individual_ratings': individual_ratings
+        })
+
+    final_score = total_score / total_standards if total_standards > 0 else 0
+
+    # Concatenar comentarios
+    for ec in evaluation_completed_list:
+        if ec.comment:
+            all_comments.append(ec.comment)
+
+    comments = '\n'.join(all_comments)
+
+    return Response({
+        'final_score': final_score,
+        'standards': results,
+        'comments': comments,
+        'total_count': total_standards,
+        'total_ratings_count': num_group_students
+    })
+
 #muestra la lista de grupos de ese curso
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -1586,7 +1670,7 @@ def search_user(request):
     return Response(user_data)
 
 #Luisa
-#Editar curso
+#Editar curso ESTE ES
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_course(request):
