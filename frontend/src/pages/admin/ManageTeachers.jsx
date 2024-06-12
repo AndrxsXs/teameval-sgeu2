@@ -71,13 +71,14 @@ export default function ManageTeachers() {
           <CreateTeacher />
         </Box>
       </Box>
-      <SearchField onSearchChange={handleSearchChange} />
+      <SearchField onSearchChange={handleSearchChange} teacher />
       <UserTable
         searchTerm={searchTerm}
         role={2}
         columns={headCells}
         disableUserRoute="api/disable_user/"
         enableUserRoute="api/enable_user/"
+        admin
       />
     </>
   );
