@@ -1,27 +1,27 @@
+/* eslint-disable react/prop-types */
 import { useState, Fragment, useEffect } from "react";
 import api from "../../api";
 import ModalFrame from "../ModalFrame";
 
 import ImportStudents from "./ImportStudents";
 
-import {
-  Box,
-  Stack,
-  FormControl,
-  FormLabel,
-  Select,
-  Option,
-  Button,
-  Input,
-  Autocomplete,
-} from "@mui/joy";
+import Box from "@mui/joy/Box";
+import Stack from "@mui/joy/Stack";
+import FormControl from "@mui/joy/FormControl";
+import FormLabel from "@mui/joy/FormLabel";
+import Select from "@mui/joy/Select";
+import Option from "@mui/joy/Option";
+import Button from "@mui/joy/Button";
+import Input from "@mui/joy/Input";
+import Autocomplete from "@mui/joy/Autocomplete";
 
 import { Add } from "@mui/icons-material";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import { useNavigate } from "react-router";
 
-export default function CreateCourse() {
+export default function ManageCourse(props) {
+  const { course, editMode } = props;
   const [loading, setLoading] = useState(false);
-  const route = "api/create_course/";
-
   const [year, setYear] = useState(undefined);
   const [cycle, setCycle] = useState(undefined);
   const [formData, setFormData] = useState({
@@ -30,8 +30,29 @@ export default function CreateCourse() {
     academic_period: "",
     user_teacher: "",
   });
+  const route = editMode ? `api/update_course` : `api/create_course/`;
+
+  useEffect(() => {
+    if (editMode) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        code: course.code,
+        name: course.name,
+        academic_period: course.academic_period,
+        user_teacher: course.teacher.code,
+      }));
+      const [yearValue, cycleValue] = course.academic_period.split("-");
+      setYear(yearValue);
+      setCycle(cycleValue);
+    }
+  }, [editMode, course]);
+
+  // console.log("Curso entrante: ", course);
+  // console.log("FormData: ", formData);
 
   const [teachers, setTeachers] = useState([]);
+
+  const navigate = useNavigate();
 
   const fetchTeachers = async () => {
     const token = localStorage.getItem("ACCESS_TOKEN");
@@ -76,9 +97,15 @@ export default function CreateCourse() {
     const token = localStorage.getItem("ACCESS_TOKEN");
 
     api
-      .post(route, formData, {
+      .request({
+        method: editMode ? "put" : "post",
+        url: route,
+        data: formData,
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          course_code: editMode ? course.code : formData.code,
         },
       })
       .then((response) => {
@@ -98,12 +125,14 @@ export default function CreateCourse() {
           user_teacher: "",
         });
         setLoading(false);
+        !editMode && navigate(`/admin/manage/courses`);
+        editMode && window.dispatchEvent(new Event("course-updated"));
       })
       .catch((error) => {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.response.data.message}`,
+              message: `${error.response.data.error}`,
               severity: "danger",
             },
           })
@@ -144,7 +173,7 @@ export default function CreateCourse() {
           window.dispatchEvent(
             new CustomEvent("responseEvent", {
               detail: {
-                message: error.response.data.message,
+                message: error.response.data.error,
                 severity: "danger",
               },
             })
@@ -168,14 +197,25 @@ export default function CreateCourse() {
 
   return (
     <Fragment>
-      <Button
-        color="primary"
-        // size="sm"
-        startDecorator={<Add />}
-        onClick={handleOpenModal}
-      >
-        Nuevo curso
-      </Button>
+      {!editMode ? (
+        <Button
+          color="primary"
+          // size="sm"
+          startDecorator={<Add />}
+          onClick={handleOpenModal}
+        >
+          Nuevo curso
+        </Button>
+      ) : (
+        <Button
+          startDecorator={<EditRoundedIcon />}
+          variant="plain"
+          color="neutral"
+          onClick={handleOpenModal}
+        >
+          Editar
+        </Button>
+      )}
 
       <ModalFrame
         open={isModalOpen}
@@ -276,13 +316,6 @@ export default function CreateCourse() {
                                             value={formData.code}
                                             onChange={e => setFormData({ ...formData, code: e.target.value })}
                                             type='number' required /> */}
-                    {/* <Select
-                                            size="sm"
-                                            placeholder="Seleccione un docente"
-                                        >
-                                            <Option value="1">Docente 1</Option>
-                                        </Select> */}
-
                     <Autocomplete
                       size="sm"
                       options={teachers}
@@ -290,14 +323,14 @@ export default function CreateCourse() {
                       isOptionEqualToValue={(option, value) =>
                         option.code === value.code
                       }
-                      // getOptionValue={(option) => option.code}
                       placeholder="Seleccione un docente"
                       getOptionLabel={(option) =>
-                        `${option.name} ${option.last_name}`
+                        `${option.name} ${!editMode ? option.last_name : ""}`
                       }
                       onChange={(e, value) => {
                         setFormData({ ...formData, user_teacher: value.code });
                       }}
+                      value={editMode ? course.teacher : ""}
                       required
                     />
                   </FormControl>
@@ -314,9 +347,9 @@ export default function CreateCourse() {
                       Periodo académico
                     </FormLabel>
                     {/* <Input size="sm" placeholder="Ingrese el teléfono"
-                                            value={formData.phone}
-                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                            type="tel" /> */}
+                                  value={formData.phone}
+                                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                  type="tel" /> */}
                     <Box
                       sx={{
                         display: "grid",
@@ -328,6 +361,7 @@ export default function CreateCourse() {
                       <Select
                         size="sm"
                         placeholder="Año"
+                        value={year || ""}
                         onChange={(e, value) => setYear(value)}
                         required
                       >
@@ -338,6 +372,7 @@ export default function CreateCourse() {
                       <Select
                         size="sm"
                         placeholder="Ciclo"
+                        value={cycle || ""}
                         onChange={(e, value) => setCycle(value)}
                         required
                       >
@@ -349,7 +384,7 @@ export default function CreateCourse() {
                 </Stack>
               </Stack>
             </Stack>
-            <ImportStudents onFileChange={handleFileChange} />
+            <ImportStudents isStudent onFileChange={handleFileChange} />
             <Box
               sx={{
                 display: "flex",
