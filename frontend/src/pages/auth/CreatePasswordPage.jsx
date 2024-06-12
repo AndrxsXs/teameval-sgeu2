@@ -27,6 +27,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 
 import TopNavbar from "../../components/TopNavbar";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 export default function CreatePasswordPage() {
   const [formData, setFormData] = useState({
@@ -121,7 +122,16 @@ export default function CreatePasswordPage() {
                   Crear contraseña
                 </Typography>
                 <Typography level="body-sm">
-                  Debe crear una contraseña segura para su cuenta
+                  Debe crear una contraseña segura para su cuenta que contenga: 
+                </Typography>
+                <Typography level="body-sm" sx={{ marginTop: 1 }}>
+                  - Mínimo 8 caracteres.
+                </Typography>
+                <Typography level="body-sm" >
+                  - 1 letra mayúscula.
+                </Typography>
+                <Typography level="body-sm" >
+                  - 1 carácter especial (!@#$%^&*) y un número.
                 </Typography>
               </header>
               <FormControl error={passwordError}>
