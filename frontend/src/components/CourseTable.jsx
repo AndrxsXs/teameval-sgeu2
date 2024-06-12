@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
 
 import api from "../api";
 
@@ -64,12 +65,24 @@ function RowMenu(props) {
   );
 }
 
-export default function CourseTable() {
+export default function CourseTable(props) {
+  const { searchTerm } = props;
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("code");
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  const filteredRows = searchTerm
+  ? courses.filter(
+      (row) =>
+        row.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.academic_period.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.teacher.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  : courses;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -172,13 +185,14 @@ export default function CourseTable() {
             showActions
           />
           <tbody>
-            {stableSort(courses, getComparator(order, orderBy)).map(
+            {stableSort(filteredRows, getComparator(order, orderBy)).map(
               (row, index) => (
                 <tr
                   key={index}
                   style={{
                     cursor: "pointer",
                   }}
+                  onClick={() => navigate(`./${row.code}`)}
                 >
                   <td>
                     <Typography level="body-xs">{row.code}</Typography>
