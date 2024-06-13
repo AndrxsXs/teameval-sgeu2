@@ -170,13 +170,7 @@ class AdminSerializer(serializers.ModelSerializer):
         admin = Admi.objects.create(user=user, **validated_data)
         return admin
 
-class GlobalRubricSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Rubric
-        fields = ['name', 'scale', 'standards', 'is_global']
-        extra_kwargs = {
-            'is_global': {'default': True}
-        }
+
 
 class ScaleSerialiazer(serializers.ModelSerializer):
     class Meta:
@@ -188,6 +182,17 @@ class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standard
         fields = ['description', 'scale_description']
+
+class GlobalRubricSerializer(serializers.ModelSerializer):
+    standards = StandardSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Rubric
+        fields = ['name', 'scale', 'standards', 'is_global']
+        extra_kwargs = {
+            'is_global': {'default': True}
+        }
+
         
 class RubricDetailSerializer(serializers.ModelSerializer):
     standards = StandardSerializer(many=True)

@@ -118,16 +118,6 @@ def validate_name(name):
     return bool(re.fullmatch(r"[A-Za-z\s]+", name))
 
 
-def validate_code(code):
-    """
-    Valida que el código solo contenga números positivos, sin letras, espacios ni caracteres especiales.
-    """
-    # Verificar si el código es numérico y positivo
-    if code.isdigit() and int(code) > 0:
-        return True
-    
-    return False
-
 def validate_name(value):
     if not re.match(r'^[a-zA-Z\s]+$', value):
         raise serializers.ValidationError("El campo solo debe contener letras y espacios")
@@ -1036,6 +1026,21 @@ def update_global_rubric(request):
         status=status.HTTP_200_OK
     )
 
+#Luisa
+#Mostrar rubrica global al administrador
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_global_rubric(request, rubric_id):
+    try:
+        rubric = Rubric.objects.get(id=rubric_id, is_global=True)
+    except Rubric.DoesNotExist:
+        return Response(
+            {"error": "La rúbrica global solicitada no existe."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    rubric_serializer = GlobalRubricSerializer(rubric)
+    return Response(rubric_serializer.data, status=status.HTTP_200_OK)
 
 #Luisa
 #Crear rubrica global
@@ -2272,38 +2277,14 @@ def update_course(request):
     data = request.data
     course_code = request.query_params.get("course_code")
 
-    if not course_code:
-        return Response(
-            {"error": "Se requiere el código del curso."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    try:
-        course = Course.objects.get(code=course_code)
-    except Course.DoesNotExist:
-        return Response(
-            {"error": "El curso con el código proporcionado no existe."},
-            status=status.HTTP_404_NOT_FOUND,
-        )
-
-    # Actualiza el campo 'user_teacher' si está presente
+    # Eliminando la validación del código del curso
+    course = Course.objects.get(code=course_code)
+    
+    # Actualiza el campo 'user_teacher' sin validaciones adicionales
     user_teacher_code = data.get("user_teacher")
     if user_teacher_code:
-        if not validate_code(user_teacher_code):
-            return Response(
-                {
-                    "error": "El código del usuario solo puede contener letras y números, sin caracteres especiales, y debe ser positivo si es numérico"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            user = User.objects.get(code=user_teacher_code)
-            data["user_teacher"] = user.id
-        except User.DoesNotExist:
-            return Response(
-                {"error": "El código de usuario proporcionado no es válido."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        user = User.objects.get(code=user_teacher_code)
+        data["user_teacher"] = user.id
 
     serializer_course = CourseSerializer(course, data=data, partial=True)
     if serializer_course.is_valid():

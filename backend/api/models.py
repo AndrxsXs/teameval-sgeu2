@@ -226,7 +226,7 @@ class Rubric(models.Model):
         Course, related_name="rubrics"
     )
 
-    #is_global = models.BooleanField(default=False)
+    is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
     description = models.TextField() #describe el criterio
@@ -321,7 +321,6 @@ class Rating(models.Model):
     evaluationCompleted = models.ForeignKey(
         EvaluationCompleted, null=True, on_delete=models.PROTECT, related_name="evaluationCompleted"
     )
-
 
 class Group(models.Model):
     name = models.CharField(max_length=50)
