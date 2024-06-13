@@ -111,7 +111,7 @@ urlpatterns = [
     #realiza la evaluacion el estudiante
     path('evaluate_student/', views.evaluate_student, name='evaluate_student'),
     #crea la evaluacion que van a usar los estudiantes
-    path('create_evaluation/<str:course_code>/', views.create_evaluation, name='create_evaluation'),
+    path('create_evaluation', views.create_evaluation, name='create_evaluation'),
     #deshabilita admin y profesor
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor

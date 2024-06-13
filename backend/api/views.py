@@ -607,10 +607,10 @@ def import_student(request):
             )
 
         # Validaciones
-        if not student_data["name"].isalpha():
-            return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
-        if not student_data["last_name"].isalpha():
-            return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["name"].isalpha():
+        #     return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["last_name"].isalpha():
+        #     return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not student_data["code"].isdigit() or int(student_data["code"]) <= 0:
             return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1270,7 +1270,8 @@ def update_rubric(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_evaluation(request, course_code):
+def create_evaluation(request):
+    course_code = request.query_params.get("course_code")
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -1511,9 +1512,10 @@ def register_admin(request):
     except serializers.ValidationError:
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    # Validar que el teléfono sean solo números mayores a cero (si se proporciona)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     admin_data = {
         "name": name,
@@ -1573,8 +1575,9 @@ def register_teacher(request):
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     teacher_data = {
         "name": name,
