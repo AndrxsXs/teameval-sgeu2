@@ -2177,10 +2177,17 @@ def user_data(request):
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
     user = request.user
-    print(user.id)
-    courses = Course.objects.filter(user_teacher=user.id)
-    print(courses)
+    
+    try:
+        courses = Course.objects.filter(user_teacher=user.id)
+    except Course.DoesNotExist:
+        return Response(
+        {"status": "El docente actualmente no tiene cursos"},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+    
     course_data = []
+    
     for course in courses:
         students = course.user_students.values(
             "user__name", "user__last_name", "user__code", "user__email"
@@ -2330,7 +2337,7 @@ def create_course(request):
         user = models.User.objects.get(code=data.get("user_teacher"))
     except User.DoesNotExist:
         return Response(
-            {"error": "El código de usuario proporcionado no es válido."},
+            {"error": "El código del profesor proporcionado no es válido."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -2466,16 +2473,26 @@ def generar_codigo_alfanumerico(longitud):
 def main_report(request):
 
     data = request.data
-    evaluations = Evaluation.objects.filter(course__code=data.get("course_code"))
-
-    evaluation_data = [
-        {
-            "estado": evaluation.estado,
-            "name": evaluation.name,
-            "rubrica": evaluation.rubric
-        }
-        for evaluation in evaluations
-    ]
+    try:
+        evaluations = Evaluation.objects.filter(course__code=data.get("course_code"))
+    except Evaluation.DoesNotExist:
+        return Response(
+            {"info": "Aún no existen evaluaciones en este curso"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+        
+    evaluation_data= []
+    
+    for evaluation in evaluations:
+        
+        evaluation_data.append(
+            {
+                "estado": evaluation.estado,
+                "name": evaluation.name,
+                "rubric": evaluation.rubric.name
+                
+            }
+        )
 
     return Response(evaluation_data)
 
