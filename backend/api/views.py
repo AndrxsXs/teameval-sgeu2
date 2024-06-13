@@ -1999,6 +1999,7 @@ def group_detail(request, course_code, group_id):
         {
             "student_code": student.user.code,
             "student_name": f"{student.user.name} {student.user.last_name}",
+            "student_email": student.user.email, 
         }
         for student in group.students.all()
     ]
