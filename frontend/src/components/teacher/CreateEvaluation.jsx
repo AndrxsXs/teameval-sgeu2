@@ -26,7 +26,7 @@ export default function CreateEvaluation() {
   const [loading, setLoading] = useState(false);
   const course_code = useParams().courseId;
 
-  console.log(selectedRubric || "rubrica no seleccionada");
+  // console.log(selectedRubric || "rubrica no seleccionada");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,14 +38,17 @@ export default function CreateEvaluation() {
   // console.log(selectedRubric);
 
   const handleResetFormData = () => {
+    console.log("Resetting form data");
     setFormData({
       name: "",
       code: "",
       estado: 1,
+      rubric_name: selectedRubric ? selectedRubric.name : "",
     });
+    handleRubricSelect(null);
   };
 
-  console.log(formData);
+  // console.log(formData);
 
   const handleRubricSelect = (rubric) => {
     setSelectedRubric(rubric);
@@ -76,7 +79,7 @@ export default function CreateEvaluation() {
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
+          eventDispacher("responseEvent", error, "danger");
           setLoading(false);
         });
     } else {
@@ -111,9 +114,11 @@ export default function CreateEvaluation() {
       >
         <form
           onSubmit={handleSubmit}
-          style={{
-            // width: "clamp(300px, 100%, 800px)",
-          }}
+          style={
+            {
+              // width: "clamp(300px, 100%, 800px)",
+            }
+          }
         >
           <Box
             component="article"
@@ -125,6 +130,7 @@ export default function CreateEvaluation() {
               // minWidth: "500px",
               overflow: "auto",
               //   maxWidth: "700px",
+              width: "clamp(30vw, 75vw, 1300px)",
             }}
           >
             <Stack
@@ -199,12 +205,12 @@ export default function CreateEvaluation() {
                     >
                       <Option value={1}>
                         <Chip color="warning" size="sm">
-                          Por iniciar
+                          Sin iniciar
                         </Chip>
                       </Option>
                       <Option value={2}>
                         <Chip color="success" size="sm">
-                          En proceso
+                          En curso
                         </Chip>
                       </Option>
                     </Select>
