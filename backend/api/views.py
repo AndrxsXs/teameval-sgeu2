@@ -806,12 +806,7 @@ def update_rubric(request):
         return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-<<<<<<< HEAD
-    
-=======
-
-        
->>>>>>> c5e1887d9cdc704be08dfc7de585df01216f3a41
+   
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 # def create_rubric(request, course_code, scale_id):
@@ -1739,7 +1734,6 @@ def enable_user(request):
         return Response({'error': f'Error al habilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def restore_password(request):
     q = request.data.get("mail", "")
     subject = "Restablecer contraseña"
@@ -1792,9 +1786,8 @@ def main_report(request):
     evaluation_data = [
         {
             "estado": evaluation.estado,
-            "date_start":evaluation.date_start,
-            "date_end": evaluation.date_end,
-            "name": evaluation.name
+            "name": evaluation.name,
+            "rubrica": evaluation.rubric
         }
         for evaluation in evaluations
     ] 
@@ -1804,13 +1797,11 @@ def main_report(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated]) 
-def view_notas(request):
+def report_detailed(request):
     
     data= request.data
     
     evaluations= EvaluationCompleted.objects.filter(evaluation__id= data.get("id_evaluation"))
-    
-    print(evaluations)
     
     report_data = []
     
@@ -1819,15 +1810,13 @@ def view_notas(request):
         ratings= Rating.objects.filter(evaluationCompleted = evaluation.id)
         #ratings= Rating.objects.all()
         #print(ratings)
-        
-     
-        
-    
+
         report_data.append(
             {
             "evaluated": rating.evaluationCompleted.evaluated.user.name,
+            "evaluator": rating.evaluationCompleted.evaluator.user.name,
             "standard": rating.standard.description,
-            "qualification": rating.qualification
+            "qualification": rating.qualification,
             }
             for rating in ratings
         )
