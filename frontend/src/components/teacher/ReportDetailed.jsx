@@ -130,9 +130,9 @@ function Row(props) {
         >
           <Typography level="body-xs">{row.student_count}</Typography>
         </td>
-        <td>
+        {/* <td>
           <RowMenu target={row} />
-        </td>
+        </td> */}
       </tr>
       <tr>
         <td style={{ height: 0, padding: 0 }} colSpan={5}>
@@ -424,7 +424,7 @@ export default function ReportDetailed({ course }) {
             onRequestSort={handleRequestSort}
             rowCount={rows.length}
             headCells={headCells}
-            showActions
+            // showActions
             showEmptyColumn
           />
           <tbody>
