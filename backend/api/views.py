@@ -547,7 +547,7 @@ def import_student(request):
             }
         except IndexError:
             return Response(
-                {"message": "El archivo CSV tiene un formato incorrecto"},
+                {"error": "El archivo CSV tiene un formato incorrecto"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -557,11 +557,11 @@ def import_student(request):
         # if not student_data["last_name"].isalpha():
         #     return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not student_data["code"].isdigit() or int(student_data["code"]) <= 0:
-            return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializers.EmailField().run_validation(student_data["email"])
         except serializers.ValidationError:
-            return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             student = Student.objects.get(user__code=student_data["code"])
@@ -626,23 +626,23 @@ def import_teacher(request):
             }
         except IndexError:
             return Response(
-                {"message": "El archivo CSV tiene un formato incorrecto"},
+                {"error": "El archivo CSV tiene un formato incorrecto"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Validaciones
         if not teacher_data["name"].isalpha():
-            return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not teacher_data["last_name"].isalpha():
-            return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not teacher_data["code"].isdigit() or int(teacher_data["code"]) <= 0:
-            return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializers.EmailField().run_validation(teacher_data["email"])
         except serializers.ValidationError:
-            return Response({"message": "El email debe seguir el formato correcto (@xxxxx.co)"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El email debe seguir el formato correcto (@xxxxx.co)"}, status=status.HTTP_400_BAD_REQUEST)
         if teacher_data["phone"] and (not teacher_data["phone"].isdigit() or int(teacher_data["phone"]) <= 0):
-            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(code=teacher_data["code"])
@@ -1491,24 +1491,24 @@ def register_admin(request):
 
     # Validar que el nombre y apellido sean solo letras
     if not name.isalpha():
-        return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
     if not last_name.isalpha():
-        return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el código sean solo números mayores a cero
     if not code.isdigit() or int(code) <= 0:
-        return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el email siga el formato correcto
     try:
         serializers.EmailField().run_validation(email)
     except serializers.ValidationError:
-        return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el teléfono sean solo números mayores a cero (si se proporciona)
     if phone is not None:
         if not phone.isdigit() or int(phone) <= 0:
-            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     admin_data = {
         "name": name,
@@ -1532,7 +1532,7 @@ def register_admin(request):
                 status=status.HTTP_409_CONFLICT,
             )
     return Response(
-        {"message": "Error al crear administrador"}, status=status.HTTP_400_BAD_REQUEST
+        {"error": "Error al crear administrador"}, status=status.HTTP_400_BAD_REQUEST
     )
 
 
@@ -1553,24 +1553,24 @@ def register_teacher(request):
 
     # Validar que el nombre y apellido sean solo letras
     if not name.isalpha():
-        return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
     if not last_name.isalpha():
-        return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el código sean solo números mayores a cero
     if not code.isdigit() or int(code) <= 0:
-        return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el email siga el formato correcto
     try:
         serializers.EmailField().run_validation(email)
     except serializers.ValidationError:
-        return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el teléfono sean solo números mayores a cero
     if phone is not None:
         if not phone.isdigit() or int(phone) <= 0:
-            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     teacher_data = {
         "name": name,
@@ -1595,7 +1595,7 @@ def register_teacher(request):
                 status=status.HTTP_409_CONFLICT,
             )
     return Response(
-        {"message": "Error al crear profesor"}, status=status.HTTP_400_BAD_REQUEST
+        {"error": "Error al crear profesor"}, status=status.HTTP_400_BAD_REQUEST
     )
 
 
