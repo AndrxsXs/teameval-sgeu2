@@ -1308,7 +1308,6 @@ def update_rubric(request):
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # crea la evaluacion que se realiza a los estudiantes
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_evaluation(request):
@@ -1338,6 +1337,10 @@ def create_evaluation(request):
 
     try:
         rubric = Rubric.objects.get(name=rubric_name)
+        if rubric.is_global:
+            return Response(
+                {"error": "No puede seleccionar una rúbrica global, intente con otra."}, status=status.HTTP_400_BAD_REQUEST
+            )
     except Rubric.DoesNotExist:
         return Response(
             {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
