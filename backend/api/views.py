@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from django.core.validators import validate_email
 
 
 # from django.contrib.auth.models import User
@@ -101,24 +102,31 @@ def student_courses(request):
             {"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
+def validate_email_format(email):
+    """
+    Valida que el email siga el formato correcto.
+    """
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
 
 def validate_name(name):
     """
-    Valida que el nombre solo contenga letras.
+    Valida que el nombre solo contenga letras y espacios.
     """
-    return bool(re.fullmatch(r"[A-Za-z]+", name))
+    return bool(re.fullmatch(r"[A-Za-z\s]+", name))
 
 
 def validate_code(code):
     """
-    Valida que el código solo contenga letras y números.
+    Valida que el código solo contenga números positivos, sin letras, espacios ni caracteres especiales.
     """
-    if bool(re.fullmatch(r"[A-Za-z0-9]+", code)):
-        # Verificar si el código es numérico y positivo
-        if code.isdigit() and int(code) > 0:
-            return True
-        elif not code.isdigit():
-            return True
+    # Verificar si el código es numérico y positivo
+    if code.isdigit() and int(code) > 0:
+        return True
+    
     return False
 
 
@@ -141,8 +149,9 @@ def update_student(request):
         name = request.data.get("name", student.user.name)
         last_name = request.data.get("last_name", student.user.last_name)
         code = request.data.get("code", student.user.code)
+        email = request.data.get("email", student.user.email)
 
-        # Validar los campos name, last_name y code
+        # Validar los campos name, last_name, code y email
         if name and not validate_name(name):
             return Response(
                 {"error": "El nombre solo puede contener letras"},
@@ -156,13 +165,15 @@ def update_student(request):
         if code and not validate_code(code):
             return Response(
                 {
-                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
+                    "error": "El código solo puede contener números positivos"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Actualizar los datos del estudiante
-        student_data = {"user": {"name": name, "last_name": last_name, "code": code}}
+        student_data = {
+            "user": {"name": name, "last_name": last_name, "code": code, "email": email}
+        }
         serializer = StudentSerializerUpdate(student, data=student_data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -178,7 +189,6 @@ def update_student(request):
         return Response(
             {"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND
         )
-
 
 # Luisa
 # Editar profesor y administrador
@@ -205,24 +215,24 @@ def update_user(request):
         code = request.data.get("code", user.code)
 
         # Validar los campos name, last_name y code
-        if name and not validate_name(name):
-            return Response(
-                {"error": "El nombre solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if last_name and not validate_name(last_name):
-            return Response(
-                {"error": "El apellido solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        #if name and not validate_name(name):
+            #return Response(
+            #    {"error": "El nombre solo puede contener letras"},
+                #status=status.HTTP_400_BAD_REQUEST,
+            #)
+        #if last_name and not validate_name(last_name):
+         #   return Response(
+          #      {"error": "El apellido solo puede contener letras"},
+           #     status=status.HTTP_400_BAD_REQUEST,
+            #)
         if code and not validate_code(code):
             return Response(
                 {
-                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
+                    "error": "El código solo puede contener números positivos"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+    
         # Actualizar los datos del usuario
         user_data = {
             "name": name,
@@ -474,7 +484,7 @@ def info_rubric(request, rubric_id):
 
 
 # Luisa
-#
+#Obtener rubricas profesor
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_teacher_rubrics(request):
@@ -933,7 +943,90 @@ def create_rubric1(request, course_id):
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Luisa
+#Editar rubrica global
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_global_rubric(request):
+    try:
+        rubric_id = request.query_params.get('rubric_id')
+        rubric = Rubric.objects.get(pk=rubric_id, is_global=True)
+    except Rubric.DoesNotExist:
+        return Response(
+            {"error": "Rúbrica global no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
+    rubric_data = request.data
+
+    # Actualizar el nombre de la rúbrica si se proporciona
+    if 'name' in rubric_data:
+        rubric.name = rubric_data['name']
+
+    # Actualizar la escala de la rúbrica si se proporciona
+    if 'scale' in rubric_data:
+        scale_data = rubric_data['scale']
+        scale_serializer = ScaleSerialiazer(rubric.scale, data=scale_data)
+        if scale_serializer.is_valid():
+            scale_serializer.save()
+        else:
+            return Response(
+                {"error": "Error al actualizar la escala.", "details": scale_serializer.errors}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    # Actualizar los estándares de la rúbrica
+    if 'standards' in rubric_data:
+        standards_data = rubric_data['standards']
+        existing_standard_ids = [standard.id for standard in rubric.standards.all()]
+        updated_standards = []
+
+        for standard_data in standards_data:
+            if 'id' in standard_data:
+                # Si el estándar ya existe, actualizarlo
+                try:
+                    standard = Standard.objects.get(pk=standard_data['id'])
+                    standard.description = standard_data.get('description', standard.description)
+                    standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                    standard.save()
+                    updated_standards.append(standard)
+                except Standard.DoesNotExist:
+                    return Response(
+                        {"error": f'No se encontró el estándar con id {standard_data["id"]}.'}, 
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                # Si no tiene ID, es un nuevo estándar que se va a crear
+                standard_serializer = StandardSerializer(data=standard_data)
+                if standard_serializer.is_valid():
+                    standard = standard_serializer.save(rubric=rubric)
+                    updated_standards.append(standard)
+                else:
+                    return Response(
+                        {"error": "Error al crear un nuevo estándar.", "details": standard_serializer.errors}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+        # Eliminar estándares que ya no están en la nueva lista
+        for standard_id in existing_standard_ids:
+            if standard_id not in [std.id for std in updated_standards]:
+                Standard.objects.get(pk=standard_id).delete()
+
+        # Asignar los estándares actualizados a la rúbrica
+        rubric.standards.set(updated_standards)
+
+    # Guardar la rúbrica actualizada
+    rubric.save()
+
+    # Serializar y devolver la rúbrica actualizada
+    rubric_serializer = GlobalRubricSerializer(rubric)
+    return Response(
+        {"message": "Rúbrica global actualizada con éxito.", "rubric": rubric_serializer.data}, 
+        status=status.HTTP_200_OK
+    )
+
+
+#Luisa
+#Crear rubrica global
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_global_rubric(request):
@@ -944,7 +1037,10 @@ def create_global_rubric(request):
     if scale_serializer.is_valid():
         scale = scale_serializer.save()
     else:
-        return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Error al crear la escala.", "details": scale_serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     # Crear los estándares (criterios) asociados a la escala
     standards_data = rubric_data.get("standards")
@@ -956,16 +1052,19 @@ def create_global_rubric(request):
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Error al crear un estándar.", "details": standard_serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Crear la rúbrica global sin asociar cursos aún
-    rubric_data = {
+    rubric_creation_data = {
         "name": rubric_data.get("name"),
         "scale": scale.id,
         "standards": [standard.id for standard in standards],  # Asociar los estándares
         "is_global": True  # Establecer is_global en True
     }
-    rubric_serializer = GlobalRubricSerializer(data=rubric_data)
+    rubric_serializer = GlobalRubricSerializer(data=rubric_creation_data)
     if rubric_serializer.is_valid():
         rubric = rubric_serializer.save()
 
@@ -975,11 +1074,15 @@ def create_global_rubric(request):
             course.rubrics.add(rubric)
 
         return Response(
-            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito."},
+            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito.", "rubric": rubric_serializer.data},
             status=status.HTTP_201_CREATED,
         )
     else:
-        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Error al crear la rúbrica global.", "details": rubric_serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1512,7 +1615,7 @@ def group_members(request):
 
     if not student_code or not course_code:
         return Response(
-            {"error": "Missing student_code or course_code"},
+            {"error": "Falta student_code o course_code"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -1521,7 +1624,7 @@ def group_members(request):
         student = Student.objects.get(user__code=student_code)
     except Student.DoesNotExist:
         return Response(
-            {"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND
+            {"error": "El estudiante no existe"}, status=status.HTTP_404_NOT_FOUND
         )
 
     try:
@@ -1529,7 +1632,7 @@ def group_members(request):
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
         return Response(
-            {"error": "Course does not exist"}, status=status.HTTP_404_NOT_FOUND
+            {"error": "El curso no existe"}, status=status.HTTP_404_NOT_FOUND
         )
 
     try:
@@ -1537,7 +1640,7 @@ def group_members(request):
         group = Group.objects.get(students=student, course=course)
     except Group.DoesNotExist:
         return Response(
-            {"error": "Student is not a member of any group in this course"},
+            {"error": "El estudiante no es miembro de ningún grupo en este curso"},
             status=status.HTTP_404_NOT_FOUND,
         )
 

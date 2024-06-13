@@ -30,7 +30,7 @@ urlpatterns = [
     path('student_courses/', views.student_courses, name='student_courses'), #Luisa
 
     #Obtener estudiantes de mi grupo
-    path('group_members', views.group_members, name='group_members'),
+    path('group_members', views.group_members, name='group_members'), #Luisa
 
     #Muestra la informacion de una rubrica
     path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
@@ -79,8 +79,11 @@ urlpatterns = [
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
     path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa
     
-    
-    path('create_global_rubric', views.create_global_rubric, name='create_global_rubric'),
+    #Crear rubrica global por parte del admin
+    path('create_global_rubric', views.create_global_rubric, name='create_global_rubric'), #Luisa
+
+    #Editar rubrica global por parte del admin
+    path('update_global_rubric', views.update_global_rubric, name='update_global_rubric'),
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
     

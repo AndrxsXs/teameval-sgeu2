@@ -200,6 +200,7 @@ class GlobalRubricSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'is_global': {'default': True}
         }
+        
 class ScaleSerialiazer(serializers.ModelSerializer):
     class Meta:
         model = Scale
