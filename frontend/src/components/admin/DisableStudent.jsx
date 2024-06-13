@@ -76,12 +76,12 @@ export default function DisableStudent(props) {
         color="danger"
         onClick={handleOpenModal}
       >
-        Deshabilitar
+        Quitar
       </Button>
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
-        ModalTitle="Deshabilitar usuario"
+        ModalTitle="Quitar estudiante del curso"
       >
         <Typography
           id="nested-modal-description"
@@ -92,11 +92,13 @@ export default function DisableStudent(props) {
             maxWidth: "300px",
           }}
         >
-          Está a punto de deshabilitar a{" "}
+          Está a punto de quitar a{" "}
           <strong>
             {user.name} {user.last_name}
           </strong>
-          . El usuario no podrá acceder a su cuenta y desaparecerá de este curso y de algún grupo en el que esté.
+          . El usuario desaparecerá de este curso y de algún grupo en el que
+          esté. Puede volver a añadirlo usando el botón{" "}
+          <Typography variant="soft" color="neutral">Nuevo estudiante.</Typography>
         </Typography>
         <Box
           sx={{
@@ -116,7 +118,7 @@ export default function DisableStudent(props) {
               handleDisableUser();
             }}
           >
-            Deshabilitar
+            Quitar
           </Button>
 
           <Button

@@ -14,6 +14,8 @@ import { Typography } from "@mui/joy";
 import api from "../api";
 import { ACCESS_TOKEN } from "../constants";
 
+import { handleKeyPress } from "../utils/handleKeyPress";
+
 export default function UserInfo({
   user,
   isModalOpen,
@@ -233,7 +235,8 @@ export default function UserInfo({
                         onChange={(e) =>
                           setFormData({ ...formData, code: e.target.value })
                         }
-                        type="number"
+                        type="text"
+                        onKeyDown={handleKeyPress}
                         required
                       />
                     )}

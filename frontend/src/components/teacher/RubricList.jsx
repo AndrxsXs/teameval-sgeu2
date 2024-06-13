@@ -109,9 +109,23 @@ function RubricCard({ rubric, selectMode, onSelect }) {
               <Typography level="title-md">{rubric.name}</Typography>
               {selectMode && ( // Renderizar el radio button si selectMode es true
                 <Radio
+                  required
+                  overlay
                   checked={selected}
                   onChange={handleSelect}
                   sx={{ mr: 1, alignSelf: "flex-end" }} // Margen derecho para separar del contenido
+                  slotProps={{
+                    action: ({ checked }) => ({
+                      // Cambiar el color del borde si el radio está seleccionado
+                      sx: (theme) => ({
+                        ...(checked && {
+                          inset: -1,
+                          border: "3px solid",
+                          borderColor: theme.vars.palette.primary[500],
+                        }),
+                      }),
+                    }),
+                  }}
                 />
               )}
             </Stack>
@@ -194,7 +208,6 @@ export default function RubricList(props) {
                 rubric={rubric}
                 selectMode={selectMode} // Pasar la prop selectMode
                 onSelect={onSelect} // Pasar la función de devolución de llamada onSelect
-                
               />
             ))
           : Array.from(new Array(9)).map((_, index) => (

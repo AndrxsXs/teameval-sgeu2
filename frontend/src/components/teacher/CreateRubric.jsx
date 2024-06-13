@@ -166,12 +166,12 @@ export default function CreateRubric(props) {
         startDecorator={<Add />}
         onClick={handleOpenModal}
       >
-        Nueva rubrica
+        Nueva rúbrica
       </Button>
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
-        ModalTitle="Crear rubrica"
+        ModalTitle="Crear rúbrica"
       >
         <form onSubmit={handleCreateRubric}>
           <Stack
