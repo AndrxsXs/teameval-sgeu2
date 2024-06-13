@@ -48,7 +48,6 @@ from .serializers import (
     EvaluationSerializerE,
     TeacherSerializerUpdate,
     AdminSerializerUpdate,
-    StudentSerializerUpdate,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -130,65 +129,6 @@ def validate_code(code):
     return False
 
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def update_student(request):
-    student_code = request.query_params.get("student_code")
-
-    if not student_code:
-        return Response(
-            {"error": "El código del estudiante es requerido"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    try:
-        # Buscar al estudiante por su código y obtener el objeto Student asociado
-        student = Student.objects.get(user__code=student_code)
-
-        # Obtener los datos a actualizar del request
-        name = request.data.get("name", student.user.name)
-        last_name = request.data.get("last_name", student.user.last_name)
-        code = request.data.get("code", student.user.code)
-        email = request.data.get("email", student.user.email)
-
-        # Validar los campos name, last_name, code y email
-        if name and not validate_name(name):
-            return Response(
-                {"error": "El nombre solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if last_name and not validate_name(last_name):
-            return Response(
-                {"error": "El apellido solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if code and not validate_code(code):
-            return Response(
-                {
-                    "error": "El código solo puede contener números positivos"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Actualizar los datos del estudiante
-        student_data = {
-            "user": {"name": name, "last_name": last_name, "code": code, "email": email}
-        }
-        serializer = StudentSerializerUpdate(student, data=student_data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {
-                    "message": "Los datos del estudiante han sido actualizados exitosamente"
-                },
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Student.DoesNotExist:
-        return Response(
-            {"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND
-        )
 
 # Luisa
 # Editar profesor y administrador
@@ -902,6 +842,49 @@ def register_student_params(request):
         {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED
     )
 
+#Luisa
+#Edita estudainte
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_student(request):
+    student_code = request.query_params.get('student_code')
+
+    if not student_code:
+        return Response(
+            {"error": "El parámetro 'student_code' es requerido en la URL."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        user = User.objects.get(code=student_code)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "Estudiante no encontrado"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+
+    data = request.data
+    user_data = {
+        "name": data.get("name", user.name),
+        "last_name": data.get("last_name", user.last_name),
+        "code": data.get("code", user.code),
+        "email": data.get("email", user.email),
+    }
+
+    
+
+    serializer_user = UserSerializer(instance=user, data=user_data, partial=True)
+    if serializer_user.is_valid():
+        serializer_user.save()
+        return Response(
+            {"message": "Estudiante actualizado exitosamente", "data": serializer_user.data},
+            status=status.HTTP_200_OK
+        )
+    return Response(
+        {"error": serializer_user.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 # crea la escala de la rubrica
 @api_view(["POST"])
