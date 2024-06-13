@@ -114,6 +114,10 @@ urlpatterns = [
     path('enable_user/', views.enable_user, name='enable_user'),
     #obtiene la nota del estudiante en anonimo
     path('evaluation_results/', views.evaluation_results, name='evaluation_results'),
+    #cambia el estado de por iniciar a iniciado (inicializa una evaluacion)
+    path('start_evaluation/', views.start_evaluation, name='start_evaluation'),
+    #cambia el estado de por iniciado a finalizado (finaliza una evaluacion)
+    path('finish_evaluation/', views.finish_evaluation, name='finish_evaluation'),
 
     
 ]

@@ -919,6 +919,11 @@ def create_evaluation(request, course_code):
     if estado == Evaluation.FINISHED:
         return Response({'error': 'No se puede crear una evaluación en estado finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if estado == Evaluation.INITIATED:
+        initiated_evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+        if initiated_evaluations.exists():
+            return Response({'error': 'Ya existe una evaluación en estado "iniciado" para este curso.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         rubric = Rubric.objects.get(name=rubric_name)
     except Rubric.DoesNotExist:
@@ -940,7 +945,55 @@ def create_evaluation(request, course_code):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
+#una evaluacion por iniciar cambia a iniciada
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def start_evaluation(request):
+    evaluation_id = request.query_params.get('evaluation_id')
+    if not evaluation_id:
+        return Response({'error': 'No se proporcionó el ID de la evaluación.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        evaluation = Evaluation.objects.get(id=evaluation_id)
+    except Evaluation.DoesNotExist:
+        return Response({'error': 'Evaluación no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if evaluation.estado != Evaluation.TO_START:
+        return Response({'error': 'La evaluación no está en estado "por iniciar".'}, status=status.HTTP_400_BAD_REQUEST)
+
+    initiated_evaluations = Evaluation.objects.filter(course=evaluation.course, estado=Evaluation.INITIATED)
+    if initiated_evaluations.exists():
+        return Response({'error': 'Ya existe una evaluación en estado "iniciado" para este curso.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    evaluation.estado = Evaluation.INITIATED
+    evaluation.save()
+
+    return Response({'message': 'Evaluación iniciada con éxito.'}, status=status.HTTP_200_OK)
+
+
+#una evaluacion iniciada cambia a finalizada
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def finish_evaluation(request):
+    evaluation_id = request.query_params.get('evaluation_id')
+    if not evaluation_id:
+        return Response({'error': 'No se proporcionó el ID de la evaluación.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        evaluation = Evaluation.objects.get(id=evaluation_id)
+    except Evaluation.DoesNotExist:
+        return Response({'error': 'Evaluación no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if evaluation.estado != Evaluation.INITIATED:
+        return Response({'error': 'La evaluación no está en estado "iniciado".'}, status=status.HTTP_400_BAD_REQUEST)
+
+    evaluation.estado = Evaluation.FINISHED
+    evaluation.save()
+
+    return Response({'message': 'Evaluación finalizada con éxito.'}, status=status.HTTP_200_OK)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_rubric_params(request):    
