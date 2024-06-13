@@ -7,6 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+from django.core.validators import RegexValidator
+from rest_framework import serializers
+
 
 # from django.contrib.auth.models import User
 from .models import (
@@ -1336,7 +1339,6 @@ def list_rubric(request, course_code):
 
     return Response(serializer.data)
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_admin(request):
@@ -1344,21 +1346,49 @@ def register_admin(request):
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
     )
+
+    # Validaciones
+    name = data.get("name")
+    last_name = data.get("last_name")
+    code = data.get("code")
+    email = data.get("email")
+    phone = data.get("phone")
+
+    # Validar que el nombre y apellido sean solo letras
+    if not name.isalpha():
+        return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+    if not last_name.isalpha():
+        return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el código sean solo números mayores a cero
+    if not code.isdigit() or int(code) <= 0:
+        return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el email siga el formato correcto
+    try:
+        serializers.EmailField().run_validation(email)
+    except serializers.ValidationError:
+        return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el teléfono sean solo números mayores a cero
+    if not phone.isdigit() or int(phone) <= 0:
+        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+
     admin_data = {
-        "name": data.get("name"),
-        "last_name": data.get("last_name"),
-        "code": data.get("code"),
-        "email": data.get("email"),
-        "phone": data.get("phone"),
+        "name": name,
+        "last_name": last_name,
+        "code": code,
+        "email": email,
+        "phone": phone,
         "password": password,
     }
+
     serializer_admin = AdminSerializer(data=admin_data)
     if serializer_admin.is_valid():
         try:
             serializer_admin.save()
             return Response(
-                {"message": "Administrador creado exitosamente"},
-                status=status.HTTP_201_CREATED,
+                {"message": "Administrador creado exitosamente"}, status=status.HTTP_201_CREATED
             )
         except:
             return Response(
@@ -1369,9 +1399,6 @@ def register_admin(request):
         {"message": "Error al crear administrador"}, status=status.HTTP_400_BAD_REQUEST
     )
 
-
-from django.core.validators import RegexValidator
-from rest_framework import serializers
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1920,7 +1947,8 @@ def user_list(request):
     role = request.GET.get("role")
     course_id = request.GET.get("course")
 
-    users = User.objects.all()
+    # Excluir al usuario actualmente autenticado
+    users = User.objects.exclude(id=request.user.id)
 
     if role:
         users = users.filter(role=role)
@@ -1942,6 +1970,7 @@ def user_list(request):
     ]
 
     return Response(user_data)
+
 
 
 # obtiene una lista de estudiantes
