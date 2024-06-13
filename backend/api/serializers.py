@@ -335,7 +335,7 @@ class EvaluationSerializerE(serializers.ModelSerializer):
 
     class Meta: 
         model = Evaluation
-        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
+        fields = ['id', 'name', 'estado', 'course', 'rubric']
         
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:

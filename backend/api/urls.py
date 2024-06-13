@@ -52,7 +52,7 @@ urlpatterns = [
     path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'), #Luisa
     
     #Evaluaciones disponibles para que el estudiante realice
-    path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
+    path('available_evaluations', views.available_evaluations, name='available_evaluations'), #Luisa
 
     #Muestra al estudiante las evaluaciones finalizadas
     path('completed_evaluations/<str:student_code>/', views.completed_evaluations, name='completed_evaluations'), #Luisa
