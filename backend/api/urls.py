@@ -21,7 +21,7 @@ urlpatterns = [
     
     path('report_datailed/', views.report_detailed , name='report_detailed'), #Informe detallado
     
-    path('main_report/', views.main_report, name='main_report'), #Main informes
+    path('main_report', views.main_report, name='main_report'), #Main informes
     
     path('report_general/', views.report_general , name='report_general'), #Informe general
 

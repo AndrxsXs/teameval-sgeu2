@@ -2469,9 +2469,8 @@ def generar_codigo_alfanumerico(longitud):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def main_report(request):
-
-    data = request.data
-    evaluations = Evaluation.objects.filter(course__code=data.get("course_code"))
+    course_code = request.query_params.get("course_code")
+    evaluations = Evaluation.objects.filter(course__code=course_code)
 
     evaluation_data = [
         {
