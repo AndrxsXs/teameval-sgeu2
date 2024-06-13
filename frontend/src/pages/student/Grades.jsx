@@ -14,6 +14,7 @@ import Chip from "@mui/joy/Chip";
 import api from "../../api";
 
 import eventDispatcher from "../../utils/eventDispacher";
+import interpretEvaluationState from "../../utils/interpretEvaluationState";
 
 export function CourseCard({ info, isReviewing }) {
   // console.log(info);
@@ -56,33 +57,34 @@ export function CourseCard({ info, isReviewing }) {
             direction="row"
             justifyContent="space-between"
             gap={1}
+            alignItems="baseline"
           >
-            <Typography level="title-md">{info.name}</Typography>
+            <Typography level="title-md">
+              {info.course.name} - {info.course.code}
+            </Typography>
             <Chip
               size="sm"
               color={
-                info.estado === "Iniciado"
+                info.estado === 2
                   ? "success"
-                  : info.estado === "Por iniciar"
+                  : info.estado === 1
                   ? "warning"
-                  : info.estado === "Finalizado"
+                  : info.estado === 3
                   ? "danger"
                   : "primary"
               }
             >
-              {info.estado}
+              {interpretEvaluationState(info.estado)}
             </Chip>
           </Stack>
-          <Typography level="body-xs">
-            {info.course.name} - {info.course.code}
-          </Typography>
+          <Typography level="body-xs">{info.name}</Typography>
           <Typography level="body-xs">
             {info.course.user_teacher.name} {info.course.user_teacher.last_name}
           </Typography>
           <Typography level="body-xs">{info.course.academic_period}</Typography>
-          <Typography level="body-xs">
+          {/* <Typography level="body-xs">
             Disponible hasta {info.date_end}
-          </Typography>
+          </Typography> */}
         </CardContent>
       </Card>
     </Link>
@@ -92,38 +94,7 @@ export function CourseCard({ info, isReviewing }) {
 export default function Grades() {
   const [loading, setLoading] = useState(true);
   const userData = useOutletContext();
-  const [evaluations, setEvaluations] = useState([
-    // {
-    //   name: "Evaluación 1",
-    //   estado: "Iniciado",
-    //   date_start: "2024-10-01",
-    //   date_end: "2024-10-31",
-    //   course: {
-    //     name: "Curso 1",
-    //     code: "32151M",
-    //     academic_period: "2024-2",
-    //     user_teacher: {
-    //       code: "123456",
-    //       name: "Profesor",
-    //       last_name: "Uno",
-    //       email: "profesor@mail.com",
-    //     },
-    //   },
-    //   rubric: {
-    //     name: "rubrica 1",
-    //     standards: [
-    //       {
-    //         description: "criterio 1",
-    //         scale_description: "awawawasdfg",
-    //       },
-    //     ],
-    //     scale: {
-    //       Lower_limit: 1,
-    //       Upper_limit: 5,
-    //     },
-    //   },
-    // },
-  ]);
+  const [evaluations, setEvaluations] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,12 +108,14 @@ export default function Grades() {
           setLoading(false);
         })
         .catch((error) => {
-          eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
+          eventDispatcher("responseEvent", error, "danger");
         });
     };
     fetchData();
   }, [userData.code]);
+
+  console.log(evaluations)
 
   return (
     <>
