@@ -63,7 +63,7 @@ export default function SearchField(props) {
             : teacher
             ? " docente"
             : student
-            ? " rstudiante"
+            ? " estudiante"
             : course
             ? " curso"
             : ""}
