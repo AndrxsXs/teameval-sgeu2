@@ -8,19 +8,22 @@ import { useEffect, useState } from "react";
 import api from "../../api";
 import { useOutletContext } from "react-router-dom";
 
+import eventDispatcher from "../../utils/eventDispacher";
+
 export default function Result() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [evaluations, setEvaluations] = useState([]);
   const userData = useOutletContext();
 
+  console.log(userData);
+
   useEffect(() => {
     const fetchEvaluations = async () => {
-      setLoading(true);
-      const token = localStorage.getItem("ACCESS_TOKEN");
       await api
-        .get(`api/completed_evaluations/${userData.code}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        .get(`api/completed_evaluations`, {
+          params: {
+            student_code: userData.code,
+            course_code: userData.course_code,
           },
         })
         .then((response) => {
@@ -28,7 +31,7 @@ export default function Result() {
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
+          eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         })
         .finally(() => {
