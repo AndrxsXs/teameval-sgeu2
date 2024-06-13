@@ -1,8 +1,28 @@
 import { Box, Typography, Table } from "@mui/joy";
+import ReportTable from "../../components/ReportTable";
+import SearchField from "../../components/admin/SearchField";
+import React, { Fragment } from 'react';
+import { Outlet, useLocation } from "react-router-dom";
+import { useState } from "react";
+import ReportDetailed from "../../components/teacher/ReportDetailed";
+import { useParams } from 'react-router-dom';
+
 
 export default function Report() {
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
+  const location = useLocation();
+  const isCoursePage =
+    location.pathname === ("/admin/manage/courses" || "/admin/manage/courses/");
+
+    const { courseId } = useParams();
   return (
-    <>
+
+    <Fragment>
       <Box
         component="header"
         sx={{
@@ -21,19 +41,14 @@ export default function Report() {
           Informes
         </Typography>
 
-        <Table>
-          <tr>
-            <th>Nombre</th>
-            <th>Proyecto</th>
-            <th>Fecha de finalización</th>
-          </tr>
-          <tr>
-            <td>Informe 1</td>
-            <td>Proyecto 1</td>
-            <td>12/05/2024</td>
-          </tr>
-        </Table>
-      </Box>
-    </>
+        </Box>
+      
+        <Fragment>
+          <SearchField course onSearchChange={handleSearchChange} />
+          <ReportDetailed course={courseId} />
+        </Fragment>
+      
+    </Fragment>
+
   );
 }
