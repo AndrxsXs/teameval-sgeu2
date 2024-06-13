@@ -9,6 +9,8 @@ import Input from "@mui/joy/Input";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 
+import eventDispatcher from "../../utils/eventDispacher";
+
 import api from "../../api";
 import { useParams } from "react-router-dom";
 
@@ -41,6 +43,7 @@ const headCells = [
 export default function CreateRubric(props) {
   const { adminMode } = props;
   const courseId = useParams().courseId;
+  const [loading, setLoading] = useState(false);
   // console.log(courseId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const action = React.useRef(null);
@@ -116,8 +119,9 @@ export default function CreateRubric(props) {
   };
 
   const handleCreateRubric = (e) => {
+    setLoading(true);
     e.preventDefault();
-    console.log(rubric);
+    // console.log(rubric);
     api
       .post(
         `api/${!adminMode ? "create_rubric" : "create_global_rubric"}`,
@@ -131,30 +135,13 @@ export default function CreateRubric(props) {
       .then((response) => {
         // console.log(response);
         setIsModalOpen(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${response.message}`,
-              severity: "success",
-            },
-          })
-        );
+        eventDispatcher("responseEvent", response);
+        setLoading(false);
       })
       .catch((error) => {
         // console.error(error);
-        setIsModalOpen(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${
-                error.response.data.error
-                  ? error.response.data.error
-                  : error.message
-              }`,
-              severity: "danger",
-            },
-          })
-        );
+        eventDispatcher("responseEvent", error, "danger");
+        setLoading(false);
       });
   };
 

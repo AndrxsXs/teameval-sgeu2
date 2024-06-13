@@ -1,12 +1,18 @@
 export default function eventDispatcher(event, response, severity = "success") {
+  console.log("Evento de respuesta: ", response);
   let message;
   if (typeof response === "string") {
     message = response;
   } else {
-    message = response.response && response.response.data && response.response.data.error
-      ? `${response.response.data.error}`
-      // : `${response.message}`;
-      : "Error interno del servidor, inténtenlo de nuevo más tarde.";
+    message =
+      response.response &&
+      response.response.data &&
+      response.response.data.error
+        ? `${response.response.data.error}`
+        : // : `${response.message}`;
+        `${response.data.message}`
+        ? `${response.data.message}`
+        : "Error interno del servidor, inténtenlo de nuevo más tarde.";
   }
 
   window.dispatchEvent(

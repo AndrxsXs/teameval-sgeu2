@@ -1,18 +1,34 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Box from "@mui/joy/Box";
 import Typography from "@mui/joy/Typography";
 import CourseCard from "../teacher/RubricList";
 import Skeleton from "@mui/joy/Skeleton";
 
 import api from "../../api";
+import eventDispatcher from "../../utils/eventDispacher";
 
 export default function EvaluationList() {
   const [loading, setLoading] = useState(true);
   const [evaluations, setEvaluations] = useState([]);
+  const course_code = useParams().courseId;
 
   useEffect(() => {
-    
-  }, []);
+    api
+      .get("api/main_report", {
+        params: {
+          course_code: course_code,
+        },
+      })
+      .then((response) => {
+        setEvaluations(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        eventDispatcher("responseEvent", error, "danger");
+        setLoading(false);
+      });
+  }, [course_code]);
 
   return (
     <>
@@ -31,7 +47,7 @@ export default function EvaluationList() {
           overflow: "hidden",
         }}
       >
-        {!loading
+        {loading
           ? evaluations.map((evaluation) => {
               const id = crypto.randomUUID();
               return <CourseCard key={id} info={evaluation} isReviewing />;
@@ -47,7 +63,7 @@ export default function EvaluationList() {
                 sx={{ borderRadius: "sm" }}
               />
             ))}
-        {evaluations.length === 0 && !loading && (
+        {evaluations.length === 0 && loading && (
           <Box
             sx={{
               display: "flex",
@@ -58,8 +74,9 @@ export default function EvaluationList() {
               width: "100%",
             }}
           >
-            <Typography level="body-sm" component="p">
-              No hay evaluaciones disponibles. Cree una con el botón de arriba.
+            <Typography level="body-sm">
+              No hay evaluaciones disponibles. Cree una con el botón{" "}
+              <Typography color="primary">Nueva evaluación</Typography>.
             </Typography>
           </Box>
         )}
