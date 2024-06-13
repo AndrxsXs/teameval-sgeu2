@@ -266,8 +266,8 @@ class Evaluation(models.Model):
     #evaluator = models.CharField(max_length=60)
     #evaluated = models.CharField(max_length=60)
     estado = models.IntegerField(choices=STATUS_CHOICES)
-    date_start = models.DateTimeField(auto_now_add=False)
-    date_end = models.DateTimeField(auto_now_add=False)
+  #  date_start = models.DateTimeField(auto_now_add=False)
+  #  date_end = models.DateTimeField(auto_now_add=False)
     name = models.CharField(max_length=60)
     comment = models.TextField(max_length=100)
     #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones

@@ -129,7 +129,7 @@ export default function Grades() {
       await api
         .get(`api/available_evaluations/${userData.code}/`)
         .then((response) => {
-          // setEvaluations(response.data);
+          setEvaluations(response.data);
           // console.log(response.data);
           setLoading(false);
         })
@@ -168,7 +168,8 @@ export default function Grades() {
             Evaluaciones disponibles
           </Typography>
           <Typography level="body-sm">
-            Seleccione un curso para evaluar a sus compañeros de equipo.
+            Seleccione una evaluación para comenzar a calificar a sus compañeros
+            de equipo.
           </Typography>
         </Stack>
       </Box>

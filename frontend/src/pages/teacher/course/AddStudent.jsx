@@ -97,7 +97,7 @@ export default function AddStudent() {
           <ImportUsersModal courseId={courseId} isStudent />
         </Box>
       </Box>
-      <SearchField onSearchChange={handleSearchChange} />
+      <SearchField student onSearchChange={handleSearchChange} />
       <StudentTable searchTerm={searchTerm} course={courseId} />
     </>
   );

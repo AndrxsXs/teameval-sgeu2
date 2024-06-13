@@ -7,17 +7,19 @@ import { jwtDecode } from "jwt-decode";
 import api from "../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
 
-import {
-  CssVarsProvider,
-  Sheet,
-  Typography,
-  FormControl,
-  FormLabel,
-  Input,
-  Button,
-  CssBaseline,
-  Box,
-} from "@mui/joy";
+import { CssVarsProvider, CssBaseline } from "@mui/joy";
+
+import Sheet from "@mui/joy/Sheet";
+import Typography from "@mui/joy/Typography";
+import FormControl from "@mui/joy/FormControl";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
+import Button from "@mui/joy/Button";
+import Box from "@mui/joy/Box";
+
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
+import IconButton from "@mui/joy/IconButton";
 
 import TopNavbar from "../../components/TopNavbar";
 
@@ -47,6 +49,9 @@ export default function LoginPage() {
     code: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
@@ -169,10 +174,19 @@ export default function LoginPage() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Ingrese su contraseña"
                   value={formData.password}
                   required
+                  endDecorator={
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  }
                 />
                 {/* <Typography sx={{ alignSelf: 'center' }}>
                 <Link href="/login"

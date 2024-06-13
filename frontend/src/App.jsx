@@ -46,11 +46,11 @@ import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
 import ViewRubric from "./pages/student/evaluation/ViewRubric";
 import RubricResult from "./pages/student/RubricResult";
 import ViewFeedback from "./pages/student/ViewFeedback";
-import ForgotPassword from "./components/ForgotPassword";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import CodePassword from "./components/CodePassword";
 import LoginPage from "./pages/auth/LoginPage";
 import CreatePasswordPage from "./pages/auth/CreatePasswordPage";
-import { CssBaseline } from '@mui/material';
+import { CssBaseline } from "@mui/material";
 // import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {

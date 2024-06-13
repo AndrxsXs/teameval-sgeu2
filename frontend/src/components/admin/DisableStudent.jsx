@@ -1,13 +1,13 @@
 /* eslint-disable react/prop-types */
 import { Fragment, useState } from "react";
 
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN } from "../../constants";
 
 import { Button, Box, Typography } from "@mui/joy";
 
-import ModalFrame from "./ModalFrame";
+import ModalFrame from "../ModalFrame";
 
-import api from "../api";
+import api from "../../api";
 
 export default function DisableStudent(props) {
   const { user, endpoint } = props;
@@ -57,7 +57,7 @@ export default function DisableStudent(props) {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.response.data.message}`,
+              message: `${error.response.data.error}`,
               severity: "danger",
             },
           })

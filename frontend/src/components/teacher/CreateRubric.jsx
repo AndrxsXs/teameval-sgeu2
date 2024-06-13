@@ -8,14 +8,9 @@ import Box from "@mui/joy/Box";
 import Input from "@mui/joy/Input";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
-import Textarea from "@mui/joy/Textarea";
 
 import api from "../../api";
 import { useParams } from "react-router-dom";
-
-import Sheet from "@mui/joy/Sheet";
-import Table from "@mui/joy/Table";
-import { Fragment } from "react";
 
 import IconButton from "@mui/joy/IconButton";
 import CloseRounded from "@mui/icons-material/CloseRounded";
@@ -23,6 +18,8 @@ import CloseRounded from "@mui/icons-material/CloseRounded";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import FormHelperText from "@mui/joy/FormHelperText";
+
+import CriteriaTable from "../CriteriaTable";
 
 import Stack from "@mui/joy/Stack";
 
@@ -41,124 +38,67 @@ const headCells = [
   },
 ];
 
-function CriteriaTable(props) {
-  const { rows, headCells, onStandardsChange } = props;
-
-  const handleDescriptionChange = (index, value) => {
-    const updatedStandards = [...rows];
-    updatedStandards[index].description = value;
-    onStandardsChange(updatedStandards);
-  };
-
-  const handleScaleDescriptionChange = (index, value) => {
-    const updatedStandards = [...rows];
-    updatedStandards[index].scale_description = value;
-    onStandardsChange(updatedStandards);
-  };
-  return (
-    <Fragment>
-      <Sheet
-        className="TableContainer"
-        variant="outlined"
-        sx={{
-          borderRadius: "sm",
-          boxShadow: "xs",
-        }}
-      >
-        <Table
-          borderAxis="bothBetween"
-          aria-labelledby="Tabla de criterios de la rúbrica"
-          stickyHeader
-          sx={{
-            "--TableCell-headBackground":
-              "var(--joy-palette-background-level1)",
-            "--Table-headerUnderlineThickness": "1px",
-            "--TableRow-hoverBackground":
-              "var(--joy-palette-background-level1)",
-            "--TableCell-paddingY": "0px",
-            "--TableHeader-paddingY": "12px",
-            "--TableCell-paddingX": "0px",
-            "& thead th": {
-              paddingY: "12px",
-              paddingX: "16px",
-            },
-            // "& thead th:nth-of-type(1)": { width: "10%" },
-
-            "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
-          }}
-        >
-          {/* <EnhancedTableHead
-            // numSelected={selected.length}
-            order={order}
-            orderBy={orderBy}
-            // onSelectAllClick={handleSelectAllClick}
-            onRequestSort={handleRequestSort}
-            rowCount={rows.length}
-            headCells={headCells}
-          /> */}
-          <thead>
-            <tr>
-              {headCells.map((headCell) => (
-                <th key={headCell.id}>{headCell.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={index}>
-                <td>
-                  <Textarea
-                    required
-                    size="sm"
-                    variant="plain"
-                    minRows={3}
-                    maxRows={5}
-                    onChange={(e) =>
-                      handleDescriptionChange(index, e.target.value)
-                    }
-                    placeholder="Descripción del criterio"
-                  />
-                </td>
-                <td>
-                  <Textarea
-                  required
-                    size="sm"
-                    variant="plain"
-                    minRows={3}
-                    maxRows={5}
-                    onChange={(e) =>
-                      handleScaleDescriptionChange(index, e.target.value)
-                    }
-                    placeholder="1. El integrante del grupo no cumple con..."
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Sheet>
-    </Fragment>
-  );
-}
-
-export default function CreateRubric() {
+export default function CreateRubric(props) {
+  const { adminMode } = props;
   const courseId = useParams().courseId;
   // console.log(courseId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const action = React.useRef(null);
+  const [addNewRow, setAddNewRow] = useState(false);
   const [rubric, setRubric] = useState({
     name: "",
-    standards: [
-      {
-        description: "",
-        scale_description: "",
-      },
-    ],
+    standards: [{ description: "", scale_description: "" }],
     scale: {
       Lower_limit: 1,
       Upper_limit: null,
     },
   });
+
+  const handleAddNewRow = () => {
+    const lastRow = rubric.standards[rubric.standards.length - 1];
+    if (
+      lastRow.description.trim() !== "" ||
+      lastRow.scale_description.trim() !== ""
+    ) {
+      setRubric((prevRubric) => ({
+        ...prevRubric,
+        standards: [
+          ...prevRubric.standards,
+          { description: "", scale_description: "" },
+        ],
+      }));
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("responseEvent", {
+          detail: {
+            message:
+              "Por favor, complete los campos de la última fila antes de agregar una nueva.",
+            severity: "warning",
+          },
+        })
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    if (addNewRow) {
+      handleAddNewRow();
+      setAddNewRow(false);
+    }
+  }, [addNewRow]);
+
+  const handleAddRow = () => {
+    setAddNewRow(true);
+  };
+
+  const handleRemoveLastRow = () => {
+    if (rubric.standards.length > 1) {
+      setRubric((prevRubric) => ({
+        ...prevRubric,
+        standards: prevRubric.standards.slice(0, -1),
+      }));
+    }
+  };
 
   const handleStandardsChange = (updatedStandards) => {
     setRubric((prevRubric) => ({
@@ -179,7 +119,15 @@ export default function CreateRubric() {
     e.preventDefault();
     console.log(rubric);
     api
-      .post(`api/create_rubric/${courseId}/`, rubric)
+      .post(
+        `api/${!adminMode ? "create_rubric" : "create_global_rubric"}`,
+        rubric,
+        {
+          params: {
+            course_code: courseId,
+          },
+        }
+      )
       .then((response) => {
         // console.log(response);
         setIsModalOpen(false);
@@ -193,12 +141,16 @@ export default function CreateRubric() {
         );
       })
       .catch((error) => {
-        console.error(error);
+        // console.error(error);
         setIsModalOpen(false);
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.message}`,
+              message: `${
+                error.response.data.error
+                  ? error.response.data.error
+                  : error.message
+              }`,
               severity: "danger",
             },
           })
@@ -368,27 +320,54 @@ export default function CreateRubric() {
                 onStandardsChange={handleStandardsChange}
               />
             </Stack>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                alignSelf: "flex-end",
-              }}
-            >
-              <Button
-                onClick={() => setIsModalOpen(false)}
-                variant="outlined"
-                color="neutral"
+            <Stack direction="row" justifyContent="space-between">
+              <Stack direction="row-reverse" gap={1}>
+                <Button
+                  onClick={handleAddRow}
+                  disabled={
+                    !(
+                      rubric.standards[
+                        rubric.standards.length - 1
+                      ].description.trim() !== "" ||
+                      rubric.standards[
+                        rubric.standards.length - 1
+                      ].scale_description.trim() !== ""
+                    )
+                  }
+                >
+                  Añadir criterio
+                </Button>
+                <Button
+                  variant="soft"
+                  color="danger"
+                  onClick={handleRemoveLastRow}
+                  disabled={rubric.standards.length === 1}
+                >
+                  Eliminar último criterio
+                </Button>
+              </Stack>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  alignSelf: "flex-end",
+                }}
               >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                //   loading={loading}
-              >
-                Crear
-              </Button>
-            </Box>
+                <Button
+                  onClick={() => setIsModalOpen(false)}
+                  variant="outlined"
+                  color="neutral"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  //   loading={loading}
+                >
+                  Crear
+                </Button>
+              </Box>
+            </Stack>
           </Stack>
         </form>
       </ModalFrame>

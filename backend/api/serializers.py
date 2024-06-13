@@ -229,8 +229,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class EvaluationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Evaluation
-        fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
-
+        fields = ['estado', 'name', 'rubric', 'course']
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
