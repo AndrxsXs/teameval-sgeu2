@@ -1,5 +1,5 @@
 import { Box, Typography, Table } from "@mui/joy";
-import ReportTable from "../../components/ReportTable";
+
 import SearchField from "../../components/admin/SearchField";
 import React, { Fragment } from 'react';
 import { Outlet, useLocation } from "react-router-dom";
