@@ -15,6 +15,8 @@ import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Avatar from "@mui/joy/Avatar";
 
+import { handleKeyPress } from "../../utils/handleKeyPress";
+
 export default function CreateTeacher() {
   const [loading, setLoading] = useState(false);
 
@@ -80,7 +82,7 @@ export default function CreateTeacher() {
       window.dispatchEvent(
         new CustomEvent("responseEvent", {
           detail: {
-            message: `${error.response.data.message}`,
+            message: `${error.response.data.error}`,
             severity: "danger",
           },
         })
@@ -252,8 +254,9 @@ export default function CreateTeacher() {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      type="number"
                       required
+                      type="text"
+                      onKeyDown={handleKeyPress}
                     />
                   </FormControl>
                   <FormControl>
@@ -265,7 +268,8 @@ export default function CreateTeacher() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      type="tel"
+                      type="text"
+                      onKeyDown={handleKeyPress}
                     />
                   </FormControl>
                 </Stack>

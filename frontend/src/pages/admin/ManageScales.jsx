@@ -1,10 +1,33 @@
 import { Fragment } from "react";
 
-import CriteriaTable from "../../components/admin/CriteriaTable";
+// import CriteriaTable from "../../components/admin/CriteriaTable";
+// import CriteriaTable from "../../components/CriteriaTable";
 
-import { Box, Typography, Button, Stack } from "@mui/joy";
-import Add from "@mui/icons-material/Add";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
+// import { Box, Typography, Button, Stack } from "@mui/joy";
+// import Add from "@mui/icons-material/Add";
+// import EditRoundedIcon from "@mui/icons-material/EditRounded";
+
+import Typography from "@mui/joy/Typography";
+import Box from "@mui/joy/Box";
+import Stack from "@mui/joy/Stack";
+
+import RubricList from "../../components/teacher/RubricList";
+import CreateRubric from "../../components/teacher/CreateRubric";
+
+// const headCells = [
+//   {
+//     id: "text",
+//     numeric: false,
+//     disablePadding: true,
+//     label: "Criterio",
+//   },
+//   // {
+//   //   id: "scale",
+//   //   numeric: false,
+//   //   disablePadding: false,
+//   //   label: "Descripción de la escala",
+//   // },
+// ];
 
 export default function ManageScales() {
   return (
@@ -34,7 +57,8 @@ export default function ManageScales() {
           </Typography>
 
           <Typography level="body-md">
-            Agregue y edite los criterios predeterminados para las escalas de evaluación.
+            Agregue y edite los criterios predeterminados que podrán usar los
+            docentes en sus rúbricas.
           </Typography>
         </Stack>
 
@@ -42,23 +66,25 @@ export default function ManageScales() {
           sx={{
             display: "flex",
             gap: 1,
-            flexDirection: { xs: "column-reverse", sm: "row-reverse" },
+            flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <Button color="primary" startDecorator={<Add />} size="sm">
+          <CreateRubric />
+          {/* <Button color="primary" startDecorator={<Add />} size="sm">
             Agregar criterios
-          </Button>
-          <Button
+          </Button> */}
+          {/* <Button
             color="neutral"
             variant="outlined"
             startDecorator={<EditRoundedIcon />}
             disabled
           >
             Editar criterios
-          </Button>
+          </Button> */}
         </Box>
       </Box>
-      <CriteriaTable />
+      {/* <CriteriaTable headCells={headCells} /> */}
+      <RubricList />
     </Fragment>
   );
 }

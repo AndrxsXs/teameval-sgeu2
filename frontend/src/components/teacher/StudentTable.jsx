@@ -16,8 +16,9 @@ import { stableSort } from "../../utils/stableSort";
 import { getComparator } from "../../utils/getComparator";
 
 import EnhancedTableHead from "../EnhacedTableHead";
-// import EditUser from "../../components/EditUser";
-import DisableStudent from "../../components/DisableStudent";
+import EditStudent from "../../components/admin/EditStudent";
+import DisableStudent from "../../components/admin/DisableStudent";
+import UserInfo from "../UserInfo";
 
 const columns = [
   {
@@ -41,26 +42,28 @@ const columns = [
 ];
 
 function RowMenu(props) {
-  const { user, endpoint } = props;
+  const { user, endpoint, admin } = props;
 
   return (
     <Box
       // size='sm'
       sx={{ display: "flex", gap: 1, justifyContent: "center" }}
     >
-      {/* <EditUser user={user} /> */}
+      {admin && <EditStudent user={user} />}
       <DisableStudent endpoint={endpoint} user={user} />
     </Box>
   );
 }
 
 export default function StudentTable(props) {
-  const { course, searchTerm } = props;
+  const { course, searchTerm, admin } = props;
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("code");
   const [selected, setSelected] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const disableStudentEndpoint = `api/unregister_student/${course}/`;
 
@@ -132,12 +135,12 @@ export default function StudentTable(props) {
 
     window.addEventListener("user-created", handleUserCreated);
     window.addEventListener("user-disabled", fetchData);
-    window.addEventListener("user-edited", fetchData);
+    window.addEventListener("user-updated", fetchData);
 
     return () => {
       window.removeEventListener("user-created", handleUserCreated);
       window.removeEventListener("user-disabled", fetchData);
-      window.removeEventListener("user-edited", fetchData);
+      window.removeEventListener("user-updated", fetchData);
     };
   }, [course]);
 
@@ -204,16 +207,28 @@ export default function StudentTable(props) {
             {stableSort(filteredRows, getComparator(order, orderBy)).map(
               (row) => {
                 return (
-                  <tr key={row.code}>
-                    <td>
+                  <tr style={{ cursor: "pointer" }} key={row.code}>
+                    <td
+                      onClick={() => {
+                        setSelectedStudent(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">{row.code}</Typography>
                     </td>
-                    <td>
+                    <td
+                      onClick={() => {
+                        setSelectedStudent(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">
                         {row.name} {""} {row.last_name}
                       </Typography>
                     </td>
-                    <td>
+                    <td
+                      onClick={() => {
+                        setSelectedStudent(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">{row.email}</Typography>
                     </td>
                     <td>
@@ -221,6 +236,7 @@ export default function StudentTable(props) {
                         user={row}
                         endpoint={disableStudentEndpoint}
                         enableRoute={disableStudentEndpoint}
+                        admin={admin}
                       />
                     </td>
                   </tr>
@@ -277,6 +293,17 @@ export default function StudentTable(props) {
           </Typography>
         )}
       </Sheet>
+      {selectedStudent && (
+        <UserInfo
+          user={selectedStudent}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          handleCloseModal={() => setIsModalOpen(false)}
+          admin={admin}
+          isStudent
+          setSelectedUser={setSelectedStudent}
+        />
+      )}
     </React.Fragment>
   );
 }

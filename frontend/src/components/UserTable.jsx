@@ -22,6 +22,7 @@ import EditUser from "../components/EditUser";
 import DisableUser from "../components/DisableUser";
 import EnableUser from "../components/EnableUser";
 import EnhancedTableHead from "./EnhacedTableHead";
+import UserInfo from "./UserInfo";
 
 function RowMenu(props) {
   const { user, disableRoute, enableRoute } = props;
@@ -42,14 +43,22 @@ function RowMenu(props) {
 }
 
 export default function UserTable(props) {
-  const { role, columns, disableUserRoute, enableUserRoute, searchTerm } =
-    props;
+  const {
+    role,
+    columns,
+    disableUserRoute,
+    enableUserRoute,
+    searchTerm,
+    admin,
+  } = props;
 
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("code");
   const [selected, setSelected] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredRows = searchTerm
     ? rows.filter(
@@ -179,19 +188,40 @@ export default function UserTable(props) {
             {stableSort(filteredRows, getComparator(order, orderBy)).map(
               (row) => {
                 return (
-                  <tr key={row.code}>
-                    <td>
+                  <tr
+                    key={row.code}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    <td
+                      onClick={() => {
+                        setSelectedUser(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">{row.code}</Typography>
                     </td>
-                    <td>
+                    <td
+                      onClick={() => {
+                        setSelectedUser(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">
                         {row.name} {""} {row.last_name}
                       </Typography>
                     </td>
-                    <td>
+                    <td
+                      onClick={() => {
+                        setSelectedUser(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Typography level="body-xs">{row.email}</Typography>
                     </td>
-                    <td>
+                    <td
+                      onClick={() => {
+                        setSelectedUser(row), setIsModalOpen(true);
+                      }}
+                    >
                       <Chip
                         size="sm"
                         variant="soft"
@@ -263,6 +293,16 @@ export default function UserTable(props) {
           </Typography>
         )}
       </Sheet>
+      {selectedUser && (
+        <UserInfo
+          user={selectedUser}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          handleCloseModal={() => setIsModalOpen(false)}
+          admin={admin}
+          setSelectedUser={setSelectedUser}
+        />
+      )}
     </React.Fragment>
   );
 }

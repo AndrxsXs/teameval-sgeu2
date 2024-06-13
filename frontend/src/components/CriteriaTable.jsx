@@ -1,25 +1,23 @@
 /* eslint-disable react/prop-types */
-import { Fragment, useState } from "react";
-
+import { Fragment } from "react";
 import Sheet from "@mui/joy/Sheet";
 import Table from "@mui/joy/Table";
 import Textarea from "@mui/joy/Textarea";
 
 export default function CriteriaTable(props) {
-  const { headCells } = props;
-  const [loading, setLoading] = useState(false);
-  const [rows, setRows] = useState([]);
+  const { rows, headCells, onStandardsChange } = props;
 
   const handleDescriptionChange = (index, value) => {
     const updatedStandards = [...rows];
     updatedStandards[index].description = value;
+    onStandardsChange(updatedStandards);
   };
 
-  // const handleScaleDescriptionChange = (index, value) => {
-  //   const updatedStandards = [...rows];
-  //   updatedStandards[index].scale_description = value;
-  // };
-
+  const handleScaleDescriptionChange = (index, value) => {
+    const updatedStandards = [...rows];
+    updatedStandards[index].scale_description = value;
+    onStandardsChange(updatedStandards);
+  };
   return (
     <Fragment>
       <Sheet
@@ -28,12 +26,12 @@ export default function CriteriaTable(props) {
         sx={{
           borderRadius: "sm",
           boxShadow: "xs",
-          height: "100%",
+          overflow: "auto",
         }}
       >
         <Table
           borderAxis="bothBetween"
-          aria-labelledby="Tabla de criterios predeterminados"
+          aria-labelledby="Tabla de criterios de la rúbrica"
           stickyHeader
           sx={{
             "--TableCell-headBackground":
@@ -85,9 +83,9 @@ export default function CriteriaTable(props) {
                     placeholder="Descripción del criterio"
                   />
                 </td>
-                {/* <td>
+                <td>
                   <Textarea
-                    required
+                    // required
                     size="sm"
                     variant="plain"
                     minRows={3}
@@ -97,7 +95,7 @@ export default function CriteriaTable(props) {
                     }
                     placeholder="1. El integrante del grupo no cumple con..."
                   />
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>

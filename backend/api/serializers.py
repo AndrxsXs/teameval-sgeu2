@@ -193,10 +193,18 @@ class AdminSerializer(serializers.ModelSerializer):
         admin = Admi.objects.create(user=user, **validated_data)
         return admin
 
+class GlobalRubricSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rubric
+        fields = ['name', 'scale', 'standards', 'is_global']
+        extra_kwargs = {
+            'is_global': {'default': True}
+        }
 class ScaleSerialiazer(serializers.ModelSerializer):
     class Meta:
         model = Scale
         fields = ['Upper_limit', 'Lower_limit']
+        
         
 class StandardSerializer(serializers.ModelSerializer):
     class Meta:
@@ -223,8 +231,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class EvaluationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Evaluation
-        fields = ['estado', 'date_start', 'date_end', 'name', 'rubric', 'course']
-
+        fields = ['estado', 'name', 'rubric', 'course']
 
 class RubricSerializer(serializers.ModelSerializer):
     class Meta:
@@ -247,7 +254,6 @@ class RubricSerializer(serializers.ModelSerializer):
                 Standard.objects.create(rubric=rubric, **standard_data)
             return rubric
         
-
 class GroupSerializer(serializers.ModelSerializer):
     student_codes = serializers.ListField(child=serializers.CharField())
 

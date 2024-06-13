@@ -1,99 +1,73 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
-import api from "../../api";
+// import api from '../../api';
 import { useState } from "react";
 import ModalFrame from "../ModalFrame";
 import Button from "@mui/joy/Button";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
-import IconButton from "@mui/joy/IconButton";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
-import { AspectRatio } from "@mui/joy";
-import Add from "@mui/icons-material/Add";
-import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import Avatar from "@mui/joy/Avatar";
-import { handleKeyPress } from "../../utils/handleKeyPress";
 
-export default function CreateAdmin() {
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
+
+import api from "../../api";
+
+export default function EditStudent(props) {
+  const { user } = props;
   const [loading, setLoading] = useState(false);
 
-  const route = "api/register_admin/";
+  // const route = "api/edit_user/"
 
   const [formData, setFormData] = useState({
-    code: "",
-    name: "",
-    last_name: "",
-    email: "",
-    phone: undefined,
+    code: user.code,
+    name: user.name,
+    last_name: user.last_name,
+    email: user.email,
   });
 
-  const handleSubmit = async (event) => {
-    // console.log(formData);
+  const handleEditStudent = async (event) => {
     setLoading(true);
     event.preventDefault();
-
     const token = localStorage.getItem("ACCESS_TOKEN");
-
-    try {
-      const response = await api.post(route, formData, {
+    await api
+      .put(`api/update_student`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-
-      if (response.status === 201) {
-        const data = await response.data;
-        // console.log(data);
-        setFormData({
-          code: "",
-          name: "",
-          last_name: "",
-          email: "",
-          phone: undefined,
-        });
-        // Emitir el evento 'userCreated' después de crear un nuevo usuario
-        window.dispatchEvent(new Event("user-created"));
+        params: {
+          student_code: user.code,
+        },
+      })
+      .then((response) => {
         window.dispatchEvent(
+          // console.log("Evento de respuesta: ", response),
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${data.message}`,
+              message: `${response.data.message}`,
               severity: "success",
             },
           })
         );
-
+        window.dispatchEvent(new Event("user-updated"));
+        setLoading(false);
         handleCloseModal(false);
-      } else {
-        const data = await response.data;
-        // console.error('Error:', response.status, response.statusText);
+        window.dispatchEvent(new Event("user-updated"));
+      })
+      .catch((error) => {
+        // console.log("Error: ", error.response.data.error);
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${data.message}`,
+              message: `${error.response.data.error}`,
               severity: "danger",
             },
           })
         );
-      }
-    } catch (error) {
-      // console.error('Error:', error);
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message: `${
-              error.response.status === 409
-                ? "La cédula ya existe en el sistema."
-                : "Error al crear el administrador. Intente nuevamente."
-            }`,
-            severity: "danger",
-          },
-        })
-      );
-    }
-
-    setLoading(false);
+        setLoading(false);
+        handleCloseModal(false);
+      });
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,20 +85,21 @@ export default function CreateAdmin() {
   return (
     <React.Fragment>
       <Button
-        color="primary"
-        // size="sm"
-        startDecorator={<Add />}
+        // disabled
+        size="sm"
+        variant="plain"
+        color="neutral"
         onClick={handleOpenModal}
       >
-        Nuevo administrador
+        Editar
       </Button>
 
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
-        ModalTitle="Nuevo administrador"
+        ModalTitle="Editar usuario"
       >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleEditStudent}>
           <Box
             component="article"
             sx={{
@@ -139,61 +114,6 @@ export default function CreateAdmin() {
               // spacing={3}
               sx={{ display: "flex", my: 1 }}
             >
-              {/* profile picture */}
-
-              <Stack
-                direction="column"
-                spacing={1}
-                sx={{
-                  display: { sm: "none", md: "none" },
-                }}
-              >
-                <AspectRatio
-                  ratio="1"
-                  maxHeight={200}
-                  sx={{
-                    // position: 'relative',
-                    flex: 1,
-                    minWidth: 120,
-                    borderRadius: "100%",
-                    // border: '1px solid',
-                    borderColor: "divider",
-                    // backgroundImage: `url(${<PersonAddRoundedIcon />})`,
-                  }}
-                >
-                  <Avatar
-                    variant="outlined"
-                    // src={profilePicture}
-                    alt=""
-                    sx={{
-                      width: "",
-                      height: "",
-                    }}
-                  />
-                </AspectRatio>
-                <IconButton
-                  aria-label="Subir una nueva imagen"
-                  size="sm"
-                  variant="outlined"
-                  color="neutral"
-                  sx={{
-                    bgcolor: "background.body",
-                    position: "absolute",
-                    zIndex: 2,
-                    borderRadius: "50%",
-                    left: 110,
-                    top: 150,
-                    boxShadow: "sm",
-                  }}
-                >
-                  {/* <Input type="file"> */}
-                  <EditRoundedIcon />
-                  {/* </Input> */}
-                </IconButton>
-              </Stack>
-
-              {/* end profile picture */}
-
               <Stack spacing={2} sx={{ flexGrow: 1 }}>
                 <Stack
                   component="section"
@@ -202,7 +122,7 @@ export default function CreateAdmin() {
                   <FormControl
                   //sx={{ display: { sm: 'flex-column', md: 'flex-row' }, gap: 2 }}
                   >
-                    <FormLabel>Nombres</FormLabel>
+                    <FormLabel>Nombre</FormLabel>
                     <Input
                       size="sm"
                       placeholder="Nombres"
@@ -249,7 +169,7 @@ export default function CreateAdmin() {
                   sx={{ flexDirection: "row", gap: 2 }}
                 >
                   <FormControl>
-                    <FormLabel>Cédula</FormLabel>
+                    <FormLabel>Código</FormLabel>
                     <Input
                       size="sm"
                       placeholder="Ingrese el código"
@@ -257,22 +177,8 @@ export default function CreateAdmin() {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      type="text"
-                      onKeyDown={handleKeyPress}
+                      type="number"
                       required
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Teléfono (Opcional)</FormLabel>
-                    <Input
-                      size="sm"
-                      placeholder="Ingrese el teléfono"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      type="text"
-                      onKeyDown={handleKeyPress}
                     />
                   </FormControl>
                 </Stack>
@@ -292,7 +198,7 @@ export default function CreateAdmin() {
                 Cancelar
               </Button>
               <Button type="submit" loading={loading}>
-                Crear
+                Guardar
               </Button>
             </Box>
           </Box>

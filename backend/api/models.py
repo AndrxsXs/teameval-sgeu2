@@ -226,14 +226,14 @@ class Rubric(models.Model):
         Course, related_name="rubrics"
     )
 
- #   is_global = models.BooleanField(default=False)
+    is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
     description = models.TextField() #describe el criterio
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
-    scale_description = models.TextField(default=False, null=True) # describe la escala
+    scale_description = models.TextField(default=False, null=True, blank=True) # describe la escala
 
  #   nota = models.PositiveIntegerField(default=False) #no va aqui, sino en rating
 
@@ -266,8 +266,8 @@ class Evaluation(models.Model):
     #evaluator = models.CharField(max_length=60)
     #evaluated = models.CharField(max_length=60)
     estado = models.IntegerField(choices=STATUS_CHOICES)
-    date_start = models.DateTimeField(auto_now_add=False)
-    date_end = models.DateTimeField(auto_now_add=False)
+  #  date_start = models.DateTimeField(auto_now_add=False)
+  #  date_end = models.DateTimeField(auto_now_add=False)
     name = models.CharField(max_length=60)
     comment = models.TextField(max_length=100)
     #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones
@@ -281,7 +281,6 @@ class Evaluation(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
 
-    completed = models.BooleanField(default=False)
     
     #al que evaluo
 '''

@@ -26,10 +26,16 @@ export default function TeacherSidebar({ userData }) {
       icon: <EditNoteRoundedIcon key="scales" />,
     },
     {
+      text: "Evaluaciones",
+      route: "./evaluaciones",
+      icon: <UploadFileIcon  key="test" />,
+    },
+    {
       text: "Informes",
       route: "./informes",
       icon: <ContentPasteIcon key="reports" />,
     },
+    
     {
       text: "Recursos",
       route: "./recursos",

@@ -50,7 +50,7 @@ urlpatterns = [
 
     #Lista de estudiantes sin grupo
     path('ungrouped_students/<str:course_code>/', views.ungrouped_students, name='ungrouped_students'), #Luisa
-
+    
     #Evaluaciones disponibles para que el estudiante realice
     path('available_evaluations/<str:student_code>/', views.available_evaluations, name='available_evaluations'), #Luisa
 
@@ -75,11 +75,13 @@ urlpatterns = [
     path('update_course', views.update_course, name='update_course'), #Luisa
 
     #Editar rubrica
-    path('update_rubric', views.update_rubric, name='update-rubric'), #Luisa
+    path('update_rubric', views.update_rubric, name='update_rubric'), #Luisa
 
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
     path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa
     
+    
+    path('create_global_rubric', views.create_global_rubric, name='create_global_rubric'),
 
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
     
@@ -87,7 +89,7 @@ urlpatterns = [
   #  path('create_rubric/', views.create_rubric, name='create_rubric'),
     # el profesor crea una rubrica para ese curso
     # path('create_rubric/<str:course_code>/<int:scale_id>/', views.create_rubric, name='create_rubric'), #karol
-    path('create_rubric/<str:course_code>/', views.create_rubric, name='create_rubric'),
+    path('create_rubric', views.create_rubric, name='create_rubric'),
     path('courses/<str:course_code>/register_student/', views.register_student, name='register_student'), #karol
     path('rubrics/<int:rubric_id>/', views.get_rubric, name='get_rubric'), #karol
     #muestra la lista de todos los grupos que hay en un curso
@@ -111,6 +113,12 @@ urlpatterns = [
     path('disable_user/', views.disable_user, name='disable_user'),
     #habilita admin y profesor
     path('enable_user/', views.enable_user, name='enable_user'),
+    #obtiene la nota del estudiante en anonimo
+    path('evaluation_results/', views.evaluation_results, name='evaluation_results'),
+    #cambia el estado de por iniciar a iniciado (inicializa una evaluacion)
+    path('start_evaluation/', views.start_evaluation, name='start_evaluation'),
+    #cambia el estado de por iniciado a finalizado (finaliza una evaluacion)
+    path('finish_evaluation/', views.finish_evaluation, name='finish_evaluation'),
 
     
 ]

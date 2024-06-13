@@ -1,10 +1,8 @@
-/* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import api from "../../../api";
+// import api from "../../api";
 
-import ModalFrame from "../../ModalFrame";
-import UngroupedStudentsTable from "./UngroupedStudentsTable";
+import ModalFrame from "../ModalFrame";
 
 import Button from "@mui/joy/Button";
 import Box from "@mui/joy/Box";
@@ -15,18 +13,32 @@ import Input from "@mui/joy/Input";
 
 import Add from "@mui/icons-material/Add";
 
-export default function CreateGroup({ course }) {
-  const [selectedStudents, setSelectedStudents] = useState([]);
+import RubricList from "./RubricList";
+
+export default function CreateEvaluation() {
+  const [selectedRubric, setSelectedRubric] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     code: "",
-    assigned_project: "",
-    student_codes: [],
+    estado: 1,
   });
 
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // console.log(selectedRubric);
+
+  const handleResetFormData = () => {
+    setFormData({
+      name: "",
+      code: "",
+      estado: 1,
+    });
+  };
+
+  const handleRubricSelect = (rubric) => {
+    setSelectedRubric(rubric);
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -40,52 +52,16 @@ export default function CreateGroup({ course }) {
     e.preventDefault();
     // console.log(formData);
     setLoading(true);
-
-    const token = localStorage.getItem("ACCESS_TOKEN");
-
-    const groupData = {
-      ...formData,
-      // students: selectedStudents,
-      student_codes: selectedStudents, // Asegúrate de que selectedStudents sea un array de códigos de estudiantes
-    };
-    // console.log(groupData);
-
-    await api
-      .post(`api/create_group/${course}/`, groupData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setFormData(response.data);
-        setLoading(false);
-        setOpen(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: "Grupo creado exitosamente",
-              severity: "success",
-            },
-          })
-        );
-        window.dispatchEvent(new CustomEvent("group-created"));
-      })
-      .catch((error) => {
-        setLoading(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${error.response.data.error}`,
-              severity: "danger",
-            },
-          })
-        );
-      });
   };
 
-  const handleSelectedStudentsChange = (selectedStudents) => {
-    setSelectedStudents(selectedStudents);
-  };
+  useEffect(() => {
+    if (selectedRubric) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        rubric: selectedRubric.name,
+      }));
+    }
+  }, [selectedRubric]);
 
   return (
     <>
@@ -95,9 +71,13 @@ export default function CreateGroup({ course }) {
         // size="sm"
         onClick={handleOpen}
       >
-        Nuevo grupo
+        Nueva evaluación
       </Button>
-      <ModalFrame ModalTitle="Nuevo grupo" open={open} onClose={handleClose}>
+      <ModalFrame
+        ModalTitle="Nueva evaluación"
+        open={open}
+        onClose={handleClose}
+      >
         <form onSubmit={handleSubmit}>
           <Box
             component="article"
@@ -107,7 +87,7 @@ export default function CreateGroup({ course }) {
               gap: 2,
               alignItems: "flex-start",
               minWidth: "500px",
-              maxWidth: "700px",
+              //   maxWidth: "700px",
             }}
           >
             <Stack
@@ -139,7 +119,7 @@ export default function CreateGroup({ course }) {
                     <FormLabel>Nombre</FormLabel>
                     <Input
                       size="sm"
-                      placeholder="Nombre del grupo"
+                      placeholder="Nombre de la evaluación"
                       type="text"
                       value={formData.name}
                       onChange={(e) =>
@@ -168,6 +148,37 @@ export default function CreateGroup({ course }) {
                       required
                     />
                   </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Fecha de inicio</FormLabel>
+                    <Input
+                      type="date"
+                      slotProps={{
+                        input: {
+                          min: "2024-06-12",
+                          max: "2025-12-12",
+                        },
+                      }}
+                      //value
+                      //Onchange
+                      required
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Fecha de finalización</FormLabel>
+                    <Input
+                      type="date"
+                      slotProps={{
+                        input: {
+                          min: "2024-06-12",
+                          max: "2024-12-12",
+                        },
+                      }}
+                      //value
+                      //Onchange
+                      required
+                    />
+                  </FormControl>
                 </Stack>
                 <Stack
                   component="section"
@@ -179,9 +190,9 @@ export default function CreateGroup({ course }) {
                     width: "100%",
                   }}
                 >
-                  <UngroupedStudentsTable
-                    course={course}
-                    onSelectedStudentsChange={handleSelectedStudentsChange}
+                  <RubricList
+                    selectMode={true} // Habilitar el modo de selección
+                    onSelect={handleRubricSelect} // Pasar la función de devolución de llamada
                   />
                 </Stack>
               </Stack>
@@ -194,7 +205,7 @@ export default function CreateGroup({ course }) {
               }}
             >
               <Button
-                onClick={() => setOpen(false)}
+                onClick={() => (setOpen(false), handleResetFormData())}
                 variant="outlined"
                 color="neutral"
               >
