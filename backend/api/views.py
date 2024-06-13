@@ -2415,3 +2415,64 @@ def report_detailed(request):
         )
 
     return Response(report_data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def report_general(request):
+
+    data = request.data
+
+    evaluations = EvaluationCompleted.objects.filter(evaluation__id=data.get("id_evaluation"))
+
+    report_data = []
+    
+    qualifications = []
+    
+    standards= []
+    
+    for evaluation in evaluations:
+        
+        code_student= evaluation.evaluated.user.code
+        
+        if code_student not in report_data:
+            report_data.append(code_student)
+        else:
+            continue
+        
+    for code in report_data:
+        
+        student= Student.objects.get(user__code= code)
+        
+        ratings = Rating.objects.filter(evaluationCompleted__evaluated=student)
+     
+        for rating in ratings:
+            
+            standard= rating.standard.id
+            
+            if standard not in standards:
+                standards.append(standard)
+            else:
+                continue
+        
+        for standard in standards:
+            
+            ratings1= ratings.filter(standard_id = standard) 
+        
+            average= 0
+        
+            count = 0
+        
+            for rating in ratings1:
+            
+                average += rating.qualification
+                count += 1
+            
+            qualifications.append(
+                {
+                    "standard": rating.standard.description,
+                    "nota": average / count,
+                    "evaluated": student.user.name + ' ' + student.user.last_name
+                }
+            )
+        
+    return Response(qualifications)
