@@ -2379,9 +2379,8 @@ def main_report(request):
     evaluation_data = [
         {
             "estado": evaluation.estado,
-            "date_start": evaluation.date_start,
-            "date_end": evaluation.date_end,
             "name": evaluation.name,
+            "rubrica": evaluation.rubric
         }
         for evaluation in evaluations
     ]
@@ -2391,7 +2390,7 @@ def main_report(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def view_notas(request):
+def report_detailed(request):
 
     data = request.data
 
@@ -2399,19 +2398,16 @@ def view_notas(request):
         evaluation__id=data.get("id_evaluation")
     )
 
-    print(evaluations)
-
     report_data = []
 
     for evaluation in evaluations:
 
         ratings = Rating.objects.filter(evaluationCompleted=evaluation.id)
-        # ratings= Rating.objects.all()
-        # print(ratings)
 
         report_data.append(
             {
                 "evaluated": rating.evaluationCompleted.evaluated.user.name,
+                "evaluator": rating.evaluationCompleted.evaluator.user.name,
                 "standard": rating.standard.description,
                 "qualification": rating.qualification,
             }
