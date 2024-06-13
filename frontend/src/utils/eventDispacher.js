@@ -1,5 +1,5 @@
 export default function eventDispatcher(event, response, severity = "success") {
-  console.log("Evento de respuesta: ", response);
+  // console.log("Evento de respuesta: ", response);
   let message;
   if (typeof response === "string") {
     message = response;
