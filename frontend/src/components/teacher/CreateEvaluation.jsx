@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-// import api from "../../api";
+import api from "../../api";
+import eventDispacher from "../../utils/eventDispacher";
 
 import ModalFrame from "../ModalFrame";
 
@@ -10,20 +11,28 @@ import Stack from "@mui/joy/Stack";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
+import Select from "@mui/joy/Select";
+import Option from "@mui/joy/Option";
+import Chip from "@mui/joy/Chip";
 
 import Add from "@mui/icons-material/Add";
 
 import RubricList from "./RubricList";
+import { useParams } from "react-router";
 
 export default function CreateEvaluation() {
   const [selectedRubric, setSelectedRubric] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const course_code = useParams().courseId;
+
+  console.log(selectedRubric || "rubrica no seleccionada");
 
   const [formData, setFormData] = useState({
     name: "",
-    code: "",
+    course_code: course_code,
     estado: 1,
+    rubric_name: selectedRubric ? selectedRubric.name : "",
   });
 
   // console.log(selectedRubric);
@@ -35,6 +44,8 @@ export default function CreateEvaluation() {
       estado: 1,
     });
   };
+
+  console.log(formData);
 
   const handleRubricSelect = (rubric) => {
     setSelectedRubric(rubric);
@@ -49,16 +60,36 @@ export default function CreateEvaluation() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    // console.log(formData);
     setLoading(true);
+    e.preventDefault();
+    if (selectedRubric) {
+      api
+        .post("api/create_evaluation", formData, {
+          params: {
+            course_code: course_code,
+          },
+        })
+        .then((response) => {
+          eventDispacher("responseEvent", response);
+          handleClose();
+          handleResetFormData();
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+        });
+    } else {
+      eventDispacher("responseEvent", "Debe seleccionar una rúbrica", "danger");
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (selectedRubric) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        rubric: selectedRubric.name,
+        rubric_name: selectedRubric.name,
       }));
     }
   }, [selectedRubric]);
@@ -78,7 +109,12 @@ export default function CreateEvaluation() {
         open={open}
         onClose={handleClose}
       >
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            // width: "clamp(300px, 100%, 800px)",
+          }}
+        >
           <Box
             component="article"
             sx={{
@@ -86,7 +122,8 @@ export default function CreateEvaluation() {
               flexDirection: "column",
               gap: 2,
               alignItems: "flex-start",
-              minWidth: "500px",
+              // minWidth: "500px",
+              overflow: "auto",
               //   maxWidth: "700px",
             }}
           >
@@ -121,7 +158,7 @@ export default function CreateEvaluation() {
                       size="sm"
                       placeholder="Nombre de la evaluación"
                       type="text"
-                      value={formData.name}
+                      defaultValue=""
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
@@ -137,7 +174,7 @@ export default function CreateEvaluation() {
                     <Input
                       size="sm"
                       placeholder="Nombre del proyecto"
-                      value={formData.assigned_project}
+                      defaultValue=""
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -150,6 +187,30 @@ export default function CreateEvaluation() {
                   </FormControl>
 
                   <FormControl>
+                    <FormLabel>Estado</FormLabel>
+                    <Select
+                      size="sm"
+                      onChange={(e, value) =>
+                        setFormData({ ...formData, estado: value })
+                      }
+                      placeholder="Estado"
+                      required
+                      defaultValue={1}
+                    >
+                      <Option value={1}>
+                        <Chip color="warning" size="sm">
+                          Por iniciar
+                        </Chip>
+                      </Option>
+                      <Option value={2}>
+                        <Chip color="success" size="sm">
+                          En proceso
+                        </Chip>
+                      </Option>
+                    </Select>
+                  </FormControl>
+
+                  {/* <FormControl>
                     <FormLabel>Fecha de inicio</FormLabel>
                     <Input
                       type="date"
@@ -178,7 +239,7 @@ export default function CreateEvaluation() {
                       //Onchange
                       required
                     />
-                  </FormControl>
+                  </FormControl> */}
                 </Stack>
                 <Stack
                   component="section"
@@ -187,7 +248,9 @@ export default function CreateEvaluation() {
                   alignItems="center"
                   justifyContent="space-between"
                   sx={{
-                    width: "100%",
+                    // width: "100%",
+                    height: "clamp(200px, 50vh, 800px)",
+                    overflow: "auto",
                   }}
                 >
                   <RubricList

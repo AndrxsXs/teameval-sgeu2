@@ -9,6 +9,7 @@ import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
 import Skeleton from "@mui/joy/Skeleton";
 import Stack from "@mui/joy/Stack";
+import Sheet from "@mui/joy/Sheet";
 
 import { Link, useParams } from "react-router-dom";
 
@@ -109,9 +110,23 @@ function RubricCard({ rubric, selectMode, onSelect }) {
               <Typography level="title-md">{rubric.name}</Typography>
               {selectMode && ( // Renderizar el radio button si selectMode es true
                 <Radio
+                  required
+                  overlay
                   checked={selected}
                   onChange={handleSelect}
                   sx={{ mr: 1, alignSelf: "flex-end" }} // Margen derecho para separar del contenido
+                  slotProps={{
+                    action: ({ checked }) => ({
+                      // Cambiar el color del borde si el radio está seleccionado
+                      sx: (theme) => ({
+                        ...(checked && {
+                          inset: -1,
+                          border: "3px solid",
+                          borderColor: theme.vars.palette.primary[500],
+                        }),
+                      }),
+                    }),
+                  }}
                 />
               )}
             </Stack>
@@ -175,9 +190,12 @@ export default function RubricList(props) {
         component="section"
         width="100%"
         height="100%"
+      >
+        <Sheet
         sx={{
+          width: "100%",
           display: "flex",
-          flex: 1,
+          // flex: 1,
           flexDirection: "row",
           flexWrap: "wrap",
           gap: 2,
@@ -186,49 +204,49 @@ export default function RubricList(props) {
           alignContent: "start",
           padding: 1,
         }}
-      >
-        {!loading
-          ? rubrics.map((rubric) => (
-              <RubricCard
-                key={rubric.id}
-                rubric={rubric}
-                selectMode={selectMode} // Pasar la prop selectMode
-                onSelect={onSelect} // Pasar la función de devolución de llamada onSelect
-                
-              />
-            ))
-          : Array.from(new Array(9)).map((_, index) => (
-              <Skeleton
-                key={index}
-                animation="wave"
-                variant="rectangular"
-                width={300}
-                height={150}
-                loading
-                sx={{ borderRadius: "sm" }}
-              />
-            ))}
-        {rubrics.length === 0 && !loading && !selectMode ? (
-          <Stack direction={{ xs: "column", sm: "row" }} width="100%">
-            <Typography level="body-sm" component="p">
-              No hay rúbricas disponibles, cree una nueva usando el botón{" "}
-              <Typography level="title-sm" color="primary">
-                Nueva rúbrica
+        >
+          {!loading
+            ? rubrics.map((rubric) => (
+                <RubricCard
+                  key={rubric.id}
+                  rubric={rubric}
+                  selectMode={selectMode} // Pasar la prop selectMode
+                  onSelect={onSelect} // Pasar la función de devolución de llamada onSelect
+                />
+              ))
+            : Array.from(new Array(9)).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  animation="wave"
+                  variant="rectangular"
+                  width={300}
+                  height={150}
+                  loading
+                  sx={{ borderRadius: "sm" }}
+                />
+              ))}
+          {rubrics.length === 0 && !loading && !selectMode ? (
+            <Stack direction={{ xs: "column", sm: "row" }} width="100%">
+              <Typography level="body-sm" component="p">
+                No hay rúbricas disponibles, cree una nueva usando el botón{" "}
+                <Typography level="title-sm" color="primary">
+                  Nueva rúbrica
+                </Typography>
+                .
               </Typography>
-              .
-            </Typography>
-          </Stack>
-        ) : rubrics.length === 0 && !loading ? (
-          <Stack direction={{ xs: "column", sm: "row" }} width="100%">
-            <Typography level="body-sm" component="p">
-              No hay rúbricas disponibles, cree una nueva usando el botón{" "}
-              <Typography level="title-sm" color="primary">
-                Nueva rúbrica
-              </Typography>{" "}
-              en el menú de escalas y criterios de la barra lateral.
-            </Typography>
-          </Stack>
-        ) : null}
+            </Stack>
+          ) : rubrics.length === 0 && !loading ? (
+            <Stack direction={{ xs: "column", sm: "row" }} width="100%">
+              <Typography level="body-sm" component="p">
+                No hay rúbricas disponibles, cree una nueva usando el botón{" "}
+                <Typography level="title-sm" color="primary">
+                  Nueva rúbrica
+                </Typography>{" "}
+                en el menú de escalas y criterios de la barra lateral.
+              </Typography>
+            </Stack>
+          ) : null}
+        </Sheet>
       </Box>
     </Fragment>
   );

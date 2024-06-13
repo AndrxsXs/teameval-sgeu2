@@ -226,14 +226,14 @@ class Rubric(models.Model):
         Course, related_name="rubrics"
     )
 
- #   is_global = models.BooleanField(default=False)
+    #is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
     description = models.TextField() #describe el criterio
     rubric = models.ForeignKey(
         Rubric, null=True, on_delete=models.PROTECT, related_name="standards"
     )
-    scale_description = models.TextField(default=False, null=True) # describe la escala
+    scale_description = models.TextField(default=False, null=True, blank=True) # describe la escala
 
  #   nota = models.PositiveIntegerField(default=False) #no va aqui, sino en rating
 
