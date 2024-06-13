@@ -875,8 +875,6 @@ def update_student(request):
         "email": data.get("email", user.email),
     }
 
-    
-
     serializer_user = UserSerializer(instance=user, data=user_data, partial=True)
     if serializer_user.is_valid():
         serializer_user.save()
@@ -1138,6 +1136,13 @@ def update_rubric(request):
             {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
         )
 
+    # Verificar si la rúbrica ha sido usada en alguna evaluación
+    if Evaluation.objects.filter(rubric=rubric).exists():
+        return Response(
+            {"error": "No se puede modificar la rúbrica porque ya ha sido utilizada en una evaluación."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
     rubric_data = request.data
 
     # Verificar si la rúbrica es global
@@ -1179,7 +1184,7 @@ def update_rubric(request):
 
         if 'scale' in rubric_data:
             scale_data = rubric_data['scale']
-            scale_serializer = ScaleSerializer(data=scale_data)
+            scale_serializer = ScaleSerialiazer(data=scale_data)
             if scale_serializer.is_valid():
                 scale = scale_serializer.save()
                 rubric.scale = scale
