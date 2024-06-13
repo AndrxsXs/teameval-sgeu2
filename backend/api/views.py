@@ -1370,6 +1370,9 @@ def register_admin(request):
     )
 
 
+from django.core.validators import RegexValidator
+from rest_framework import serializers
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_teacher(request):
@@ -1377,14 +1380,43 @@ def register_teacher(request):
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
     )
+
+    # Validaciones
+    name = data.get("name")
+    last_name = data.get("last_name")
+    code = data.get("code")
+    email = data.get("email")
+    phone = data.get("phone")
+
+    # Validar que el nombre y apellido sean solo letras
+    if not name.isalpha():
+        return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+    if not last_name.isalpha():
+        return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el código sean solo números mayores a cero
+    if not code.isdigit() or int(code) <= 0:
+        return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el email siga el formato correcto
+    try:
+        serializers.EmailField().run_validation(email)
+    except serializers.ValidationError:
+        return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar que el teléfono sean solo números mayores a cero
+    if not phone.isdigit() or int(phone) <= 0:
+        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+
     teacher_data = {
-        "name": data.get("name"),
-        "last_name": data.get("last_name"),
-        "code": data.get("code"),
-        "email": data.get("email"),
-        "phone": data.get("phone"),
+        "name": name,
+        "last_name": last_name,
+        "code": code,
+        "email": email,
+        "phone": phone,
         "password": password,
     }
+
     serializer_teacher = TeacherSerializer(data=teacher_data)
     if serializer_teacher.is_valid():
         try:
