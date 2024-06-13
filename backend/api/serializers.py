@@ -308,12 +308,12 @@ class InfoRubricSerializer(serializers.ModelSerializer):
 
 class EvaluationSerializerE(serializers.ModelSerializer):
     course = CourseSerializer()
-    rubric = serializers.PrimaryKeyRelatedField(queryset=Rubric.objects.all())
+    rubric = RubricDetailSerializer(read_only=True)
 
     class Meta: 
         model = Evaluation
         fields = ['id', 'name', 'estado', 'course', 'rubric']
-        
+ 
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Note

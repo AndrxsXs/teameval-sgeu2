@@ -476,8 +476,24 @@ def available_evaluations(request):
         estado=Evaluation.INITIATED
     )
 
-    serializer = EvaluationSerializerE(evaluations, many=True)
-    return Response({"message": "Evaluaciones disponibles"}, serializer.data, status=status.HTTP_200_OK)
+    # Preparar los datos para la respuesta
+    data = []
+    for evaluation in evaluations:
+        # Serializar la evaluación
+        evaluation_serializer = EvaluationSerializerE(evaluation)
+
+        # Obtener el profesor asociado al curso de la evaluación
+        teacher = Teacher.objects.get(user=evaluation.course.user_teacher)
+
+        # Serializar el profesor
+        teacher_serializer = TeacherSerializer(teacher)
+
+        data.append({
+            'evaluation': evaluation_serializer.data,
+            'teacher': teacher_serializer.data
+        })
+
+    return Response({"message": "Evaluaciones disponibles", "data": data}, status=status.HTTP_200_OK)
 
 
 # Luisa
