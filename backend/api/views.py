@@ -956,17 +956,14 @@ def create_global_rubric(request):
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(
-                standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Crear la rúbrica global sin asociar cursos aún
     rubric_data = {
         "name": rubric_data.get("name"),
         "scale": scale.id,
-        "standards": [
-            standard.id for standard in standards
-        ],  # No olvides asociar los estándares
+        "standards": [standard.id for standard in standards],  # Asociar los estándares
+        "is_global": True  # Establecer is_global en True
     }
     rubric_serializer = GlobalRubricSerializer(data=rubric_data)
     if rubric_serializer.is_valid():
@@ -978,14 +975,11 @@ def create_global_rubric(request):
             course.rubrics.add(rubric)
 
         return Response(
-            {
-                "message": "Rúbrica global creada y asignada a todos los cursos con éxito."
-            },
+            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito."},
             status=status.HTTP_201_CREATED,
         )
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1057,54 +1051,79 @@ def update_rubric(request):
 
     rubric_data = request.data
 
-    # Actualizar el nombre de la rúbrica si se proporciona
-    if 'name' in rubric_data:
-        rubric.name = rubric_data['name']
+    # Verificar si la rúbrica es global
+    if rubric.is_global:
+        # Crear una nueva rúbrica basada en la original pero con los cambios aplicados
+        new_rubric = Rubric.objects.create(
+            name=rubric_data.get('name', rubric.name),
+            scale=rubric.scale
+        )
+        new_rubric.is_global = False  # La nueva rúbrica no es global
 
-    # Actualizar la escala de la rúbrica si se proporciona
-    if 'scale' in rubric_data:
-        scale_data = rubric_data['scale']
-        scale_serializer = ScaleSerialiazer(data=scale_data)
-        if scale_serializer.is_valid():
-            scale = scale_serializer.save()
-            rubric.scale = scale
-        else:
-            return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Actualizar los estándares de la rúbrica
-    if 'standards' in rubric_data:
-        standards_data = rubric_data['standards']
-        updated_standards = []
+        # Clonar y actualizar los estándares
+        standards_data = rubric_data.get('standards', [])
+        for standard in rubric.standards.all():
+            new_standard = Standard.objects.create(
+                description=standard.description,
+                rubric=new_rubric,
+                scale_description=standard.scale_description
+            )
 
         for standard_data in standards_data:
-            if 'id' in standard_data:
-                # Si el estándar ya existe, actualizarlo
-                try:
-                    standard = Standard.objects.get(pk=standard_data['id'])
-                    standard.description = standard_data.get('description', standard.description)
-                    standard.scale_description = standard_data.get('scale_description', standard.scale_description)
-                    standard.save()
-                    updated_standards.append(standard)
-                except Standard.DoesNotExist:
-                    return Response({'error': f'No se encontró el estándar con id {standard_data["id"]}.'}, status=status.HTTP_404_NOT_FOUND)
+            standard_serializer = StandardSerializer(data=standard_data)
+            if standard_serializer.is_valid():
+                new_standard = standard_serializer.save(rubric=new_rubric)
             else:
-                # Si no tiene ID, es un nuevo estándar que se va a crear
-                standard_serializer = StandardSerializer(data=standard_data)
-                if standard_serializer.is_valid():
-                    standard = standard_serializer.save(rubric=rubric)
-                    updated_standards.append(standard)
+                return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        new_rubric.save()
+        # Asociar la nueva rúbrica a los cursos que tenía la original
+        for course in rubric.courses.all():
+            course.rubrics.add(new_rubric)
+
+        rubric_serializer = RubricSerializer(new_rubric)
+        return Response(rubric_serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        # Si la rúbrica no es global, actualizar la rúbrica existente
+        if 'name' in rubric_data:
+            rubric.name = rubric_data['name']
+
+        if 'scale' in rubric_data:
+            scale_data = rubric_data['scale']
+            scale_serializer = ScaleSerializer(data=scale_data)
+            if scale_serializer.is_valid():
+                scale = scale_serializer.save()
+                rubric.scale = scale
+            else:
+                return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'standards' in rubric_data:
+            standards_data = rubric_data['standards']
+            updated_standards = []
+
+            for standard_data in standards_data:
+                if 'id' in standard_data:
+                    try:
+                        standard = Standard.objects.get(pk=standard_data['id'])
+                        standard.description = standard_data.get('description', standard.description)
+                        standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                        standard.save()
+                        updated_standards.append(standard)
+                    except Standard.DoesNotExist:
+                        return Response({'error': f'No se encontró el estándar con id {standard_data["id"]}.'}, status=status.HTTP_404_NOT_FOUND)
                 else:
-                    return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    standard_serializer = StandardSerializer(data=standard_data)
+                    if standard_serializer.is_valid():
+                        standard = standard_serializer.save(rubric=rubric)
+                        updated_standards.append(standard)
+                    else:
+                        return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Asignar los estándares actualizados a la rúbrica
-        rubric.standards.set(updated_standards)
+            rubric.standards.set(updated_standards)
 
-    # Guardar la rúbrica actualizada
-    rubric.save()
-
-    # Serializar y devolver la rúbrica actualizada
-    rubric_serializer = RubricSerializer(rubric)
-    return Response(rubric_serializer.data, status=status.HTTP_200_OK)
+        rubric.save()
+        rubric_serializer = RubricSerializer(rubric)
+        return Response(rubric_serializer.data, status=status.HTTP_200_OK)
 
 
 # @api_view(["POST"])

@@ -196,8 +196,10 @@ class AdminSerializer(serializers.ModelSerializer):
 class GlobalRubricSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rubric
-        fields = ['name', 'scale', 'standards']
-
+        fields = ['name', 'scale', 'standards', 'is_global']
+        extra_kwargs = {
+            'is_global': {'default': True}
+        }
 class ScaleSerialiazer(serializers.ModelSerializer):
     class Meta:
         model = Scale

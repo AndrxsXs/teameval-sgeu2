@@ -226,7 +226,7 @@ class Rubric(models.Model):
         Course, related_name="rubrics"
     )
 
- #   is_global = models.BooleanField(default=False)
+    is_global = models.BooleanField(default=False)
 
 class Standard(models.Model):
     description = models.TextField() #describe el criterio
