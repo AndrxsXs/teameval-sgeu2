@@ -26,6 +26,7 @@ export default function CriteriaTable(props) {
         sx={{
           borderRadius: "sm",
           boxShadow: "xs",
+          overflow: "auto",
         }}
       >
         <Table
@@ -84,7 +85,7 @@ export default function CriteriaTable(props) {
                 </td>
                 <td>
                   <Textarea
-                    required
+                    // required
                     size="sm"
                     variant="plain"
                     minRows={3}
