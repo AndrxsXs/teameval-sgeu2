@@ -13,6 +13,8 @@ import Chip from "@mui/joy/Chip";
 
 import api from "../../api";
 
+import eventDispatcher from "../../utils/eventDispacher";
+
 export function CourseCard({ info, isReviewing }) {
   // console.log(info);
 
@@ -88,58 +90,59 @@ export function CourseCard({ info, isReviewing }) {
 }
 
 export default function Grades() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const userData = useOutletContext();
   const [evaluations, setEvaluations] = useState([
-    {
-      name: "Evaluación 1",
-      estado: "Iniciado",
-      date_start: "2024-10-01",
-      date_end: "2024-10-31",
-      course: {
-        name: "Curso 1",
-        code: "32151M",
-        academic_period: "2024-2",
-        user_teacher: {
-          code: "123456",
-          name: "Profesor",
-          last_name: "Uno",
-          email: "profesor@mail.com",
-        },
-      },
-      rubric: {
-        name: "rubrica 1",
-        standards: [
-          {
-            description: "criterio 1",
-            scale_description: "awawawasdfg",
-          },
-        ],
-        scale: {
-          Lower_limit: 1,
-          Upper_limit: 5,
-        },
-      },
-    },
+    // {
+    //   name: "Evaluación 1",
+    //   estado: "Iniciado",
+    //   date_start: "2024-10-01",
+    //   date_end: "2024-10-31",
+    //   course: {
+    //     name: "Curso 1",
+    //     code: "32151M",
+    //     academic_period: "2024-2",
+    //     user_teacher: {
+    //       code: "123456",
+    //       name: "Profesor",
+    //       last_name: "Uno",
+    //       email: "profesor@mail.com",
+    //     },
+    //   },
+    //   rubric: {
+    //     name: "rubrica 1",
+    //     standards: [
+    //       {
+    //         description: "criterio 1",
+    //         scale_description: "awawawasdfg",
+    //       },
+    //     ],
+    //     scale: {
+    //       Lower_limit: 1,
+    //       Upper_limit: 5,
+    //     },
+    //   },
+    // },
   ]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       await api
-        .get(`api/available_evaluations/${userData.code}/`)
+        .get(`api/available_evaluations`, {
+          params: { student_code: userData.code },
+        })
         .then((response) => {
           setEvaluations(response.data);
           // console.log(response.data);
           setLoading(false);
         })
         .catch((error) => {
-          console.log(error);
+          eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         });
     };
     fetchData();
-  }, [userData]);
+  }, [userData.code]);
 
   return (
     <>

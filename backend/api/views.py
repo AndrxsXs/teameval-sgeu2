@@ -452,7 +452,11 @@ def get_teacher_rubrics(request):
 # Evaluaciones disponibles para que el estudiante las realice
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def available_evaluations(request, student_code):
+def available_evaluations(request):
+    student_code = request.query_params.get('student_code')
+    if not student_code:
+        return Response({'error': 'No se proporcionó el código del estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         # Obtener el estudiante por código
         student = Student.objects.get(user__code=student_code)
@@ -461,16 +465,10 @@ def available_evaluations(request, student_code):
             {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone("America/Bogota")
-    current_time = timezone.now().astimezone(bogota_tz)
-
-    # Filtrar las evaluaciones que están disponibles para el estudiante
+    # Filtrar las evaluaciones que están en estado "iniciado" para el estudiante
     evaluations = Evaluation.objects.filter(
         course__user_students=student,
-        date_start__lte=current_time,
-        date_end__gte=current_time,
-        completed=False,
+        estado=Evaluation.INITIATED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
@@ -481,26 +479,31 @@ def available_evaluations(request, student_code):
 # Muestra al estudiante las evaluaciones finalizadas
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def completed_evaluations(request, student_code):
+def completed_evaluations(request):
+    student_code = request.query_params.get('student_code')
+    course_code = request.query_params.get('course_code')
+    if not student_code or not course_code:
+        return Response({'error': 'No se proporcionó el código del estudiante o del curso.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        # Obtener el estudiante por código
+        # Obtener el estudiante y el curso por código
         student = Student.objects.get(user__code=student_code)
-    except Student.DoesNotExist:
+        course = Course.objects.get(code=course_code)
+    except (Student.DoesNotExist, Course.DoesNotExist):
         return Response(
-            {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            {"error": "Estudiante o curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone("America/Bogota")
-    current_time = timezone.now().astimezone(bogota_tz)
-
-    # Filtrar las evaluaciones que están finalizadas para el estudiante
+    # Filtrar las evaluaciones que están en estado "finalizado" para el estudiante en el curso
     evaluations = Evaluation.objects.filter(
-        course__user_students=student, estado=Evaluation.FINISHED
+        course=course,
+        course__user_students=student,
+        estado=Evaluation.FINISHED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["POST"])
@@ -549,10 +552,10 @@ def import_student(request):
             )
 
         # Validaciones
-        if not student_data["name"].isalpha():
-            return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
-        if not student_data["last_name"].isalpha():
-            return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["name"].isalpha():
+        #     return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["last_name"].isalpha():
+        #     return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not student_data["code"].isdigit() or int(student_data["code"]) <= 0:
             return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1255,7 +1258,8 @@ def update_rubric(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_evaluation(request, course_code):
+def create_evaluation(request):
+    course_code = request.query_params.get("course_code")
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -1496,9 +1500,10 @@ def register_admin(request):
     except serializers.ValidationError:
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    # Validar que el teléfono sean solo números mayores a cero (si se proporciona)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     admin_data = {
         "name": name,
@@ -1558,8 +1563,9 @@ def register_teacher(request):
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     teacher_data = {
         "name": name,

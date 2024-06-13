@@ -26,74 +26,55 @@ export default function CreateAdmin() {
     name: "",
     last_name: "",
     email: "",
-    phone: undefined,
+    phone: null,
   });
+
+  const handleResetFormData = () => {
+    setFormData({
+      code: "",
+      name: "",
+      last_name: "",
+      email: "",
+      phone: null,
+    });
+  };
 
   const handleSubmit = async (event) => {
     // console.log(formData);
     setLoading(true);
     event.preventDefault();
 
-    const token = localStorage.getItem("ACCESS_TOKEN");
-
-    try {
-      const response = await api.post(route, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 201) {
-        const data = await response.data;
-        // console.log(data);
-        setFormData({
-          code: "",
-          name: "",
-          last_name: "",
-          email: "",
-          phone: undefined,
-        });
-        // Emitir el evento 'userCreated' después de crear un nuevo usuario
-        window.dispatchEvent(new Event("user-created"));
+    api
+      .post(route, formData)
+      .then((response) => {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${data.message}`,
+              message: `${response.data.message}`,
               severity: "success",
             },
           })
         );
-
+        setLoading(false);
         handleCloseModal(false);
-      } else {
-        const data = await response.data;
-        // console.error('Error:', response.status, response.statusText);
+        handleResetFormData();
+        window.dispatchEvent(new Event("user-created"));
+      })
+      .catch((error) => {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${data.message}`,
+              message: `${
+                error.response.data.error
+                  ? error.response.data.error
+                  : error.response.message
+              }`,
               severity: "danger",
             },
           })
         );
-      }
-    } catch (error) {
-      // console.error('Error:', error);
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message: `${
-              error.response.status === 409
-                ? "La cédula ya existe en el sistema."
-                : "Error al crear el administrador. Intente nuevamente."
-            }`,
-            severity: "danger",
-          },
-        })
-      );
-    }
-
-    setLoading(false);
+        setLoading(false);
+      });
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);

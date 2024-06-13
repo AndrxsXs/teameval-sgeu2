@@ -348,10 +348,6 @@ export default function ManageCourse(props) {
                     >
                       Periodo académico
                     </FormLabel>
-                    {/* <Input size="sm" placeholder="Ingrese el teléfono"
-                                  value={formData.phone}
-                                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                  type="tel" /> */}
                     <Box
                       sx={{
                         display: "grid",

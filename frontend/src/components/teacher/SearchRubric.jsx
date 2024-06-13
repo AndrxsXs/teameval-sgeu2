@@ -23,7 +23,7 @@ export default function SearchRubric() {
                 },
             }}
         >
-            <FormLabel sx={{ alignSelf: 'flex-start' }}>Buscar rubrica</FormLabel> {/* Alinea el título al inicio */}
+            <FormLabel sx={{ alignSelf: 'flex-start' }}>Buscar rúbrica</FormLabel> {/* Alinea el título al inicio */}
             <FormControl sx={{ width: '100%' }} size="sm">
                 <Input size="sm" placeholder="Buscar" startDecorator={<SearchIcon />} />
             </FormControl>

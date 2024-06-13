@@ -12,6 +12,8 @@ import Stack from "@mui/joy/Stack";
 
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 
+import { handleKeyPress } from "../../utils/handleKeyPress";
+
 import api from "../../api";
 
 export default function EditStudent(props) {
@@ -177,7 +179,8 @@ export default function EditStudent(props) {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      type="number"
+                      type="text"
+                      onKeyDown={handleKeyPress}
                       required
                     />
                   </FormControl>

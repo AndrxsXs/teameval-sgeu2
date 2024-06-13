@@ -111,7 +111,11 @@ export default function CourseTable(props) {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
-              message: `${error.response.status} ${error.response.statusText}`,
+              message: `${
+                error.response.data.error
+                  ? error.response.data.error
+                  : error.response.message
+              }`,
               severity: "danger",
             },
           })
