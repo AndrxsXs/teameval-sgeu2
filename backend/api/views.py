@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from django.core.validators import validate_email
 
 
 # from django.contrib.auth.models import User
@@ -47,7 +48,6 @@ from .serializers import (
     EvaluationSerializerE,
     TeacherSerializerUpdate,
     AdminSerializerUpdate,
-    StudentSerializerUpdate,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -101,83 +101,33 @@ def student_courses(request):
             {"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
+def validate_email_format(email):
+    """
+    Valida que el email siga el formato correcto.
+    """
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
 
 def validate_name(name):
     """
-    Valida que el nombre solo contenga letras.
+    Valida que el nombre solo contenga letras y espacios.
     """
-    return bool(re.fullmatch(r"[A-Za-z]+", name))
+    return bool(re.fullmatch(r"[A-Za-z\s]+", name))
 
 
 def validate_code(code):
     """
-    Valida que el código solo contenga letras y números.
+    Valida que el código solo contenga números positivos, sin letras, espacios ni caracteres especiales.
     """
-    if bool(re.fullmatch(r"[A-Za-z0-9]+", code)):
-        # Verificar si el código es numérico y positivo
-        if code.isdigit() and int(code) > 0:
-            return True
-        elif not code.isdigit():
-            return True
+    # Verificar si el código es numérico y positivo
+    if code.isdigit() and int(code) > 0:
+        return True
+    
     return False
 
-
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def update_student(request):
-    student_code = request.query_params.get("student_code")
-
-    if not student_code:
-        return Response(
-            {"error": "El código del estudiante es requerido"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    try:
-        # Buscar al estudiante por su código y obtener el objeto Student asociado
-        student = Student.objects.get(user__code=student_code)
-
-        # Obtener los datos a actualizar del request
-        name = request.data.get("name", student.user.name)
-        last_name = request.data.get("last_name", student.user.last_name)
-        code = request.data.get("code", student.user.code)
-
-        # Validar los campos name, last_name y code
-        if name and not validate_name(name):
-            return Response(
-                {"error": "El nombre solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if last_name and not validate_name(last_name):
-            return Response(
-                {"error": "El apellido solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if code and not validate_code(code):
-            return Response(
-                {
-                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Actualizar los datos del estudiante
-        student_data = {"user": {"name": name, "last_name": last_name, "code": code}}
-        serializer = StudentSerializerUpdate(student, data=student_data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {
-                    "message": "Los datos del estudiante han sido actualizados exitosamente"
-                },
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Student.DoesNotExist:
-        return Response(
-            {"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND
-        )
 
 
 # Luisa
@@ -205,24 +155,24 @@ def update_user(request):
         code = request.data.get("code", user.code)
 
         # Validar los campos name, last_name y code
-        if name and not validate_name(name):
-            return Response(
-                {"error": "El nombre solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if last_name and not validate_name(last_name):
-            return Response(
-                {"error": "El apellido solo puede contener letras"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        #if name and not validate_name(name):
+            #return Response(
+            #    {"error": "El nombre solo puede contener letras"},
+                #status=status.HTTP_400_BAD_REQUEST,
+            #)
+        #if last_name and not validate_name(last_name):
+         #   return Response(
+          #      {"error": "El apellido solo puede contener letras"},
+           #     status=status.HTTP_400_BAD_REQUEST,
+            #)
         if code and not validate_code(code):
             return Response(
                 {
-                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
+                    "error": "El código solo puede contener números positivos"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+    
         # Actualizar los datos del usuario
         user_data = {
             "name": name,
@@ -474,7 +424,7 @@ def info_rubric(request, rubric_id):
 
 
 # Luisa
-#
+#Obtener rubricas profesor
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_teacher_rubrics(request):
@@ -502,7 +452,11 @@ def get_teacher_rubrics(request):
 # Evaluaciones disponibles para que el estudiante las realice
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def available_evaluations(request, student_code):
+def available_evaluations(request):
+    student_code = request.query_params.get('student_code')
+    if not student_code:
+        return Response({'error': 'No se proporcionó el código del estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         # Obtener el estudiante por código
         student = Student.objects.get(user__code=student_code)
@@ -511,16 +465,10 @@ def available_evaluations(request, student_code):
             {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone("America/Bogota")
-    current_time = timezone.now().astimezone(bogota_tz)
-
-    # Filtrar las evaluaciones que están disponibles para el estudiante
+    # Filtrar las evaluaciones que están en estado "iniciado" para el estudiante
     evaluations = Evaluation.objects.filter(
         course__user_students=student,
-        date_start__lte=current_time,
-        date_end__gte=current_time,
-        completed=False,
+        estado=Evaluation.INITIATED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
@@ -531,26 +479,31 @@ def available_evaluations(request, student_code):
 # Muestra al estudiante las evaluaciones finalizadas
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def completed_evaluations(request, student_code):
+def completed_evaluations(request):
+    student_code = request.query_params.get('student_code')
+    course_code = request.query_params.get('course_code')
+    if not student_code or not course_code:
+        return Response({'error': 'No se proporcionó el código del estudiante o del curso.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        # Obtener el estudiante por código
+        # Obtener el estudiante y el curso por código
         student = Student.objects.get(user__code=student_code)
-    except Student.DoesNotExist:
+        course = Course.objects.get(code=course_code)
+    except (Student.DoesNotExist, Course.DoesNotExist):
         return Response(
-            {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            {"error": "Estudiante o curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone("America/Bogota")
-    current_time = timezone.now().astimezone(bogota_tz)
-
-    # Filtrar las evaluaciones que están finalizadas para el estudiante
+    # Filtrar las evaluaciones que están en estado "finalizado" para el estudiante en el curso
     evaluations = Evaluation.objects.filter(
-        course__user_students=student, estado=Evaluation.FINISHED
+        course=course,
+        course__user_students=student,
+        estado=Evaluation.FINISHED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["POST"])
@@ -599,10 +552,10 @@ def import_student(request):
             )
 
         # Validaciones
-        if not student_data["name"].isalpha():
-            return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
-        if not student_data["last_name"].isalpha():
-            return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["name"].isalpha():
+        #     return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not student_data["last_name"].isalpha():
+        #     return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not student_data["code"].isdigit() or int(student_data["code"]) <= 0:
             return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -892,6 +845,49 @@ def register_student_params(request):
         {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED
     )
 
+#Luisa
+#Edita estudainte
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_student(request):
+    student_code = request.query_params.get('student_code')
+
+    if not student_code:
+        return Response(
+            {"error": "El parámetro 'student_code' es requerido en la URL."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        user = User.objects.get(code=student_code)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "Estudiante no encontrado"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+
+    data = request.data
+    user_data = {
+        "name": data.get("name", user.name),
+        "last_name": data.get("last_name", user.last_name),
+        "code": data.get("code", user.code),
+        "email": data.get("email", user.email),
+    }
+
+    
+
+    serializer_user = UserSerializer(instance=user, data=user_data, partial=True)
+    if serializer_user.is_valid():
+        serializer_user.save()
+        return Response(
+            {"message": "Estudiante actualizado exitosamente", "data": serializer_user.data},
+            status=status.HTTP_200_OK
+        )
+    return Response(
+        {"error": serializer_user.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 # crea la escala de la rubrica
 @api_view(["POST"])
@@ -933,7 +929,90 @@ def create_rubric1(request, course_id):
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#Luisa
+#Editar rubrica global
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_global_rubric(request):
+    try:
+        rubric_id = request.query_params.get('rubric_id')
+        rubric = Rubric.objects.get(pk=rubric_id, is_global=True)
+    except Rubric.DoesNotExist:
+        return Response(
+            {"error": "Rúbrica global no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
+    rubric_data = request.data
+
+    # Actualizar el nombre de la rúbrica si se proporciona
+    if 'name' in rubric_data:
+        rubric.name = rubric_data['name']
+
+    # Actualizar la escala de la rúbrica si se proporciona
+    if 'scale' in rubric_data:
+        scale_data = rubric_data['scale']
+        scale_serializer = ScaleSerialiazer(rubric.scale, data=scale_data)
+        if scale_serializer.is_valid():
+            scale_serializer.save()
+        else:
+            return Response(
+                {"error": "Error al actualizar la escala.", "details": scale_serializer.errors}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    # Actualizar los estándares de la rúbrica
+    if 'standards' in rubric_data:
+        standards_data = rubric_data['standards']
+        existing_standard_ids = [standard.id for standard in rubric.standards.all()]
+        updated_standards = []
+
+        for standard_data in standards_data:
+            if 'id' in standard_data:
+                # Si el estándar ya existe, actualizarlo
+                try:
+                    standard = Standard.objects.get(pk=standard_data['id'])
+                    standard.description = standard_data.get('description', standard.description)
+                    standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                    standard.save()
+                    updated_standards.append(standard)
+                except Standard.DoesNotExist:
+                    return Response(
+                        {"error": f'No se encontró el estándar con id {standard_data["id"]}.'}, 
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                # Si no tiene ID, es un nuevo estándar que se va a crear
+                standard_serializer = StandardSerializer(data=standard_data)
+                if standard_serializer.is_valid():
+                    standard = standard_serializer.save(rubric=rubric)
+                    updated_standards.append(standard)
+                else:
+                    return Response(
+                        {"error": "Error al crear un nuevo estándar.", "details": standard_serializer.errors}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+        # Eliminar estándares que ya no están en la nueva lista
+        for standard_id in existing_standard_ids:
+            if standard_id not in [std.id for std in updated_standards]:
+                Standard.objects.get(pk=standard_id).delete()
+
+        # Asignar los estándares actualizados a la rúbrica
+        rubric.standards.set(updated_standards)
+
+    # Guardar la rúbrica actualizada
+    rubric.save()
+
+    # Serializar y devolver la rúbrica actualizada
+    rubric_serializer = GlobalRubricSerializer(rubric)
+    return Response(
+        {"message": "Rúbrica global actualizada con éxito.", "rubric": rubric_serializer.data}, 
+        status=status.HTTP_200_OK
+    )
+
+
+#Luisa
+#Crear rubrica global
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_global_rubric(request):
@@ -944,7 +1023,10 @@ def create_global_rubric(request):
     if scale_serializer.is_valid():
         scale = scale_serializer.save()
     else:
-        return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Error al crear la escala.", "details": scale_serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     # Crear los estándares (criterios) asociados a la escala
     standards_data = rubric_data.get("standards")
@@ -956,16 +1038,19 @@ def create_global_rubric(request):
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Error al crear un estándar.", "details": standard_serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Crear la rúbrica global sin asociar cursos aún
-    rubric_data = {
+    rubric_creation_data = {
         "name": rubric_data.get("name"),
         "scale": scale.id,
         "standards": [standard.id for standard in standards],  # Asociar los estándares
         "is_global": True  # Establecer is_global en True
     }
-    rubric_serializer = GlobalRubricSerializer(data=rubric_data)
+    rubric_serializer = GlobalRubricSerializer(data=rubric_creation_data)
     if rubric_serializer.is_valid():
         rubric = rubric_serializer.save()
 
@@ -975,11 +1060,15 @@ def create_global_rubric(request):
             course.rubrics.add(rubric)
 
         return Response(
-            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito."},
+            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito.", "rubric": rubric_serializer.data},
             status=status.HTTP_201_CREATED,
         )
     else:
-        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Error al crear la rúbrica global.", "details": rubric_serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1169,7 +1258,8 @@ def update_rubric(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_evaluation(request, course_code):
+def create_evaluation(request):
+    course_code = request.query_params.get("course_code")
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -1410,9 +1500,10 @@ def register_admin(request):
     except serializers.ValidationError:
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    # Validar que el teléfono sean solo números mayores a cero (si se proporciona)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     admin_data = {
         "name": name,
@@ -1472,8 +1563,9 @@ def register_teacher(request):
         return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el teléfono sean solo números mayores a cero
-    if not phone.isdigit() or int(phone) <= 0:
-        return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+    if phone is not None:
+        if not phone.isdigit() or int(phone) <= 0:
+            return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     teacher_data = {
         "name": name,
@@ -1512,7 +1604,7 @@ def group_members(request):
 
     if not student_code or not course_code:
         return Response(
-            {"error": "Missing student_code or course_code"},
+            {"error": "Falta student_code o course_code"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -1521,7 +1613,7 @@ def group_members(request):
         student = Student.objects.get(user__code=student_code)
     except Student.DoesNotExist:
         return Response(
-            {"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND
+            {"error": "El estudiante no existe"}, status=status.HTTP_404_NOT_FOUND
         )
 
     try:
@@ -1529,7 +1621,7 @@ def group_members(request):
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
         return Response(
-            {"error": "Course does not exist"}, status=status.HTTP_404_NOT_FOUND
+            {"error": "El curso no existe"}, status=status.HTTP_404_NOT_FOUND
         )
 
     try:
@@ -1537,7 +1629,7 @@ def group_members(request):
         group = Group.objects.get(students=student, course=course)
     except Group.DoesNotExist:
         return Response(
-            {"error": "Student is not a member of any group in this course"},
+            {"error": "El estudiante no es miembro de ningún grupo en este curso"},
             status=status.HTTP_404_NOT_FOUND,
         )
 

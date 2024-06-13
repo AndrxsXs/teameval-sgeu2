@@ -12,6 +12,8 @@ import Stack from "@mui/joy/Stack";
 // import Add from '@mui/icons-material/Add';
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 
+import { handleKeyPress } from "../utils/handleKeyPress";
+
 import api from "../api";
 
 export default function EditUser(props) {
@@ -33,14 +35,11 @@ export default function EditUser(props) {
     event.preventDefault();
     const token = localStorage.getItem("ACCESS_TOKEN");
     await api
-      .put(
-        `api/update_user?user_code=${user.code}`, formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
+      .put(`api/update_user?user_code=${user.code}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         window.dispatchEvent(
           // console.log("Evento de respuesta: ", response),
@@ -176,7 +175,8 @@ export default function EditUser(props) {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      type="number"
+                      type="text"
+                      onKeyDown={handleKeyPress}
                       required
                     />
                   </FormControl>
@@ -189,7 +189,8 @@ export default function EditUser(props) {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      type="tel"
+                      type="text"
+                      onKeyDown={handleKeyPress}
                     />
                   </FormControl>
                 </Stack>

@@ -98,29 +98,6 @@ class TeacherSerializer(serializers.ModelSerializer):
         teacher = Teacher.objects.create(user=user, **validated_data)
         return teacher
     
-class StudentSerializerUpdate(serializers.ModelSerializer):
-    name = serializers.CharField(source='user.name')
-    last_name = serializers.CharField(source='user.last_name')
-    email = serializers.EmailField(source='user.email')
-    code = serializers.CharField(source='user.code')
-
-    class Meta:
-        model = Student
-        fields = ["name", "last_name", "code", "email"]
-
-    def update(self, instance, validated_data):
-        # Extraer y actualizar los datos del usuario
-        user_data = validated_data.pop('user', {})
-        for attr, value in user_data.items():
-            setattr(instance.user, attr, value)
-        instance.user.save()
-
-        # Actualizar los datos del estudiante
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        return instance
     
 class TeacherSerializerUpdate(serializers.ModelSerializer):
     name = serializers.CharField(source='user.name')
@@ -200,6 +177,7 @@ class GlobalRubricSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'is_global': {'default': True}
         }
+
 class ScaleSerialiazer(serializers.ModelSerializer):
     class Meta:
         model = Scale
@@ -334,7 +312,7 @@ class EvaluationSerializerE(serializers.ModelSerializer):
 
     class Meta: 
         model = Evaluation
-        fields = ['id', 'name', 'estado', 'date_start', 'date_end', 'course', 'rubric']
+        fields = ['id', 'name', 'estado', 'course', 'rubric']
         
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:

@@ -14,6 +14,9 @@ import Stack from "@mui/joy/Stack";
 import Add from "@mui/icons-material/Add";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 
+import { handleKeyPress } from "../../utils/handleKeyPress";
+import eventDispatcher from "../../utils/eventDispacher";
+
 export default function CreateStudent(props) {
   const { course } = props;
   const [loading, setLoading] = useState(false);
@@ -27,71 +30,98 @@ export default function CreateStudent(props) {
     email: "",
   });
 
+  const handleResetFormData = () => {
+    setFormData({
+      name: "",
+      last_name: "",
+      code: "",
+      email: "",
+    });
+  };
+
   const handleSubmit = async (event) => {
     setLoading(true);
     event.preventDefault();
-
-    const token = localStorage.getItem("ACCESS_TOKEN");
-
-    try {
-      const response = await api.post(route, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Aquí es donde se agrega el token a los headers
-        },
+    await api
+      .post(route, formData)
+      .then((response) => {
+        eventDispatcher("responseEvent", response);
+        setLoading(false);
+        handleCloseModal(false);
+        handleResetFormData();
+        window.dispatchEvent(new Event("user-created"));
+      })
+      .catch((error) => {
+        eventDispatcher("responseEvent", error, "danger");
+        setLoading(false);
       });
-      // console.log(response);
-      switch (response.status) {
-        case 201:
-          window.dispatchEvent(new Event("user-created"));
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: response.data.message,
-                severity: "success",
-              },
-            })
-          );
-          setLoading(false);
-          handleCloseModal(false);
-          break;
-        case 400:
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: response.data.message,
-                severity: "danger",
-              },
-            })
-          );
-          setLoading(false);
-          handleCloseModal(false);
-          break;
-        default:
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: "Error desconocido, inténtenlo de nuevo.",
-                severity: "danger",
-              },
-            })
-          );
-          setLoading(false);
-          handleCloseModal(false);
-          break;
-      }
-      setLoading(false);
-    } catch (error) {
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message: `${error.response.status} ${error.response.statusText}`,
-            severity: "danger",
-          },
-        })
-      );
-      setLoading(false);
-    }
   };
+
+  // const handleSubmit = async (event) => {
+  //   setLoading(true);
+  //   event.preventDefault();
+
+  //   const token = localStorage.getItem("ACCESS_TOKEN");
+
+  //   try {
+  //     const response = await api.post(route, formData, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, // Aquí es donde se agrega el token a los headers
+  //       },
+  //     });
+  //     // console.log(response);
+  //     switch (response.status) {
+  //       case 201:
+  //         window.dispatchEvent(new Event("user-created"));
+  //         window.dispatchEvent(
+  //           new CustomEvent("responseEvent", {
+  //             detail: {
+  //               message: response.data.message,
+  //               severity: "success",
+  //             },
+  //           })
+  //         );
+  //         setLoading(false);
+  //         handleCloseModal(false);
+  //         break;
+  //       case 400:
+  //         window.dispatchEvent(
+  //           new CustomEvent("responseEvent", {
+  //             detail: {
+  //               message: response.data.message,
+  //               severity: "danger",
+  //             },
+  //           })
+  //         );
+  //         setLoading(false);
+  //         handleCloseModal(false);
+  //         break;
+  //       default:
+  //         window.dispatchEvent(
+  //           new CustomEvent("responseEvent", {
+  //             detail: {
+  //               message: "Error desconocido, inténtenlo de nuevo.",
+  //               severity: "danger",
+  //             },
+  //           })
+  //         );
+  //         setLoading(false);
+  //         handleCloseModal(false);
+  //         break;
+  //     }
+  //     setLoading(false);
+  //   } catch (error) {
+  //     window.dispatchEvent(
+  //       new CustomEvent("responseEvent", {
+  //         detail: {
+  //           message: `${error.response.status} ${error.response.statusText}`,
+  //           severity: "danger",
+  //         },
+  //       })
+  //     );
+  //     setLoading(false);
+  //   }
+  // };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -109,12 +139,12 @@ export default function CreateStudent(props) {
     <React.Fragment>
       <Button
         color="neutral"
-        variant="plain"
+        variant="outlined"
         // size="sm"
         startDecorator={<Add />}
         onClick={handleOpenModal}
       >
-        Añadir otro estudiante
+        Nuevo estudiante
       </Button>
 
       <ModalFrame
@@ -196,7 +226,8 @@ export default function CreateStudent(props) {
                       onChange={(e) =>
                         setFormData({ ...formData, code: e.target.value })
                       }
-                      type="number"
+                      type="text"
+                      onKeyDown={handleKeyPress}
                       required
                     />
                   </FormControl>

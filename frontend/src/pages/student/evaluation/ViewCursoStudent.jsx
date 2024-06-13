@@ -153,7 +153,7 @@ function CriteriaTable(props) {
 }
 
 const data = [
-  { title: 'Evaluación primer sprint ', description: 'Supongo que aquí puede ir una descripción o el nombre clave que pide en crear rubrica.' },
+  { title: 'Evaluación primer sprint ', description: 'Supongo que aquí puede ir una descripción o el nombre clave que pide en crear rúbrica.' },
   
 ];
 

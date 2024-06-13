@@ -7,6 +7,8 @@ import { jwtDecode } from "jwt-decode";
 import api from "../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
 
+import { handleKeyPress } from "../../utils/handleKeyPress";
+
 import { CssVarsProvider, CssBaseline } from "@mui/joy";
 
 import Sheet from "@mui/joy/Sheet";
@@ -155,7 +157,8 @@ export default function LoginPage() {
                   }
                   // html input attribute
                   name="code"
-                  type="number"
+                  type="text"
+                  onKeyDown={handleKeyPress}
                   placeholder="Ingrese su código"
                   value={formData.code}
                   required
