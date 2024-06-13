@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import api from "../../api";
+// import api from "../../api";
 
 import ModalFrame from "../ModalFrame";
-import UngroupedStudentsTable from "./groups/UngroupedStudentsTable";
 
 import Button from "@mui/joy/Button";
 import Box from "@mui/joy/Box";
@@ -14,20 +13,32 @@ import Input from "@mui/joy/Input";
 
 import Add from "@mui/icons-material/Add";
 
+import RubricList from "./RubricList";
 
-export default function CreateEvaluation(){
-
-    const [selectedStudents, setSelectedStudents] = useState([]);
+export default function CreateEvaluation() {
+  const [selectedRubric, setSelectedRubric] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     code: "",
-    assigned_project: "",
-    student_codes: [],
+    estado: 1,
   });
 
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // console.log(selectedRubric);
+
+  const handleResetFormData = () => {
+    setFormData({
+      name: "",
+      code: "",
+      estado: 1,
+    });
+  };
+
+  const handleRubricSelect = (rubric) => {
+    setSelectedRubric(rubric);
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -41,12 +52,16 @@ export default function CreateEvaluation(){
     e.preventDefault();
     // console.log(formData);
     setLoading(true);
-
   };
 
-  const handleSelectedStudentsChange = (selectedStudents) => {
-    setSelectedStudents(selectedStudents);
-  };
+  useEffect(() => {
+    if (selectedRubric) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        rubric: selectedRubric.name,
+      }));
+    }
+  }, [selectedRubric]);
 
   return (
     <>
@@ -58,7 +73,11 @@ export default function CreateEvaluation(){
       >
         Nueva evaluación
       </Button>
-      <ModalFrame ModalTitle="Nueva evaluación" open={open} onClose={handleClose}>
+      <ModalFrame
+        ModalTitle="Nueva evaluación"
+        open={open}
+        onClose={handleClose}
+      >
         <form onSubmit={handleSubmit}>
           <Box
             component="article"
@@ -68,7 +87,7 @@ export default function CreateEvaluation(){
               gap: 2,
               alignItems: "flex-start",
               minWidth: "500px",
-            //   maxWidth: "700px",
+              //   maxWidth: "700px",
             }}
           >
             <Stack
@@ -131,35 +150,35 @@ export default function CreateEvaluation(){
                   </FormControl>
 
                   <FormControl>
-                  <FormLabel>Fecha de inicio</FormLabel>
-                  <Input
-                    type="date"
-                    slotProps={{
-                      input: {
-                        min: "2024-06-12",
-                        max: "2025-12-12",
-                      },
-                    }}
-                    //value
-                    //Onchange
-                    required
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Fecha de finalización</FormLabel>
-                  <Input
-                    type="date"
-                    slotProps={{
-                      input: {
-                        min: "2024-06-12",
-                        max: "2024-12-12",
-                      },
-                    }}
-                    //value
-                    //Onchange
-                    required
-                  />
-                </FormControl> 
+                    <FormLabel>Fecha de inicio</FormLabel>
+                    <Input
+                      type="date"
+                      slotProps={{
+                        input: {
+                          min: "2024-06-12",
+                          max: "2025-12-12",
+                        },
+                      }}
+                      //value
+                      //Onchange
+                      required
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Fecha de finalización</FormLabel>
+                    <Input
+                      type="date"
+                      slotProps={{
+                        input: {
+                          min: "2024-06-12",
+                          max: "2024-12-12",
+                        },
+                      }}
+                      //value
+                      //Onchange
+                      required
+                    />
+                  </FormControl>
                 </Stack>
                 <Stack
                   component="section"
@@ -171,7 +190,10 @@ export default function CreateEvaluation(){
                     width: "100%",
                   }}
                 >
-                  
+                  <RubricList
+                    selectMode={true} // Habilitar el modo de selección
+                    onSelect={handleRubricSelect} // Pasar la función de devolución de llamada
+                  />
                 </Stack>
               </Stack>
             </Stack>
@@ -183,7 +205,7 @@ export default function CreateEvaluation(){
               }}
             >
               <Button
-                onClick={() => setOpen(false)}
+                onClick={() => (setOpen(false), handleResetFormData())}
                 variant="outlined"
                 color="neutral"
               >
