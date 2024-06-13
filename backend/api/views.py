@@ -7,11 +7,24 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+
 # from django.contrib.auth.models import User
-from .models import User, Course, Scale, Rubric, Standard,Student, Group, Evaluation, Teacher, EvaluationCompleted, Rating
+from .models import (
+    User,
+    Course,
+    Scale,
+    Rubric,
+    Standard,
+    Student,
+    Group,
+    Evaluation,
+    Teacher,
+    EvaluationCompleted,
+    Rating,
+)
 from .models import User
 from . import models
-from rest_framework import generics, status 
+from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import (
     GlobalRubricSerializer,
@@ -54,14 +67,17 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-#Luisa
-#Los cursos del estudiante 
+# Luisa
+# Los cursos del estudiante
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def student_courses(request):
     user = request.user
     if user.role != models.User.STUDENT:
-        return Response({"error": "El usuario no es un estudiante"}, status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            {"error": "El usuario no es un estudiante"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     student = models.Student.objects.get(user=user)
     courses = student.courses_user_student.all()
@@ -78,19 +94,23 @@ def student_courses(request):
         ]
         return Response(course_data)
     else:
-        return Response({"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 def validate_name(name):
     """
     Valida que el nombre solo contenga letras.
     """
-    return bool(re.fullmatch(r'[A-Za-z]+', name))
+    return bool(re.fullmatch(r"[A-Za-z]+", name))
+
 
 def validate_code(code):
     """
     Valida que el código solo contenga letras y números.
     """
-    if bool(re.fullmatch(r'[A-Za-z0-9]+', code)):
+    if bool(re.fullmatch(r"[A-Za-z0-9]+", code)):
         # Verificar si el código es numérico y positivo
         if code.isdigit() and int(code) > 0:
             return True
@@ -98,111 +118,157 @@ def validate_code(code):
             return True
     return False
 
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_student(request):
-    student_code = request.query_params.get('student_code')
-    
+    student_code = request.query_params.get("student_code")
+
     if not student_code:
-        return Response({"error": "El código del estudiante es requerido"}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "El código del estudiante es requerido"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
         # Buscar al estudiante por su código y obtener el objeto Student asociado
         student = Student.objects.get(user__code=student_code)
 
         # Obtener los datos a actualizar del request
-        name = request.data.get('name', student.user.name)
-        last_name = request.data.get('last_name', student.user.last_name)
-        code = request.data.get('code', student.user.code)
+        name = request.data.get("name", student.user.name)
+        last_name = request.data.get("last_name", student.user.last_name)
+        code = request.data.get("code", student.user.code)
 
         # Validar los campos name, last_name y code
         if name and not validate_name(name):
-            return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El nombre solo puede contener letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if last_name and not validate_name(last_name):
-            return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El apellido solo puede contener letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if code and not validate_code(code):
-            return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Actualizar los datos del estudiante
-        student_data = {
-            'user': {
-                'name': name,
-                'last_name': last_name,
-                'code': code
-            }
-        }
+        student_data = {"user": {"name": name, "last_name": last_name, "code": code}}
         serializer = StudentSerializerUpdate(student, data=student_data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Los datos del estudiante han sido actualizados exitosamente"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "Los datos del estudiante han sido actualizados exitosamente"
+                },
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Student.DoesNotExist:
-        return Response({"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND) 
-    
-#Luisa
-#Editar profesor y administrador
+        return Response(
+            {"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# Luisa
+# Editar profesor y administrador
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_user(request):
-    user_code = request.query_params.get('user_code')
-    
+    user_code = request.query_params.get("user_code")
+
     # Verificar si el usuario que realiza la solicitud es un administrador
     if not request.user.is_superuser:
-        return Response({"error": "No tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
-    
+        return Response(
+            {"error": "No tiene permiso para realizar esta acción"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     try:
         # Buscar al usuario por código
         user = User.objects.get(code=user_code)
-        
+
         # Obtener los datos a actualizar del request
-        name = request.data.get('name', user.name)
-        last_name = request.data.get('last_name', user.last_name)
-        email = request.data.get('email', user.email)
-        code = request.data.get('code', user.code)
-        
+        name = request.data.get("name", user.name)
+        last_name = request.data.get("last_name", user.last_name)
+        email = request.data.get("email", user.email)
+        code = request.data.get("code", user.code)
+
         # Validar los campos name, last_name y code
         if name and not validate_name(name):
-            return Response({"error": "El nombre solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El nombre solo puede contener letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if last_name and not validate_name(last_name):
-            return Response({"error": "El apellido solo puede contener letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El apellido solo puede contener letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if code and not validate_code(code):
-            return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(
+                {
+                    "error": "El código solo puede contener letras y números, sin caracteres especiales ni números negativos"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Actualizar los datos del usuario
         user_data = {
-            'name': name,
-            'last_name': last_name,
-            'email': email,
-            'code': code,
+            "name": name,
+            "last_name": last_name,
+            "email": email,
+            "code": code,
         }
         user_serializer = TeacherSerializer(user, data=user_data, partial=True)
         if user_serializer.is_valid():
             user_serializer.save()
-            
+
             # Verificar y actualizar datos específicos del profesor o administrador
-            if hasattr(user, 'teacher'):
+            if hasattr(user, "teacher"):
                 teacher = user.teacher
-                teacher_serializer = TeacherSerializerUpdate(teacher, data=request.data, partial=True)
+                teacher_serializer = TeacherSerializerUpdate(
+                    teacher, data=request.data, partial=True
+                )
                 if teacher_serializer.is_valid():
                     teacher_serializer.save()
                 else:
-                    return Response(teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            elif hasattr(user, 'admi'):
+                    return Response(
+                        teacher_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+            elif hasattr(user, "admi"):
                 admin = user.admi
-                admin_serializer = AdminSerializerUpdate(admin, data=request.data, partial=True)
+                admin_serializer = AdminSerializerUpdate(
+                    admin, data=request.data, partial=True
+                )
                 if admin_serializer.is_valid():
                     admin_serializer.save()
                 else:
-                    return Response(admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                
-            return Response({"message": "Los datos del usuario han sido actualizados exitosamente"}, status=status.HTTP_200_OK)
+                    return Response(
+                        admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            return Response(
+                {"message": "Los datos del usuario han sido actualizados exitosamente"},
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
-        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-#Luisa
-#Informacion profesor
+        return Response(
+            {"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# Luisa
+# Informacion profesor
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def teacher_info(request, teacher_code):
@@ -216,16 +282,19 @@ def teacher_info(request, teacher_code):
             "email": teacher.email,
             "status": teacher.status,
         }
-        if hasattr(teacher, 'teacher'):
+        if hasattr(teacher, "teacher"):
             teacher_info["phone"] = teacher.teacher.phone
         else:
             teacher_info["phone"] = None
         return Response(teacher_info)
     except models.Teacher.DoesNotExist:
-        return Response({"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-    
-#Luisa
-#Informacion administrador
+        return Response(
+            {"error": "Profesor no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# Luisa
+# Informacion administrador
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def admin_info(request, admin_code):
@@ -239,16 +308,19 @@ def admin_info(request, admin_code):
             "email": admin.email,
             "status": admin.status,
         }
-        if hasattr(admin, 'admi'):
+        if hasattr(admin, "admi"):
             admin_info["phone"] = admin.admi.phone
         else:
             admin_info["phone"] = None
         return Response(admin_info)
     except models.Admi.DoesNotExist:
-        return Response({"error": "Administrador no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Administrador no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
 
-#Luisa
-#Detalle del curso
+
+# Luisa
+# Detalle del curso
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def course_info(request, course_code):
@@ -258,14 +330,16 @@ def course_info(request, course_code):
 
         student_info = []
         for student in students:
-            student_info.append({
-                "id": student.user.id,
-                "code": student.user.code,
-                "name": student.user.name,
-                "last_name": student.user.last_name,
-                "email": student.user.email,
-                "status": student.user.status,
-            })
+            student_info.append(
+                {
+                    "id": student.user.id,
+                    "code": student.user.code,
+                    "name": student.user.name,
+                    "last_name": student.user.last_name,
+                    "email": student.user.email,
+                    "status": student.user.status,
+                }
+            )
 
         course_info = {
             "name": course.name,
@@ -275,27 +349,41 @@ def course_info(request, course_code):
             "course_status": course.course_status,
             "teacher": {
                 "code": course.user_teacher.code if course.user_teacher else None,
-                "name": f"{course.user_teacher.name} {course.user_teacher.last_name}" if course.user_teacher else "No asignado"
+                "name": (
+                    f"{course.user_teacher.name}"
+                    if course.user_teacher
+                    else "No asignado"
+                ),
+                "last_name": (
+                    f"{course.user_teacher.last_name}"
+                    if course.user_teacher
+                    else "No asignado"
+                ),
             },
-            "students": student_info
+            "students": student_info,
         }
         return Response(course_info)
     except models.Course.DoesNotExist:
-        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)    
-#No es importante
+        return Response(
+            {"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# No es importante
 @api_view(["GET"])
 def list_user_teachers(request):
     teachers = User.objects.filter(role=User.TEACHER)
     serializer = UserSerializer(teachers, many=True)
     return Response(serializer.data)
 
-#Luisa
-#Deshabilitar estudiante de un curso
+
+# Luisa
+# Deshabilitar estudiante de un curso
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def unregister_student(request, course_code):
     student_code = request.query_params.get("user_code")
-    
+
     # Obtiene el estudiante usando el código del estudiante proporcionado
     student = get_object_or_404(Student, user__code=student_code)
 
@@ -304,15 +392,23 @@ def unregister_student(request, course_code):
 
     # Verifica si el estudiante está inscrito en el curso
     if course not in student.courses_user_student.all():
-        return Response({"message": "El estudiante no está inscrito en este curso"}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"message": "El estudiante no está inscrito en este curso"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
     # Verifica si el estudiante ha completado alguna evaluación en el curso
     has_completed_evaluation = EvaluationCompleted.objects.filter(
         Q(evaluated=student) & Q(evaluation__course=course) & Q(completed=True)
     ).exists()
-    
+
     if has_completed_evaluation:
-        return Response({"message": "El estudiante ya ha completado una evaluación en este curso y no puede deshabilitarse"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "message": "El estudiante ya ha completado una evaluación en este curso y no puede deshabilitarse"
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Elimina la relación entre el estudiante y el curso específico
     student.courses_user_student.remove(course)
@@ -324,7 +420,11 @@ def unregister_student(request, course_code):
         if student in group.students.all():
             group.students.remove(student)
 
-    return Response({"message": "Estudiante deshabilitado del curso y grupos correctamente"}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Estudiante deshabilitado del curso y grupos correctamente"},
+        status=status.HTTP_200_OK,
+    )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -340,58 +440,76 @@ def enable_student(request, course_code):
 
     # Verifica si el estudiante ya está inscrito en el curso
     if course in student.courses_user_student.all():
-        return Response({"message": "El estudiante ya está inscrito en este curso"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"message": "El estudiante ya está inscrito en este curso"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Vuelve a habilitar al estudiante para el curso
     student.courses_user_student.add(course)
 
-    return Response({"message": "Estudiante habilitado en el curso correctamente"}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Estudiante habilitado en el curso correctamente"},
+        status=status.HTTP_200_OK,
+    )
 
-#Luisa
-#informacion completa de la rubrica
+
+# Luisa
+# informacion completa de la rubrica
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def info_rubric(request, rubric_id):
     try:
         rubric = Rubric.objects.get(id=rubric_id)
     except Rubric.DoesNotExist:
-        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
+
     serializer = InfoRubricSerializer(rubric)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#Luisa
+
+# Luisa
 #
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_teacher_rubrics(request):
     user = request.user
-    
+
     if user.role != User.TEACHER:
-        return Response({"error": "El usuario no es un profesor"}, status=status.HTTP_403_FORBIDDEN)
-    
+        return Response(
+            {"error": "El usuario no es un profesor"}, status=status.HTTP_403_FORBIDDEN
+        )
+
     courses = Course.objects.filter(user_teacher=user)
     rubrics = Rubric.objects.filter(courses__in=courses).distinct()
-    
+
     if not rubrics.exists():
-        return Response({"message": "No se encuentran rubricas para el profesor"}, status=status.HTTP_200_OK)
-    
+        return Response(
+            {"message": "No se encuentran rubricas para el profesor"},
+            status=status.HTTP_200_OK,
+        )
+
     serializer = RubricSerializer(rubrics, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#Luisa
-#Evaluaciones disponibles para que el estudiante las realice
-@api_view(['GET'])
+
+# Luisa
+# Evaluaciones disponibles para que el estudiante las realice
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_evaluations(request, student_code):
     try:
         # Obtener el estudiante por código
         student = Student.objects.get(user__code=student_code)
     except Student.DoesNotExist:
-        return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone('America/Bogota')
+    bogota_tz = pytz.timezone("America/Bogota")
     current_time = timezone.now().astimezone(bogota_tz)
 
     # Filtrar las evaluaciones que están disponibles para el estudiante
@@ -399,52 +517,60 @@ def available_evaluations(request, student_code):
         course__user_students=student,
         date_start__lte=current_time,
         date_end__gte=current_time,
-        completed=False
+        completed=False,
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#Luisa
-#Muestra al estudiante las evaluaciones finalizadas
-@api_view(['GET'])
+
+# Luisa
+# Muestra al estudiante las evaluaciones finalizadas
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def completed_evaluations(request, student_code):
     try:
         # Obtener el estudiante por código
         student = Student.objects.get(user__code=student_code)
     except Student.DoesNotExist:
-        return Response({'error': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone('America/Bogota')
+    bogota_tz = pytz.timezone("America/Bogota")
     current_time = timezone.now().astimezone(bogota_tz)
 
     # Filtrar las evaluaciones que están finalizadas para el estudiante
     evaluations = Evaluation.objects.filter(
-        course__user_students=student,
-        estado=Evaluation.FINISHED
+        course__user_students=student, estado=Evaluation.FINISHED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_student(request):
     csv_file = request.FILES["csv_file"]
     course_code = request.GET.get("course_code")
     if not course_code:
-        return Response({"message": "El código del curso es obligatorio"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"message": "El código del curso es obligatorio"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({"message": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"message": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    
+
     # Detectar el delimitador utilizado en el archivo CSV
     sniffer = csv.Sniffer()
     dialect = sniffer.sniff(io_string.read(1024))
@@ -472,7 +598,9 @@ def import_student(request):
         try:
             student = Student.objects.get(user__code=student_data["code"])
         except Student.DoesNotExist:
-            password = User.default_password(student_data["name"], student_data["code"], student_data["last_name"])
+            password = User.default_password(
+                student_data["name"], student_data["code"], student_data["last_name"]
+            )
             user_data = student_data.copy()
             user_data["role"] = User.STUDENT
             user_data["password"] = password
@@ -481,12 +609,16 @@ def import_student(request):
                 user = user_serializer.save()
                 student = Student.objects.create(user=user)
             else:
-                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    user_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
 
         if course not in student.courses_user_student.all():
             student.courses_user_student.add(course)
         else:
-            omitted_students.append(f"{student_data['name']} {student_data['last_name']}")
+            omitted_students.append(
+                f"{student_data['name']} {student_data['last_name']}"
+            )
 
     message = "Estudiantes importados exitosamente."
     if omitted_students:
@@ -497,18 +629,19 @@ def import_student(request):
         status=status.HTTP_201_CREATED,
     )
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_teacher(request):
     csv_file = request.FILES["csv_file"]
     decoded_file = csv_file.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
-    
+
     # Detectar el delimitador utilizado en el archivo CSV
     sniffer = csv.Sniffer()
     dialect = sniffer.sniff(io_string.read(1024))
     io_string.seek(0)
-    
+
     reader = csv.reader(io_string, delimiter=dialect.delimiter)
     next(reader)  # Saltar la cabecera del CSV
 
@@ -528,24 +661,32 @@ def import_teacher(request):
                 {"message": "El archivo CSV tiene un formato incorrecto"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
-        if not teacher_data["phone"]:  # Si el campo phone está vacío, establecerlo como None
+
+        if not teacher_data[
+            "phone"
+        ]:  # Si el campo phone está vacío, establecerlo como None
             teacher_data["phone"] = None
-        
+
         try:
             user = User.objects.get(code=teacher_data["code"])
-            omitted_teachers.append(f"{teacher_data['name']} {teacher_data['last_name']}")
+            omitted_teachers.append(
+                f"{teacher_data['name']} {teacher_data['last_name']}"
+            )
         except User.DoesNotExist:
             user_data = teacher_data.copy()
             user_data["role"] = User.TEACHER
-            user_data["password"] = User.default_password(teacher_data["name"], teacher_data["code"], teacher_data["last_name"])
+            user_data["password"] = User.default_password(
+                teacher_data["name"], teacher_data["code"], teacher_data["last_name"]
+            )
             user_serializer = UserSerializer(data=user_data)
-            
+
             if user_serializer.is_valid():
                 user = user_serializer.save()
                 Teacher.objects.create(user=user, phone=teacher_data["phone"])
             else:
-                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    user_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
 
     message = "Profesores importados exitosamente."
     if omitted_teachers:
@@ -555,7 +696,6 @@ def import_teacher(request):
         {"message": message},
         status=status.HTTP_201_CREATED,
     )
-
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -601,10 +741,13 @@ def register_student2(request):
     if serializer_student.is_valid():
         try:
             student = serializer_student.save()
-            course_id = data.get('course_id')
+            course_id = data.get("course_id")
             course = Course.objects.get(id=course_id)
             if course in student.course_set.all():
-                return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+                return Response(
+                    {"message": "El estudiante ya esta en este curso"},
+                    status=status.HTTP_409_CONFLICT,
+                )
             student.course_set.add(course)
             course.user_students.add(student)
             return Response(
@@ -616,6 +759,7 @@ def register_student2(request):
                 status=status.HTTP_409_CONFLICT,
             )
     return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # creacion de un estudiante
 # student creation
@@ -643,33 +787,44 @@ def register_student(request, course_code):
         if serializer_student.is_valid():
             student = serializer_student.save()
         else:
-            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer_student.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Obtiene el curso
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({"message": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"message": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # Verifica si el estudiante ya está en el curso
     if course in student.courses_user_student.all():
-        return Response({"message": "El estudiante ya está en este curso"}, status=status.HTTP_409_CONFLICT)
+        return Response(
+            {"message": "El estudiante ya está en este curso"},
+            status=status.HTTP_409_CONFLICT,
+        )
 
     # Agrega el estudiante al curso
     student.courses_user_student.add(course)
     course.user_students.add(student)
 
     return Response(
-        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED)
+        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED
+    )
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def register_student_params(request):   
-    data = request.data 
+def register_student_params(request):
+    data = request.data
     course_id = data.get("course")
     if not course_id:
-        return Response({'error': 'ID del curso no proporcionado.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "ID del curso no proporcionado."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     password = User.default_password(
         data.get("name"), data.get("code"), data.get("last_name")
@@ -691,51 +846,69 @@ def register_student_params(request):
         if serializer_student.is_valid():
             student = serializer_student.save()
         else:
-            return Response(serializer_student.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer_student.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Obtiene el curso
     course = Course.objects.get(code=course_id)
 
     # Verifica si el estudiante ya está en el curso
     if course in student.courses_user_student.all():
-        return Response({"message": "El estudiante ya esta en este curso"}, status=status.HTTP_409_CONFLICT)
+        return Response(
+            {"message": "El estudiante ya esta en este curso"},
+            status=status.HTTP_409_CONFLICT,
+        )
 
     # Agrega el estudiante al curso
     student.courses_user_student.add(course)
     course.user_students.add(student)
 
     return Response(
-        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED)
+        {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED
+    )
 
 
-#crea la escala de la rubrica
+# crea la escala de la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def scale_rubric(request):
-    upper_limit = int(request.data.get('upper_limit'))
-    lower_limit = 1 # limite inferior es 1
-    
-    scale = Scale.objects.create(Upper_limit=upper_limit, Lower_limit=lower_limit)
-    
-    return Response({'message': f'Escala creada con éxito con ID {scale.id}.'}, status=status.HTTP_201_CREATED)
+    upper_limit = int(request.data.get("upper_limit"))
+    lower_limit = 1  # limite inferior es 1
 
-#el profesor crea la rubrica
+    scale = Scale.objects.create(Upper_limit=upper_limit, Lower_limit=lower_limit)
+
+    return Response(
+        {"message": f"Escala creada con éxito con ID {scale.id}."},
+        status=status.HTTP_201_CREATED,
+    )
+
+
+# el profesor crea la rubrica
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric1(request, course_id):    
-  #  print(request.data)
-  #  print(f"course_id: {course_id}") 
+def create_rubric1(request, course_id):
+    #  print(request.data)
+    #  print(f"course_id: {course_id}")
     try:
         course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
-        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-    
-    request.data['courses'] = [course_id]
+        return Response(
+            {"error": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    request.data["courses"] = [course_id]
     serializer = RubricSerializer(data=request.data)
     if serializer.is_valid():
         rubric = serializer.save()
-        return Response({'message': f'Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": f"Rúbrica creada con éxito con ID {rubric.id} y asociada al curso {course.name}."
+            },
+            status=status.HTTP_201_CREATED,
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -743,29 +916,33 @@ def create_global_rubric(request):
     rubric_data = request.data
 
     # Crear la escala primero
-    scale_serializer = ScaleSerialiazer(data=rubric_data.get('scale'))
+    scale_serializer = ScaleSerialiazer(data=rubric_data.get("scale"))
     if scale_serializer.is_valid():
         scale = scale_serializer.save()
     else:
         return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Crear los estándares (criterios) asociados a la escala
-    standards_data = rubric_data.get('standards')
+    standards_data = rubric_data.get("standards")
     standards = []
     for standard_data in standards_data:
-        standard_data['scale'] = scale.id  # Asociar la escala a cada estándar
+        standard_data["scale"] = scale.id  # Asociar la escala a cada estándar
         standard_serializer = StandardSerializer(data=standard_data)
         if standard_serializer.is_valid():
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Crear la rúbrica global sin asociar cursos aún
     rubric_data = {
-        'name': rubric_data.get('name'),
-        'scale': scale.id,
-        'standards': [standard.id for standard in standards]  # No olvides asociar los estándares
+        "name": rubric_data.get("name"),
+        "scale": scale.id,
+        "standards": [
+            standard.id for standard in standards
+        ],  # No olvides asociar los estándares
     }
     rubric_serializer = GlobalRubricSerializer(data=rubric_data)
     if rubric_serializer.is_valid():
@@ -776,22 +953,31 @@ def create_global_rubric(request):
         for course in all_courses:
             course.rubrics.add(rubric)
 
-        return Response({'message': 'Rúbrica global creada y asignada a todos los cursos con éxito.'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": "Rúbrica global creada y asignada a todos los cursos con éxito."
+            },
+            status=status.HTTP_201_CREATED,
+        )
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric(request, course_code):
+def create_rubric(request):
+    course_code = request.query_params.get("course_code")
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     rubric_data = request.data
 
     # Crear la escala primero
-    scale_data = rubric_data.get('scale')
+    scale_data = rubric_data.get("scale")
     scale_serializer = ScaleSerialiazer(data=scale_data)
     if scale_serializer.is_valid():
         scale = scale_serializer.save()
@@ -799,66 +985,93 @@ def create_rubric(request, course_code):
         return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Crear los estándares (criterios)
-    standards_data = rubric_data.get('standards')
+    standards_data = rubric_data.get("standards")
     standards = []
     for standard_data in standards_data:
-        standard_data['rubric'] = scale.id  # Asociar la escala a cada estándar
+        standard_data["rubric"] = scale.id  # Asociar la escala a cada estándar
         standard_serializer = StandardSerializer(data=standard_data)
         if standard_serializer.is_valid():
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Crear la rúbrica y asociar la escala y los estándares
     rubric_data = {
-        'name': rubric_data.get('name'),
-        'scale': scale.id,
-        'courses': [course.id],
-        'standards': [standard.id for standard in standards]
+        "name": rubric_data.get("name"),
+        "scale": scale.id,
+        "courses": [course.id],
+        "standards": [standard.id for standard in standards],
     }
     rubric_serializer = RubricSerializer(data=rubric_data)
     if rubric_serializer.is_valid():
         rubric_serializer.save()
-        return Response({'message': f'Rúbrica, escala y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": f"Rúbrica, escala y estándares creados con éxito y asociados al curso {course.name}."
+            },
+            status=status.HTTP_201_CREATED,
+        )
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#Luisa
-#Editar rubrica
+
+# Luisa
+# Editar rubrica
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_rubric(request):
-    rubric_id = request.query_params.get('rubric_id')
+    rubric_id = request.query_params.get("rubric_id")
     if not rubric_id:
-        return Response({'error': 'No se proporcionó un ID de rúbrica.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se proporcionó un ID de rúbrica."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         rubric = Rubric.objects.get(id=rubric_id)
     except Rubric.DoesNotExist:
-        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # Verificar que ninguna evaluación asociada a la rúbrica haya iniciado
     evaluations = Evaluation.objects.filter(rubric=rubric)
 
     for evaluation in evaluations:
-        if evaluation.estado == Evaluation.INITIATED or evaluation.estado == Evaluation.FINISHED:
-            return Response({'error': 'No se puede editar la rúbrica porque hay evaluaciones que ya han iniciado.'}, status=status.HTTP_400_BAD_REQUEST)
+        if (
+            evaluation.estado == Evaluation.INITIATED
+            or evaluation.estado == Evaluation.FINISHED
+        ):
+            return Response(
+                {
+                    "error": "No se puede editar la rúbrica porque hay evaluaciones que ya han iniciado."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     rubric_data = request.data
 
     # Validar el campo 'name' si está presente
-    name = rubric_data.get('name')
+    name = rubric_data.get("name")
     if name and not validate_name(name):
-        return Response({"error": "El nombre solo puede contener letras y números positivos"}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "El nombre solo puede contener letras y números positivos"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     # Actualizar la rúbrica con los datos proporcionados
     rubric_serializer = RubricSerializer(rubric, data=rubric_data, partial=True)
     if rubric_serializer.is_valid():
         rubric_serializer.save()
-        return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Rúbrica actualizada con éxito."}, status=status.HTTP_200_OK
+        )
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
@@ -898,15 +1111,18 @@ def update_rubric(request):
 #         return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
 #     else:
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-#crea la evaluacion que se realiza a los estudiantes
+
+# crea la evaluacion que se realiza a los estudiantes
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_evaluation(request, course_code):
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     data = request.data
     rubric_name = data.get('rubric_name')
@@ -927,7 +1143,9 @@ def create_evaluation(request, course_code):
     try:
         rubric = Rubric.objects.get(name=rubric_name)
     except Rubric.DoesNotExist:
-        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     evaluation_data = {
         'estado': estado,
@@ -940,8 +1158,13 @@ def create_evaluation(request, course_code):
 
     serializer = EvaluationSerializer(data=evaluation_data)
     if serializer.is_valid():
+
         serializer.save()
-        return Response({'message': 'Evaluación creada con éxito.'}, status=status.HTTP_201_CREATED)
+
+        return Response(
+            {"message": "Evaluación creada con éxito."}, status=status.HTTP_201_CREATED
+        )
+
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -996,25 +1219,32 @@ def finish_evaluation(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_rubric_params(request):    
+def create_rubric_params(request):
     course_id = request.GET.get("course")
     scale_id = request.GET.get("scale")
 
     if not course_id or not scale_id:
-        return Response({'error': 'ID del curso y de la escala son requeridos.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "ID del curso y de la escala son requeridos."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
-        return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
+
     try:
         scale = Scale.objects.get(id=scale_id)
     except Scale.DoesNotExist:
-        return Response({'error': 'Escala no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Escala no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
+
     # Crear los estándares primero
-    standards_data = request.data.get('standards')
+    standards_data = request.data.get("standards")
     standards = []
     for standard_data in standards_data:
         standard_serializer = StandardSerializer(data=standard_data)
@@ -1022,14 +1252,16 @@ def create_rubric_params(request):
             standard = standard_serializer.save()
             standards.append(standard)
         else:
-            return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
     # Crear la rúbrica y asociar los estándares a ella
     rubric_data = {
-        'name': request.data.get('name'),
-        'scale': scale.id,
-        'courses': [course_id],
-        'standards': [standard.id for standard in standards]
+        "name": request.data.get("name"),
+        "scale": scale.id,
+        "courses": [course_id],
+        "standards": [standard.id for standard in standards],
     }
     rubric_serializer = RubricSerializer(data=rubric_data)
     if rubric_serializer.is_valid():
@@ -1037,36 +1269,51 @@ def create_rubric_params(request):
     else:
         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({'message': f'Rúbrica y estándares creados con éxito y asociados al curso {course.name}.'}, status=status.HTTP_201_CREATED)
+    return Response(
+        {
+            "message": f"Rúbrica y estándares creados con éxito y asociados al curso {course.name}."
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
-#obtiene la informacion de la rubrica para poder evaluar un estudiante
+
+# obtiene la informacion de la rubrica para poder evaluar un estudiante
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_rubric(request, rubric_id):
     try:
         rubric = Rubric.objects.get(id=rubric_id)
     except Rubric.DoesNotExist:
-        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     serializer = RubricDetailSerializer(rubric)
     return Response(serializer.data)
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_rubric_params(request):    
+def get_rubric_params(request):
     rubric_id = request.GET.get("rubric")
     if not rubric_id:
-        return Response({'error': 'ID de la rúbrica no proporcionado.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "ID de la rúbrica no proporcionado."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         rubric = Rubric.objects.get(id=rubric_id)
     except Rubric.DoesNotExist:
-        return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     serializer = RubricDetailSerializer(rubric)
     return Response(serializer.data)
 
-#obtener la informacion de todas las rubricas que tiene un curso
+
+# obtener la informacion de todas las rubricas que tiene un curso
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_rubric(request, course_code):
@@ -1078,6 +1325,7 @@ def list_rubric(request, course_code):
     serializer = RubricDetailSerializer(rubrics, many=True)
 
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1099,7 +1347,8 @@ def register_admin(request):
         try:
             serializer_admin.save()
             return Response(
-                {"message": "Administrador creado exitosamente"}, status=status.HTTP_201_CREATED
+                {"message": "Administrador creado exitosamente"},
+                status=status.HTTP_201_CREATED,
             )
         except:
             return Response(
@@ -1131,7 +1380,8 @@ def register_teacher(request):
         try:
             serializer_teacher.save()
             return Response(
-                {"message": "Profesor creado exitosamente"}, status=status.HTTP_201_CREATED
+                {"message": "Profesor creado exitosamente"},
+                status=status.HTTP_201_CREATED,
             )
         except:
             return Response(
@@ -1142,83 +1392,102 @@ def register_teacher(request):
         {"message": "Error al crear profesor"}, status=status.HTTP_400_BAD_REQUEST
     )
 
-#Luisa
-#obtener estudiantes de mi grupo
-@api_view(['GET'])
+
+# Luisa
+# obtener estudiantes de mi grupo
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def group_members(request):
-    student_code = request.query_params.get('student_code')
-    course_code = request.query_params.get('course_code')
+    student_code = request.query_params.get("student_code")
+    course_code = request.query_params.get("course_code")
 
     if not student_code or not course_code:
-        return Response({"error": "Missing student_code or course_code"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Missing student_code or course_code"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         # Obtener el estudiante usando el código
         student = Student.objects.get(user__code=student_code)
     except Student.DoesNotExist:
-        return Response({"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND
+        )
+
     try:
         # Obtener el curso usando el código
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({"error": "Course does not exist"}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Course does not exist"}, status=status.HTTP_404_NOT_FOUND
+        )
+
     try:
         # Obtener el grupo al que pertenece el estudiante en el curso específico
         group = Group.objects.get(students=student, course=course)
     except Group.DoesNotExist:
-        return Response({"error": "Student is not a member of any group in this course"}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"error": "Student is not a member of any group in this course"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
     # Obtener los integrantes del grupo
     group_members = group.students.all()
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-#obtener estudiantes del grupo
-@api_view(['GET'])
+
+# obtener estudiantes del grupo
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def group_members_no(request, student_id):
     try:
         student = Student.objects.get(pk=student_id)
     except Student.DoesNotExist:
-        return Response({"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Student does not exist"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     # Obtener el grupo al que pertenece el estudiante
     try:
         group = Group.objects.get(students=student)
     except Group.DoesNotExist:
-        return Response({"error": "Student is not a member of any group"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Student is not a member of any group"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
     # Obtener los integrantes del grupo
     group_members = group.students.all()
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def group_list(request):
     course_id = request.GET.get("course")
-    
+
     if course_id:
         course = Course.objects.get(id=course_id)
         groups = Group.objects.filter(course=course)
-    
+
     group_data = [
         {
             "id": group.id,
             "name": group.name,
             "assigned_project": group.assigned_project,
-            "student_count": group.students.count(),            
+            "student_count": group.students.count(),
         }
         for group in groups
     ]
-    
+
     return Response(group_data)
 
-#Luisa
-#Lista de estudiantes que no pertenecen a un grupo@api_view(["GET"])
+
+# Luisa
+# Lista de estudiantes que no pertenecen a un grupo@api_view(["GET"])
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def ungrouped_students(request, course_code):
@@ -1226,14 +1495,14 @@ def ungrouped_students(request, course_code):
         print(f"Buscando curso con código: {course_code}")
         course = Course.objects.get(code=course_code)
         print(f"Curso encontrado: {course}")
-        
+
         all_students = set(course.user_students.all())
         print(f"Todos los estudiantes del curso: {all_students}")
-        
+
         # Corregir la consulta para obtener estudiantes agrupados
         grouped_students = set(Student.objects.filter(students__course=course))
         print(f"Estudiantes agrupados: {grouped_students}")
-        
+
         ungrouped_students = all_students - grouped_students
         print(f"Estudiantes no agrupados: {ungrouped_students}")
 
@@ -1248,20 +1517,24 @@ def ungrouped_students(request, course_code):
             }
             for student in ungrouped_students
         ]
-        
+
         print(f"Información de estudiantes no agrupados: {student_info}")
-        
+
         return Response(student_info, status=status.HTTP_200_OK)
     except Course.DoesNotExist:
         print("Curso no encontrado")
-        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
     except Exception as e:
         print(f"Error inesperado: {str(e)}")
-        return Response({"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
-#Luisa
-#Creación del grupo
+# Luisa
+# Creación del grupo
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_group(request, course_code):
@@ -1271,11 +1544,15 @@ def create_group(request, course_code):
         print("Curso encontrado:", course)
     except Course.DoesNotExist:
         print("Curso no encontrado")
-        return Response({"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Curso no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
 
-    student_codes = request.data.get("student_codes", [])  # Obtener los códigos de estudiante de la solicitud POST
+    student_codes = request.data.get(
+        "student_codes", []
+    )  # Obtener los códigos de estudiante de la solicitud POST
     request.data["students"] = student_codes
-    
+
     print("Estudiantes recibidos:")
     for code in student_codes:
         print("Código de estudiante:", code)
@@ -1290,75 +1567,101 @@ def create_group(request, course_code):
         except ValidationError as e:
             # Manejar la excepción ValidationError del serializador
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "Grupo creado correctamente"}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Grupo creado correctamente"}, status=status.HTTP_201_CREATED
+        )
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#evalua a un estudiante
-@api_view(['POST'])
+
+# evalua a un estudiante
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def evaluate_student(request):
-    data= request.data
+    data = request.data
     try:
-        evaluation = Evaluation.objects.get(id= data.get("id_evaluation"))
+        evaluation = Evaluation.objects.get(id=data.get("id_evaluation"))
     except Evaluation.DoesNotExist:
-        return Response({'message': 'No se encontró una evaluación pendiente.'}, status=status.HTTP_404_NOT_FOUND)
-    
+        return Response(
+            {"message": "No se encontró una evaluación pendiente."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
     standards = evaluation.rubric.standards.all()
-    
-    #user= request.user
-    
-    evaluation_completed= EvaluationCompleted(
-        evaluated= get_object_or_404(Student, user__code= data.get("evaluated")),
-        evaluator= get_object_or_404(Student, user__code= data.get("evaluator")),
-        evaluation= evaluation
-        
+
+    # user= request.user
+
+    evaluation_completed = EvaluationCompleted(
+        evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
+        evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
+        evaluation=evaluation,
     )
-    
+
     evaluation_completed.save()
-    
+
     for standard in standards:
         score = request.data.get(f"standard_{standard.id}")
         if score is not None:
-            rating_data = {'standard': standard.id, 'evaluationCompleted': evaluation_completed.id, 'qualification': int(score)}
+            rating_data = {
+                "standard": standard.id,
+                "evaluationCompleted": evaluation_completed.id,
+                "qualification": int(score),
+            }
             rating_serializer = RatingSerializer(data=rating_data)
             if rating_serializer.is_valid():
                 rating_serializer.save()
             else:
-                return Response(rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+                return Response(
+                    rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
+
     # Guardar el comentario general de la evaluación
     comment = request.data.get("comment")
     if comment:
         evaluation_completed.comment = comment
-    
-    evaluation_completed.completed = True
-    
-    evaluation_completed.evaluated = get_object_or_404(Student, user__code= data.get("evaluated"))
-    
-    evaluation_completed.evaluator = get_object_or_404(Student, user__code= data.get("evaluator"))
-    
-    evaluation_completed.save()
-        
-    return Response({'message': 'Evaluación completada con éxito.'}, status=status.HTTP_200_OK)
 
-#obtiene la nota definitiva de un estudiante en especifico y sus compañeros estan en anonimo
-@api_view(['GET'])
+    evaluation_completed.completed = True
+
+    evaluation_completed.evaluated = get_object_or_404(
+        Student, user__code=data.get("evaluated")
+    )
+
+    evaluation_completed.evaluator = get_object_or_404(
+        Student, user__code=data.get("evaluator")
+    )
+
+    evaluation_completed.save()
+
+    return Response(
+        {"message": "Evaluación completada con éxito."}, status=status.HTTP_200_OK
+    )
+
+
+# obtiene la nota definitiva de un estudiante en especifico y sus compañeros estan en anonimo
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def evaluation_results(request):
-    student_code = request.GET.get('student_code')
-    evaluation_id = request.GET.get('evaluation_id')
+    student_code = request.GET.get("student_code")
+    evaluation_id = request.GET.get("evaluation_id")
 
     try:
         student = Student.objects.get(user__code=student_code)
         evaluation = Evaluation.objects.get(id=evaluation_id)
     except (Student.DoesNotExist, Evaluation.DoesNotExist):
-        return Response({'error': 'Estudiante o evaluación no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Estudiante o evaluación no encontrado."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
-    evaluation_completed_list = EvaluationCompleted.objects.filter(evaluated=student, evaluation=evaluation)
-    
+    evaluation_completed_list = EvaluationCompleted.objects.filter(
+        evaluated=student, evaluation=evaluation
+    )
+
     if not evaluation_completed_list.exists():
-        return Response({'error': 'No hay evaluaciones completadas para este estudiante.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "No hay evaluaciones completadas para este estudiante."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
     results = []
     total_score = 0
@@ -1368,7 +1671,9 @@ def evaluation_results(request):
     num_group_students = group_students.count()
 
     for standard in evaluation.rubric.standards.all():
-        ratings = Rating.objects.filter(evaluationCompleted__in=evaluation_completed_list, standard=standard)
+        ratings = Rating.objects.filter(
+            evaluationCompleted__in=evaluation_completed_list, standard=standard
+        )
         num_ratings = ratings.count()
         sum_ratings = sum(rating.qualification for rating in ratings)
         average_rating = sum_ratings / num_ratings if num_ratings > 0 else 0
@@ -1379,11 +1684,13 @@ def evaluation_results(request):
         # Agregar ceros para los estudiantes que no calificaron
         individual_ratings += [0] * (num_group_students - num_ratings)
 
-        results.append({
-            'standard_description': standard.description,
-            'average_rating': average_rating,
-            'individual_ratings': individual_ratings
-        })
+        results.append(
+            {
+                "standard_description": standard.description,
+                "average_rating": average_rating,
+                "individual_ratings": individual_ratings,
+            }
+        )
 
     final_score = total_score / total_standards if total_standards > 0 else 0
 
@@ -1392,23 +1699,26 @@ def evaluation_results(request):
         if ec.comment:
             all_comments.append(ec.comment)
 
-    comments = '\n'.join(all_comments)
+    comments = "\n".join(all_comments)
 
-    return Response({
-        'final_score': final_score,
-        'standards': results,
-        'comments': comments,
-        'total_count': total_standards,
-        'total_ratings_count': num_group_students
-    })
+    return Response(
+        {
+            "final_score": final_score,
+            "standards": results,
+            "comments": comments,
+            "total_count": total_standards,
+            "total_ratings_count": num_group_students,
+        }
+    )
 
-#muestra la lista de grupos de ese curso
-@api_view(['GET'])
+
+# muestra la lista de grupos de ese curso
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def group_list(request, course_code):
     course = get_object_or_404(Course, code=course_code)
     groups = Group.objects.filter(course=course)
-    
+
     group_data = [
         {
             "id": group.id,
@@ -1418,15 +1728,16 @@ def group_list(request, course_code):
         }
         for group in groups
     ]
-    
+
     return Response(group_data)
-    
-#muestra la informacion de un grupo
-@api_view(['GET'])
+
+
+# muestra la informacion de un grupo
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def group_detail(request, course_code, group_id):
     group = get_object_or_404(Group, id=group_id, course__code=course_code)
-    
+
     student_data = [
         {
             "student_code": student.user.code,
@@ -1434,15 +1745,16 @@ def group_detail(request, course_code, group_id):
         }
         for student in group.students.all()
     ]
-    
+
     group_data = {
         "group_id": group.id,
         "course_id": group.course.code,
         "assigned_project": group.assigned_project,
         "students": student_data,
     }
-    
+
     return Response(group_data)
+
 
 # creacion de un profesor
 # teacher creation
@@ -1597,13 +1909,13 @@ def user_list(request):
 def student_list(request):
     course_id = request.GET.get("course")
     try:
-        course= Course.objects.get(code= course_id)
+        course = Course.objects.get(code=course_id)
     except Course.DoesNotExist:
         return Response(
             {"error": "No exite un curso con el codigo proporcionado."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    students= course.user_students.all()
+    students = course.user_students.all()
 
     user_data = [
         {
@@ -1616,7 +1928,8 @@ def student_list(request):
         for student in students
     ]
     return Response(user_data)
-    
+
+
 # obtiene una lista de cursos
 # gets a list of course
 @api_view(["GET"])
@@ -1660,15 +1973,15 @@ def user_data(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
-    user= request.user
+    user = request.user
     print(user.id)
-    courses = Course.objects.filter(
-        user_teacher= user.id)
+    courses = Course.objects.filter(user_teacher=user.id)
     print(courses)
     course_data = []
     for course in courses:
         students = course.user_students.values(
-           "user__name", "user__last_name", "user__code", "user__email")
+            "user__name", "user__last_name", "user__code", "user__email"
+        )
         course_data.append(
             {
                 "code": course.code,
@@ -1679,10 +1992,12 @@ def main_teacher(request):
             }
         )
     return Response(course_data)
-    #else:
+    # else:
     return Response(
-            {"status": "El docente actualmente no tiene cursos"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        {"status": "El docente actualmente no tiene cursos"},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1705,42 +2020,61 @@ def search_user(request):
         ]
     return Response(user_data)
 
-#Luisa
-#Editar curso ESTE ES
+
+# Luisa
+# Editar curso ESTE ES
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_course(request):
     data = request.data
-    course_code = request.query_params.get('course_code')
+    course_code = request.query_params.get("course_code")
 
     if not course_code:
-        return Response({"error": "Se requiere el código del curso."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Se requiere el código del curso."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
-        return Response({"error": "El curso con el código proporcionado no existe."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "El curso con el código proporcionado no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
     # Actualiza el campo 'user_teacher' si está presente
     user_teacher_code = data.get("user_teacher")
     if user_teacher_code:
         if not validate_code(user_teacher_code):
-            return Response({"error": "El código del usuario solo puede contener letras y números, sin caracteres especiales, y debe ser positivo si es numérico"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "El código del usuario solo puede contener letras y números, sin caracteres especiales, y debe ser positivo si es numérico"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             user = User.objects.get(code=user_teacher_code)
             data["user_teacher"] = user.id
         except User.DoesNotExist:
-            return Response({"error": "El código de usuario proporcionado no es válido."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El código de usuario proporcionado no es válido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     serializer_course = CourseSerializer(course, data=data, partial=True)
     if serializer_course.is_valid():
         serializer_course.save()
-        return Response({"message": "Curso actualizado con éxito", "data": serializer_course.data}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Curso actualizado con éxito", "data": serializer_course.data},
+            status=status.HTTP_200_OK,
+        )
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#Luisa
-#Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
+
+# Luisa
+# Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def disable_course(request, course_code):
@@ -1756,7 +2090,9 @@ def disable_course(request, course_code):
     evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
     if evaluations.exists():
         return Response(
-            {"error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."},
+            {
+                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."
+            },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -1766,26 +2102,27 @@ def disable_course(request, course_code):
 
     serializer = CourseSerializer(course)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_course(request):
-    
-    codigo= request.data.get("code")
-    
+
+    codigo = request.data.get("code")
+
     try:
-        course= Course.objects.get(code= codigo)
+        course = Course.objects.get(code=codigo)
     except Course.DoesNotExist:
-        course= None
-    
+        course = None
+
     if course is not None:
-            return Response(
+        return Response(
             {"error": "Ya existe un curso con este codigo"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
-    
+
     data = request.data
-    
+
     try:
         user = models.User.objects.get(code=data.get("user_teacher"))
     except User.DoesNotExist:
@@ -1805,79 +2142,105 @@ def create_course(request):
     if serializer_course.is_valid():
         serializer_course.save()
 
-        #if Rubric.objects.filter(name= 'Rubrica Predeterminada').exists: 
-            #rubric= Rubric.objects.get(name= 'Rubrica Predeterminada')
-            #rubric.courses.add(Course.objects.get(code= data.get("code")))
-        
-        return Response({"message": "Curso creado con éxito."}, status=status.HTTP_201_CREATED)
+        # if Rubric.objects.filter(name= 'Rubrica Predeterminada').exists:
+        # rubric= Rubric.objects.get(name= 'Rubrica Predeterminada')
+        # rubric.courses.add(Course.objects.get(code= data.get("code")))
+
+        return Response(
+            {"message": "Curso creado con éxito."}, status=status.HTTP_201_CREATED
+        )
 
     return Response(serializer_course.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#deshabilita profe y admin
+
+# deshabilita profe y admin
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def disable_user(request):
     try:
         user_code = request.GET.get("user_code")
         user = User.search(user_code)
-        
+
         if user:
             # Verificar si el usuario es un profesor y está asignado a algún curso
-            if user.role == User.TEACHER and Course.objects.filter(user_teacher=user).exists():
+            if (
+                user.role == User.TEACHER
+                and Course.objects.filter(user_teacher=user).exists()
+            ):
                 return Response(
-                    {'error': 'El usuario no puede ser deshabilitado porque está asignado a un curso.'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "error": "El usuario no puede ser deshabilitado porque está asignado a un curso."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             user.status = False
             user.save()
-            return Response({'message': 'Usuario deshabilitado correctamente.'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Usuario deshabilitado correctamente."},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-    
+            return Response(
+                {"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            )
+
     except Exception as e:
-        return Response({'error': f'Error al deshabilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#habilita admin y profesor 
+        return Response(
+            {"error": f"Error al deshabilitar el usuario: {e}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# habilita admin y profesor
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def enable_user(request):
     try:
-        user = User.search(request.GET.get("user_code")) 
+        user = User.search(request.GET.get("user_code"))
         if user:
             user.status = True
             user.save()
-            return Response({'message': 'Usuario habilitado correctamente.'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Usuario habilitado correctamente."},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            )
     except Exception as e:
-        return Response({'error': f'Error al habilitar el usuario: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": f"Error al habilitar el usuario: {e}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
+
+# @permission_classes([IsAuthenticated])
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def restore_password(request):
     q = request.data.get("mail", "")
     subject = "Restablecer contraseña"
-    
+
     longitud_codigo = 6  # Puedes cambiar la longitud del código aquí
     codigo_aleatorio = generar_codigo_alfanumerico(longitud_codigo)
     print("Código alfanumérico aleatorio:", codigo_aleatorio)
-    
-    usuario= models.User.objects.get(email=q)
-    
+
+    usuario = models.User.objects.get(email=q)
+
     usuario.set_password(codigo_aleatorio)
-    
+
     usuario.first_login = True
-    
+
     usuario.save()
-    
-    
+
     if models.User.objects.filter(email__icontains=q).exists():
         message = EmailMultiAlternatives(
             subject,  # Titulo
-            "Hola, su contraseña temporal es %s " %codigo_aleatorio ,
+            "Hola, su contraseña temporal es %s " % codigo_aleatorio,
             settings.EMAIL_HOST_USER,  # Remitente
             [q],
-        )  # Destinatario 
+        )  # Destinatario
         message.send()
         return Response(
             {"message": "Correo enviado correctamente"}, status=status.HTTP_200_OK
@@ -1887,63 +2250,61 @@ def restore_password(request):
             {"error": "No existe un usuario con esta direccion de correo electronico"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-        
-        
+
 
 def generar_codigo_alfanumerico(longitud):
     caracteres = string.ascii_letters + string.digits
-    codigo = ''.join(random.choice(caracteres) for _ in range(longitud))
+    codigo = "".join(random.choice(caracteres) for _ in range(longitud))
     return codigo
-        
+
+
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])     
+@permission_classes([IsAuthenticated])
 def main_report(request):
-    
-    data= request.data
-    evaluations= Evaluation.objects.filter(course__code=data.get("course_code"))
-    
-           
+
+    data = request.data
+    evaluations = Evaluation.objects.filter(course__code=data.get("course_code"))
+
     evaluation_data = [
         {
             "estado": evaluation.estado,
-            "date_start":evaluation.date_start,
+            "date_start": evaluation.date_start,
             "date_end": evaluation.date_end,
-            "name": evaluation.name
+            "name": evaluation.name,
         }
         for evaluation in evaluations
-    ] 
-    
+    ]
+
     return Response(evaluation_data)
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def view_notas(request):
-    
-    data= request.data
-    
-    evaluations= EvaluationCompleted.objects.filter(evaluation__id= data.get("id_evaluation"))
-    
+
+    data = request.data
+
+    evaluations = EvaluationCompleted.objects.filter(
+        evaluation__id=data.get("id_evaluation")
+    )
+
     print(evaluations)
-    
+
     report_data = []
-    
+
     for evaluation in evaluations:
-    
-        ratings= Rating.objects.filter(evaluationCompleted = evaluation.id)
-        #ratings= Rating.objects.all()
-        #print(ratings)
-        
-     
-        
-    
+
+        ratings = Rating.objects.filter(evaluationCompleted=evaluation.id)
+        # ratings= Rating.objects.all()
+        # print(ratings)
+
         report_data.append(
             {
-            "evaluated": rating.evaluationCompleted.evaluated.user.name,
-            "standard": rating.standard.description,
-            "qualification": rating.qualification
+                "evaluated": rating.evaluationCompleted.evaluated.user.name,
+                "standard": rating.standard.description,
+                "qualification": rating.qualification,
             }
             for rating in ratings
         )
-    
+
     return Response(report_data)
