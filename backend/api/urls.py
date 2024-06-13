@@ -74,7 +74,7 @@ urlpatterns = [
     path('update_course', views.update_course, name='update_course'), #Luisa
 
     #Editar rubrica
-    path('update_rubric', views.update_rubric, name='update-rubric'), #Luisa
+    path('update_rubric', views.update_rubric, name='update_rubric'), #Luisa
 
     #Deshabilitar curso con la excepción de que no puede tener evaluaciones en curso
     path('disable_course/<str:course_code>/', views.disable_course, name='disable_course'), #Luisa

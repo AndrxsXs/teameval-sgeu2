@@ -829,36 +829,62 @@ def create_rubric(request, course_code):
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_rubric(request):
-    rubric_id = request.query_params.get('rubric_id')
-    if not rubric_id:
-        return Response({'error': 'No se proporcionó un ID de rúbrica.'}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
-        rubric = Rubric.objects.get(id=rubric_id)
+        rubric_id = request.query_params.get('rubric_id')
+        rubric = Rubric.objects.get(pk=rubric_id)
     except Rubric.DoesNotExist:
         return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Verificar que ninguna evaluación asociada a la rúbrica haya iniciado
-    evaluations = Evaluation.objects.filter(rubric=rubric)
-
-    for evaluation in evaluations:
-        if evaluation.estado == Evaluation.INITIATED or evaluation.estado == Evaluation.FINISHED:
-            return Response({'error': 'No se puede editar la rúbrica porque hay evaluaciones que ya han iniciado.'}, status=status.HTTP_400_BAD_REQUEST)
-
     rubric_data = request.data
 
-    # Validar el campo 'name' si está presente
-    name = rubric_data.get('name')
-    if name and not validate_name(name):
-        return Response({"error": "El nombre solo puede contener letras y números positivos"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Actualizar la rúbrica con los datos proporcionados
-    rubric_serializer = RubricSerializer(rubric, data=rubric_data, partial=True)
-    if rubric_serializer.is_valid():
-        rubric_serializer.save()
-        return Response({'message': 'Rúbrica actualizada con éxito.'}, status=status.HTTP_200_OK)
-    else:
-        return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Actualizar el nombre de la rúbrica si se proporciona
+    if 'name' in rubric_data:
+        rubric.name = rubric_data['name']
+
+    # Actualizar la escala de la rúbrica si se proporciona
+    if 'scale' in rubric_data:
+        scale_data = rubric_data['scale']
+        scale_serializer = ScaleSerialiazer(data=scale_data)
+        if scale_serializer.is_valid():
+            scale = scale_serializer.save()
+            rubric.scale = scale
+        else:
+            return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Actualizar los estándares de la rúbrica
+    if 'standards' in rubric_data:
+        standards_data = rubric_data['standards']
+        updated_standards = []
+
+        for standard_data in standards_data:
+            if 'id' in standard_data:
+                # Si el estándar ya existe, actualizarlo
+                try:
+                    standard = Standard.objects.get(pk=standard_data['id'])
+                    standard.description = standard_data.get('description', standard.description)
+                    standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                    standard.save()
+                    updated_standards.append(standard)
+                except Standard.DoesNotExist:
+                    return Response({'error': f'No se encontró el estándar con id {standard_data["id"]}.'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # Si no tiene ID, es un nuevo estándar que se va a crear
+                standard_serializer = StandardSerializer(data=standard_data)
+                if standard_serializer.is_valid():
+                    standard = standard_serializer.save(rubric=rubric)
+                    updated_standards.append(standard)
+                else:
+                    return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Asignar los estándares actualizados a la rúbrica
+        rubric.standards.set(updated_standards)
+
+    # Guardar la rúbrica actualizada
+    rubric.save()
+
+    # Serializar y devolver la rúbrica actualizada
+    rubric_serializer = RubricSerializer(rubric)
+    return Response(rubric_serializer.data, status=status.HTTP_200_OK)
 
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
@@ -1644,16 +1670,6 @@ def update_course(request):
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
         return Response({"error": "El curso con el código proporcionado no existe."}, status=status.HTTP_404_NOT_FOUND)
-
-    # Validar el campo 'name' si está presente
-    name = data.get('name')
-    if name and not validate_name(name):
-        return Response({"error": "El nombre solo puede contener letras y espacios"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Validar el campo 'code' si está presente
-    code = data.get('code')
-    if code and not validate_code(code):
-        return Response({"error": "El código solo puede contener letras y números, sin caracteres especiales, y debe ser positivo si es numérico"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualiza el campo 'user_teacher' si está presente
     user_teacher_code = data.get("user_teacher")

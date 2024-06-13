@@ -203,6 +203,7 @@ class ScaleSerialiazer(serializers.ModelSerializer):
         model = Scale
         fields = ['Upper_limit', 'Lower_limit']
         
+        
 class StandardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standard
