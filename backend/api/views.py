@@ -900,10 +900,9 @@ def update_rubric(request):
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #crea la evaluacion que se realiza a los estudiantes
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def  create_evaluation(request, course_code):
+def create_evaluation(request, course_code):
     try:
         course = Course.objects.get(code=course_code)
     except Course.DoesNotExist:
@@ -912,33 +911,21 @@ def  create_evaluation(request, course_code):
     data = request.data
     rubric_name = data.get('rubric_name')
     name = data.get('name')
-    date_start = data.get('date_start')
-    date_end = data.get('date_end')
+    estado = data.get('estado')
 
-    if not rubric_name or not name or not date_start or not date_end:
+    if not rubric_name or not name or not estado:
         return Response({'error': 'Faltan datos necesarios.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if estado == Evaluation.FINISHED:
+        return Response({'error': 'No se puede crear una evaluación en estado finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         rubric = Rubric.objects.get(name=rubric_name)
     except Rubric.DoesNotExist:
         return Response({'error': 'Rúbrica no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
-    bogota_tz = pytz.timezone('America/Bogota')
-    date_start = timezone.datetime.fromisoformat(date_start).astimezone(bogota_tz)
-    date_end = timezone.datetime.fromisoformat(date_end).astimezone(bogota_tz)
-
-    current_time = timezone.now().astimezone(bogota_tz)
-    if current_time < date_start:
-        estado = Evaluation.TO_START
-    elif date_start <= current_time <= date_end:
-        estado = Evaluation.INITIATED
-    else:
-        estado = Evaluation.FINISHED
-
     evaluation_data = {
         'estado': estado,
-        'date_start': date_start,
-        'date_end': date_end,
         'name': name,
         'rubric': rubric.id,
         'course': course.id, 
@@ -948,15 +935,11 @@ def  create_evaluation(request, course_code):
 
     serializer = EvaluationSerializer(data=evaluation_data)
     if serializer.is_valid():
-        
         serializer.save()
-        
         return Response({'message': 'Evaluación creada con éxito.'}, status=status.HTTP_201_CREATED)
-    
     else:
-        
-         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
-     
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
