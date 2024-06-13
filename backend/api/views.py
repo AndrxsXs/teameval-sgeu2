@@ -128,7 +128,23 @@ def validate_code(code):
     
     return False
 
+def validate_name(value):
+    if not re.match(r'^[a-zA-Z\s]+$', value):
+        raise serializers.ValidationError("El campo solo debe contener letras y espacios")
 
+def validate_code(value):
+    if not value.isdigit():
+        raise serializers.ValidationError("El código debe ser solo números")
+
+def validate_email(value):
+    try:
+        serializers.EmailField().run_validation(value)
+    except serializers.ValidationError:
+        raise serializers.ValidationError("El email debe seguir el formato correcto (@example.com)")
+    
+def validate_phone(value):
+    if value is not None and not value.isdigit():
+        raise serializers.ValidationError("El teléfono debe ser solo números")
 
 # Luisa
 # Editar profesor y administrador
@@ -154,25 +170,15 @@ def update_user(request):
         email = request.data.get("email", user.email)
         code = request.data.get("code", user.code)
 
-        # Validar los campos name, last_name y code
-        #if name and not validate_name(name):
-            #return Response(
-            #    {"error": "El nombre solo puede contener letras"},
-                #status=status.HTTP_400_BAD_REQUEST,
-            #)
-        #if last_name and not validate_name(last_name):
-         #   return Response(
-          #      {"error": "El apellido solo puede contener letras"},
-           #     status=status.HTTP_400_BAD_REQUEST,
-            #)
-        if code and not validate_code(code):
-            return Response(
-                {
-                    "error": "El código solo puede contener números positivos"
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-    
+        # Validar los datos
+        try:
+            validate_name(name)
+            validate_name(last_name)
+            validate_code(code)
+            validate_email(email)
+        except serializers.ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         # Actualizar los datos del usuario
         user_data = {
             "name": name,
@@ -218,7 +224,6 @@ def update_user(request):
         return Response(
             {"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND
         )
-
 
 # Luisa
 # Informacion profesor
@@ -472,7 +477,7 @@ def available_evaluations(request):
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"message": "Evaluaciones disponibles"}, serializer.data, status=status.HTTP_200_OK)
 
 
 # Luisa
@@ -502,7 +507,7 @@ def completed_evaluations(request):
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"message": "Evaluaciones finalizadas"}, serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -866,7 +871,6 @@ def update_student(request):
             status=status.HTTP_404_NOT_FOUND
         )
     
-
     data = request.data
     user_data = {
         "name": data.get("name", user.name),
@@ -874,6 +878,14 @@ def update_student(request):
         "code": data.get("code", user.code),
         "email": data.get("email", user.email),
     }
+
+    try:
+        validate_name(user_data["name"])
+        validate_name(user_data["last_name"])
+        validate_code(user_data["code"])
+        validate_email(user_data["email"])
+    except serializers.ValidationError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer_user = UserSerializer(instance=user, data=user_data, partial=True)
     if serializer_user.is_valid():
@@ -1693,7 +1705,7 @@ def group_list(request):
 
 
 # Luisa
-# Lista de estudiantes que no pertenecen a un grupo@api_view(["GET"])
+# Lista de estudiantes que no pertenecen a un grupo
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def ungrouped_students(request, course_code):
