@@ -539,26 +539,31 @@ def available_evaluations(request):
 # Muestra al estudiante las evaluaciones finalizadas
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def completed_evaluations(request, student_code):
+def completed_evaluations(request):
+    student_code = request.query_params.get('student_code')
+    course_code = request.query_params.get('course_code')
+    if not student_code or not course_code:
+        return Response({'error': 'No se proporcionó el código del estudiante o del curso.'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        # Obtener el estudiante por código
+        # Obtener el estudiante y el curso por código
         student = Student.objects.get(user__code=student_code)
-    except Student.DoesNotExist:
+        course = Course.objects.get(code=course_code)
+    except (Student.DoesNotExist, Course.DoesNotExist):
         return Response(
-            {"error": "Estudiante no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            {"error": "Estudiante o curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Obtener el tiempo actual en la zona horaria de Bogotá
-    bogota_tz = pytz.timezone("America/Bogota")
-    current_time = timezone.now().astimezone(bogota_tz)
-
-    # Filtrar las evaluaciones que están finalizadas para el estudiante
+    # Filtrar las evaluaciones que están en estado "finalizado" para el estudiante en el curso
     evaluations = Evaluation.objects.filter(
-        course__user_students=student, estado=Evaluation.FINISHED
+        course=course,
+        course__user_students=student,
+        estado=Evaluation.FINISHED
     )
 
     serializer = EvaluationSerializerE(evaluations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["POST"])
