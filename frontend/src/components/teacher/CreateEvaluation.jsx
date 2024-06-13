@@ -109,7 +109,12 @@ export default function CreateEvaluation() {
         open={open}
         onClose={handleClose}
       >
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            // width: "clamp(300px, 100%, 800px)",
+          }}
+        >
           <Box
             component="article"
             sx={{
@@ -117,7 +122,8 @@ export default function CreateEvaluation() {
               flexDirection: "column",
               gap: 2,
               alignItems: "flex-start",
-              minWidth: "500px",
+              // minWidth: "500px",
+              overflow: "auto",
               //   maxWidth: "700px",
             }}
           >
@@ -242,8 +248,9 @@ export default function CreateEvaluation() {
                   alignItems="center"
                   justifyContent="space-between"
                   sx={{
-                    width: "100%",
-                    overflow: "auto"
+                    // width: "100%",
+                    height: "clamp(200px, 50vh, 800px)",
+                    overflow: "auto",
                   }}
                 >
                   <RubricList
