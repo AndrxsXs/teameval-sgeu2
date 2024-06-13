@@ -1,7 +1,9 @@
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import * as React from 'react';
 import { Box } from "@mui/joy"
 import { Typography } from "@mui/joy"
 import ImportResources from '../../components/teacher/import/ImportResources';
+import Table from '@mui/joy/Table';
 
 export default function Resources() {
 
@@ -40,6 +42,8 @@ export default function Resources() {
 
                 <ImportResources />
             </Box>
+            
+            
         </>
     )
 }
