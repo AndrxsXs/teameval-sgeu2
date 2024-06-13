@@ -105,7 +105,7 @@ export default function CourseDetailed() {
                   {courseCode}
                 </Typography>
                 <Typography level="body-sm">
-                  <strong>Docente:</strong> {courseInfo.teacher.name}
+                  <strong>Docente:</strong> {courseInfo.teacher.name} {courseInfo.teacher.last_name}
                 </Typography>
               </Stack>
               <CourseActions course={courseInfo} />

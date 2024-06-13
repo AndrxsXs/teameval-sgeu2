@@ -201,7 +201,7 @@ export default function CourseTable(props) {
                   <td onClick={() => navigate(`./${row.code}`)}>
                     <Typography level="body-xs">{row.code}</Typography>
                   </td>
-                  <td>
+                  <td onClick={() => navigate(`./${row.code}`)}>
                     <Typography level="body-xs">{row.name}</Typography>
                   </td>
                   <td onClick={() => navigate(`./${row.code}`)}>

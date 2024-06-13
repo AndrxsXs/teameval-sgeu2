@@ -32,6 +32,8 @@ export default function ManageCourse(props) {
   });
   const route = editMode ? `api/update_course` : `api/create_course/`;
 
+  // console.log(course);
+
   useEffect(() => {
     if (editMode) {
       setFormData((prevFormData) => ({
@@ -325,12 +327,12 @@ export default function ManageCourse(props) {
                       }
                       placeholder="Seleccione un docente"
                       getOptionLabel={(option) =>
-                        `${option.name} ${!editMode ? option.last_name : ""}`
+                        `${option.name} ${option.last_name}`
                       }
                       onChange={(e, value) => {
                         setFormData({ ...formData, user_teacher: value.code });
                       }}
-                      value={editMode ? course.teacher : ""}
+                      defaultValue={editMode && course.teacher}
                       required
                     />
                   </FormControl>
