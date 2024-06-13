@@ -19,10 +19,11 @@ urlpatterns = [
     
     path('restore_password/', views.restore_password, name='restore_password'), #Enviar correo para restablecer contraseña
     
-    path('view_notas/', views.view_notas , name='view_notas'), #Boceto informes
+    path('report_datailed/', views.report_detailed , name='view_notas'), #Informe detallado
+    
+    path('main_report/', views.main_report, name='main_report'), #Main informes
     
     
-    path('main_report/', views.main_report, name='main_report'), #Boceto main informes
 
     path('teacher-rubrics/', views.get_teacher_rubrics, name='get_teacher_rubrics'), #Luisa
 
