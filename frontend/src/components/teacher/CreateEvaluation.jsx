@@ -243,6 +243,7 @@ export default function CreateEvaluation() {
                   justifyContent="space-between"
                   sx={{
                     width: "100%",
+                    overflow: "auto"
                   }}
                 >
                   <RubricList

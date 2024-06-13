@@ -10,6 +10,8 @@ import Input from "@mui/joy/Input";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
 
+import eventDispatcher from "../../utils/eventDispacher";
+
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 
 import { handleKeyPress } from "../../utils/handleKeyPress";
@@ -58,17 +60,8 @@ export default function EditStudent(props) {
         window.dispatchEvent(new Event("user-updated"));
       })
       .catch((error) => {
-        // console.log("Error: ", error.response.data.error);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${error.response.data.error}`,
-              severity: "danger",
-            },
-          })
-        );
+        eventDispatcher("responseEvent", error, "danger");
         setLoading(false);
-        handleCloseModal(false);
       });
   };
 
