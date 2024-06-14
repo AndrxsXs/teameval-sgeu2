@@ -36,11 +36,11 @@ export default function TeacherSidebar({ userData }) {
       icon: <ContentPasteIcon key="reports" />,
     },
     
-    {
-      text: "Recursos",
-      route: "./recursos",
-      icon: <UploadFileIcon key="resource" />,
-    },
+    // {
+    //   text: "Recursos",
+    //   route: "./recursos",
+    //   icon: <UploadFileIcon key="resource" />,
+    // },
   ];
 
   const settingsRoute = "./ajustes";
