@@ -2005,8 +2005,6 @@ def evaluate_student(request):
 
     standards = evaluation.rubric.standards.all()
 
-    # user= request.user
-
     evaluation_completed = EvaluationCompleted(
         evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
         evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
@@ -2016,7 +2014,7 @@ def evaluate_student(request):
     evaluation_completed.save()
 
     for standard in standards:
-        score = request.data.get(standard.id)
+        score = request.data.get(str(standard.id))  # Buscar la calificación en el objeto principal
         if score is not None:
             rating_data = {
                 "standard": standard.id,
@@ -2031,7 +2029,6 @@ def evaluate_student(request):
                     rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )
 
-    # Guardar el comentario general de la evaluación
     comment = request.data.get("comment")
     if comment:
         evaluation_completed.comment = comment
