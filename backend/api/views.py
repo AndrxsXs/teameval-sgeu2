@@ -489,19 +489,28 @@ def available_evaluations(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def rubric_evaluate(request):
-    evaluation_id = request.query_params.get("evaluation_id")
-    if not evaluation_id:
+    course_code = request.query_params.get("course_code")
+    if not course_code:
         return Response(
-            {"error": "No se proporcionó el ID de la evaluación."},
+            {"error": "No se proporcionó el código del curso."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     try:
-        # Obtener la evaluación por ID
-        evaluation = Evaluation.objects.get(id=evaluation_id)
+        # Obtener el curso por código
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "Curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        # Obtener la evaluación que está en estado "iniciado" para el curso
+        evaluation = Evaluation.objects.get(course=course, estado=Evaluation.INITIATED)
     except Evaluation.DoesNotExist:
         return Response(
-            {"error": "Evaluación no encontrada."}, status=status.HTTP_404_NOT_FOUND
+            {"error": "No se encontró una evaluación en estado 'iniciado' para el curso."},
+            status=status.HTTP_404_NOT_FOUND
         )
 
     # Serializar la evaluación
@@ -510,6 +519,7 @@ def rubric_evaluate(request):
     return Response(
         {"data": evaluation_serializer.data}, status=status.HTTP_200_OK
     )
+
 
 
 
@@ -1837,8 +1847,8 @@ def group_members(request):
     # Obtener los integrantes del grupo
     group_members = group.students.all()
 
-    # Filtrar los miembros del grupo que aún no han sido evaluados por el estudiante
-    group_members = [member for member in group_members if not EvaluationCompleted.objects.filter(evaluated=member, evaluator=student, evaluation__course=course, completed=True).exists()]
+    # Filtrar los miembros del grupo que aún no han sido evaluados por el estudiante y que no son el estudiante que hace la solicitud
+    group_members = [member for member in group_members if member != student and not EvaluationCompleted.objects.filter(evaluated=member, evaluator=student, evaluation__course=course, completed=True).exists()]
 
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
