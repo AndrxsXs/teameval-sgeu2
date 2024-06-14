@@ -485,9 +485,14 @@ def available_evaluations(request):
         # Serializar la evaluación
         evaluation_serializer = EvaluationSerializerE(evaluation)
 
-        # Obtener el profesor asociado al curso de la evaluación
-        teacher = Teacher.objects.get(user=evaluation.course.user_teacher)
-
+        if evaluation.course.user_teacher is not None:
+            teacher = Teacher.objects.get(user=evaluation.course.user_teacher)
+        else:
+            return Response(
+                {"error": "El curso de la evaluación no tiene un profesor asociado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
         # Serializar el profesor
         teacher_serializer = TeacherSerializer(teacher)
 
