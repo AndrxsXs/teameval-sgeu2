@@ -512,9 +512,24 @@ def completed_evaluations(request):
         estado=Evaluation.FINISHED
     )
 
-    serializer = EvaluationSerializerE(evaluations, many=True)
-    return Response({"message": "Evaluaciones finalizadas"}, serializer.data, status=status.HTTP_200_OK)
+    # Preparar los datos para la respuesta
+    data = []
+    for evaluation in evaluations:
+        # Serializar la evaluación
+        evaluation_serializer = EvaluationSerializerE(evaluation)
 
+        # Obtener el profesor asociado al curso de la evaluación
+        teacher = Teacher.objects.get(user=evaluation.course.user_teacher)
+
+        # Serializar el profesor
+        teacher_serializer = TeacherSerializer(teacher)
+
+        data.append({
+            'evaluation': evaluation_serializer.data,
+            'teacher': teacher_serializer.data
+        })
+
+    return Response({"message": "Evaluaciones finalizadas", "data": data}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -1293,7 +1308,6 @@ def update_rubric(request):
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # crea la evaluacion que se realiza a los estudiantes
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_evaluation(request):
@@ -1323,6 +1337,10 @@ def create_evaluation(request):
 
     try:
         rubric = Rubric.objects.get(name=rubric_name)
+        if rubric.is_global:
+            return Response(
+                {"error": "No puede seleccionar una rúbrica global, intente con otra."}, status=status.HTTP_400_BAD_REQUEST
+            )
     except Rubric.DoesNotExist:
         return Response(
             {"error": "Rúbrica no encontrada."}, status=status.HTTP_404_NOT_FOUND
@@ -1981,6 +1999,7 @@ def group_detail(request, course_code, group_id):
         {
             "student_code": student.user.code,
             "student_name": f"{student.user.name} {student.user.last_name}",
+            "student_email": student.user.email, 
         }
         for student in group.students.all()
     ]
@@ -2187,6 +2206,7 @@ def course_list(request):
                 "code": course.code,
                 "name": course.name,
                 "teacher": course.teacher_name,
+                "course_status": course.course_status,
                 "academic_period": course.academic_period,
                 "student_count": course.student_count,
                 "students": list(students),

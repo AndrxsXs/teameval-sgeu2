@@ -67,8 +67,8 @@ export default function ManageCourse(props) {
           role: 2,
         },
       });
-      setTeachers(response.data);
-      // console.log('Docentes:', response.data);
+      setTeachers(response.data.filter((teacher) => teacher.status === true));
+      console.log('Docentes:', response.data);
     } catch (error) {
       console.error("Error obteniendo datos de docentes:", error);
     }
