@@ -110,6 +110,9 @@ export default function Evaluate({ evaluationData }) {
         setSelectedCriteria({}); // Resetear selectedCriteria
         setSelectedValues(rows.map(() => null)); // Resetear selectedValues
         setLoading(false);
+        if (compañeros.length < 1) {
+          navigate(-1);
+        }
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error, "danger");
@@ -170,7 +173,6 @@ export default function Evaluate({ evaluationData }) {
             </>
           )}
         </Stack>
-        <Button onClick={() => navigate(-1)}>Regresar</Button>
       </Stack>
       {!fetching ? (
         <>
@@ -210,7 +212,7 @@ export default function Evaluate({ evaluationData }) {
             borderRadius: "sm",
             boxShadow: "xs",
             overflow: "auto",
-            height: "100%",
+            height: "min-content",
           }}
         >
           <Table
@@ -388,7 +390,13 @@ export default function Evaluate({ evaluationData }) {
             </tbody>
           </Table>
         </Sheet>
-        <Stack justifyContent="end" width="100%" direction="row">
+        <Stack
+          justifyContent="end"
+          width="100%"
+          direction="row-reverse"
+          alignItems="baseline"
+          gap={2}
+        >
           <Button
             loading={loading}
             sx={{
@@ -397,6 +405,9 @@ export default function Evaluate({ evaluationData }) {
             type="submit"
           >
             Calificar
+          </Button>
+          <Button color="neutral" variant="outlined" onClick={() => navigate(-1)}>
+            Regresar
           </Button>
         </Stack>
       </form>
