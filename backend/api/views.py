@@ -1999,7 +1999,7 @@ def evaluate_student(request):
         evaluation = Evaluation.objects.get(id=data.get("id_evaluation"))
     except Evaluation.DoesNotExist:
         return Response(
-            {"message": "No se encontró una evaluación pendiente."},
+            {"error": "No se encontró una evaluación pendiente."},
             status=status.HTTP_404_NOT_FOUND,
         )
 
