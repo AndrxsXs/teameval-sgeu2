@@ -483,7 +483,7 @@ def available_evaluations(request):
     data = [EvaluationSerializerE(evaluation).data for evaluation in evaluations]
 
     return Response(
-        {"message": "Evaluaciones disponibles", "data": data}, status=status.HTTP_200_OK
+        {"data": data}, status=status.HTTP_200_OK
     )
 
 
