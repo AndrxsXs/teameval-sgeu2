@@ -25,7 +25,7 @@ function CourseActions(props) {
 
   return (
     <Stack className="course-details-button-group" direction="row" gap={2}>
-      {course.status == true ? (
+      {course.course_status == true ? (
         <DisableCourse course={course} />
       ) : (
         <EnableCourse course={course} />
@@ -66,9 +66,13 @@ export default function CourseDetailed() {
     fetchGroupInfo();
 
     window.addEventListener("course-updated", fetchGroupInfo);
+    window.addEventListener("course-enabled", fetchGroupInfo);
+    window.addEventListener("course-disabled", fetchGroupInfo);
 
     return () => {
       window.removeEventListener("course-updated", fetchGroupInfo);
+      window.removeEventListener("course-enabled", fetchGroupInfo);
+      window.removeEventListener("course-disabled", fetchGroupInfo);
     };
   }, [courseCode]);
 

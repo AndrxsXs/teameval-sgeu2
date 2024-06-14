@@ -42,7 +42,7 @@ import Grades from "./pages/student/Grades";
 
 import Result from "./pages/student/Result";
 import Feedback from "./pages/student/Feedback";
-import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
+// import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
 import ViewRubric from "./pages/student/evaluation/ViewRubric";
 import RubricResult from "./pages/student/RubricResult";
 import ViewFeedback from "./pages/student/ViewFeedback";
@@ -51,6 +51,7 @@ import CodePassword from "./components/CodePassword";
 import LoginPage from "./pages/auth/LoginPage";
 import CreatePasswordPage from "./pages/auth/CreatePasswordPage";
 import { CssBaseline } from "@mui/material";
+import Evaluate from "./pages/student/evaluation/Evaluate";
 // import ImportStudent from './components/teacher/ImportStudent';
 
 function Logout() {
@@ -72,6 +73,7 @@ function App() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [evaluationData, setEvaluationData] = useState([]);
 
   const handleResponseEvent = (event) => {
     // console.log('Evento recibido:', event);
@@ -133,8 +135,15 @@ function App() {
           }
           errorElement={<NotFound />}
         >
-          <Route index element={<Grades />} />
-          <Route path="evaluar/:curso" element={<ViewCursoStudent />} />
+          <Route
+            index
+            element={<Grades setEvaluationData={setEvaluationData} />}
+          />
+          {/* <Route path="evaluar/:curso" element={<ViewCursoStudent />} /> */}
+          <Route
+            path="evaluar/:curso"
+            element={<Evaluate evaluationData={evaluationData} />}
+          />
           <Route path="./rubrica" element={<ViewRubric />} />
 
           <Route path="resultados" element={<Result />} />

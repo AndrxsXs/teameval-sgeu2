@@ -35,7 +35,7 @@ export default function EnableCourse(props) {
       .then((response) => {
         eventDispatcher("responseEvent", response);
         setLoading(false);
-        window.dispatchEvent(new Event("course-disabled"));
+        window.dispatchEvent(new Event("course-enabled"));
         handleCloseModal(false);
       })
       .catch((error) => {

@@ -60,7 +60,7 @@ export default function DisableCourse(props) {
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
-        ModalTitle="Quitar estudiante del curso"
+        ModalTitle="Deshabilitar curso"
       >
         <Typography
           id="nested-modal-description"

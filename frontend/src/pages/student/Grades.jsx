@@ -16,7 +16,7 @@ import api from "../../api";
 import eventDispatcher from "../../utils/eventDispacher";
 import interpretEvaluationState from "../../utils/interpretEvaluationState";
 
-export function CourseCard({ info, isReviewing }) {
+export function CourseCard({ info, isReviewing, setEvaluationData }) {
   // console.log(info);
 
   const route = isReviewing ? "./evaluar" : "./resultados";
@@ -26,6 +26,9 @@ export function CourseCard({ info, isReviewing }) {
       style={{
         textDecoration: "none",
         color: "inherit",
+      }}
+      onClick={() => {
+        setEvaluationData(info);
       }}
     >
       <Card
@@ -40,9 +43,14 @@ export function CourseCard({ info, isReviewing }) {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 2,
-          transition: "box-shadow 0.3s",
+          transition: "box-shadow 0.3s, transform 0.1s",
           "&:hover": {
             boxShadow: "sm",
+            transform: "scale(0.99)",
+          },
+          "&:active": {
+            boxShadow: "none",
+            transform: "scale(0.98)",
           },
           overflow: "hidden",
         }}
@@ -91,11 +99,12 @@ export function CourseCard({ info, isReviewing }) {
   );
 }
 
-export default function Grades() {
+export default function Grades({ setEvaluationData }) {
   const [loading, setLoading] = useState(true);
   const userData = useOutletContext();
+  console.log(userData);
   const [evaluations, setEvaluations] = useState([]);
-
+  console.log(evaluations);
   useEffect(() => {
     const fetchData = async () => {
       await api
@@ -103,8 +112,7 @@ export default function Grades() {
           params: { student_code: userData.code },
         })
         .then((response) => {
-          setEvaluations(response.data);
-          // console.log(response.data);
+          setEvaluations(response.data.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -115,7 +123,7 @@ export default function Grades() {
     fetchData();
   }, [userData.code]);
 
-  console.log(evaluations)
+  // console.log(evaluations)
 
   return (
     <>
@@ -167,7 +175,14 @@ export default function Grades() {
         {!loading
           ? evaluations.map((evaluation) => {
               const id = crypto.randomUUID();
-              return <CourseCard key={id} info={evaluation} isReviewing />;
+              return (
+                <CourseCard
+                  key={id}
+                  info={evaluation}
+                  setEvaluationData={setEvaluationData}
+                  isReviewing
+                />
+              );
             })
           : Array.from(new Array(9)).map((_, index) => (
               <Skeleton

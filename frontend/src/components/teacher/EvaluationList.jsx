@@ -40,11 +40,11 @@ export default function EvaluationList() {
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           // gridTemplateRows: "repeat(3, 1fr)",
-          gridAutoRows: "150px",
+          gridAutoRows: "200px",
           width: "100%",
           height: "100%",
           gap: 2,
-          overflow: "hidden",
+          overflow: "auto",
         }}
       >
         {!loading
