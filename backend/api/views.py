@@ -2330,23 +2330,42 @@ def disable_course(request, course_code):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    # Verificar si el curso tiene evaluaciones en estado 'INITIATED'
-    evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+    # Verificar si el curso tiene evaluaciones en estado 'TO_START' o 'INITIATED'
+    evaluations = Evaluation.objects.filter(course=course).filter(estado__in=[Evaluation.TO_START, Evaluation.INITIATED])
     if evaluations.exists():
         return Response(
             {
-                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."
+                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones en estado 'Por iniciar' o 'Iniciado'."
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Si no tiene evaluaciones en estado 'INITIATED', deshabilitar el curso
+    # Si no tiene evaluaciones en estado 'TO_START' ni 'INITIATED', deshabilitar el curso
     course.course_status = False
     course.save()
 
     serializer = CourseSerializer(course)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"message": "Curso deshabilitado con éxito.", "course": serializer.data}, status=status.HTTP_200_OK)
 
+#Luisa
+#Habilitar curso
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def enable_course(request, course_code):
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "El curso no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Habilitar el curso
+    course.course_status = True
+    course.save()
+
+    serializer = CourseSerializer(course)
+    return Response({"message": "Curso habilitado con éxito.", "course": serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

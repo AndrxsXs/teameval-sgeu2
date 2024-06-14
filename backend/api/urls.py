@@ -89,6 +89,9 @@ urlpatterns = [
     #Mostrar rubrica global al administrador
     path('get_global_rubric/<int:rubric_id>/', views.get_global_rubric, name='get_global_rubric'), #Luisa
 
+    #Habilitar curso
+    path('enable_course/<str:course_code>/', views.enable_course, name='enable_course'),
+
     #path('teacher_course_groups/<int:course_id>/', views.teacher_course_groups, name='teacher_course_groups'),
     
     path('scale_rubric/', views.scale_rubric, name='scale_rubric'), #karol
