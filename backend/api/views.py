@@ -2006,7 +2006,7 @@ def evaluate_student(request):
     evaluation_completed.save()
 
     for standard in standards:
-        score = request.data.get(f"standard_{standard.id}")
+        score = request.data.get(standard.id)
         if score is not None:
             rating_data = {
                 "standard": standard.id,
