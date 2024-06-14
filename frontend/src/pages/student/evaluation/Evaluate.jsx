@@ -1,6 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import { useNavigate, redirect, useOutletContext } from "react-router-dom";
+import {
+  useNavigate,
+  redirect,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 
 import Stack from "@mui/joy/Stack";
 import Sheet from "@mui/joy/Sheet";
@@ -8,7 +13,7 @@ import Table from "@mui/joy/Table";
 import Button from "@mui/joy/Button";
 import Skeleton from "@mui/joy/Skeleton";
 import Typography from "@mui/joy/Typography";
-import Checkbox from "@mui/joy/Checkbox";
+import Radio from "@mui/joy/Radio";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import IconButton from "@mui/joy/IconButton";
@@ -20,15 +25,25 @@ import eventDispatcher from "../../../utils/eventDispacher";
 
 export default function Evaluate({ evaluationData }) {
   const userData = useOutletContext();
-  //   console.log(userData);
+  //   const curso = useParams().curso;
+
+  //   console.log(curso);
+
   const data = evaluationData;
   const scale = data.rubric.scale;
   const rows = data.rubric.standards;
   const [loading, setLoading] = useState(false);
   const [compañeros, setCompañeros] = useState([]);
-  const [selectedPartner, setSelectedPartner] = useState({});
+  const [selectedValues, setSelectedValues] = useState(rows.map(() => null));
+  const [selectedCriteria, setSelectedCriteria] = useState({});
+  //   console.log(selectedValues);
 
-  //   console.log(compañeros);
+  const [formData, setFormData] = useState({
+    id_evaluation: data.id,
+    evaluator: userData.code,
+  });
+
+  console.log(selectedCriteria);
 
   const navigate = useNavigate();
   //   console.log(data);
@@ -58,14 +73,39 @@ export default function Evaluate({ evaluationData }) {
         });
     };
     fetchPartners();
+
+    window.addEventListener("user-evaluated", fetchPartners());
+
+    return () => {
+      window.removeEventListener("user-evaluated", fetchPartners());
+    };
   }, [evaluationData, userData.code, data.course.code]);
 
-  const handleSubmit = async () => {
-    console.log("submitting evaluation");
+  const handleSubmit = async (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const data = { ...formData, ...selectedCriteria };
+    await api
+      .post(`api/evaluate_student/`, data)
+      .then((response) => {
+        window.dispatchEvent(new Event("user-evaluated"));
+        eventDispatcher("responseEvent", response);
+        setFormData({
+          id_evaluation: data.id,
+          evaluator: userData.code,
+        });
+        setSelectedCriteria({}); // Resetear selectedCriteria
+        setSelectedValues(rows.map(() => null)); // Resetear selectedValues
+        setLoading(false);
+      })
+      .catch((error) => {
+        eventDispatcher("responseEvent", error, "danger");
+      });
+    setLoading(false);
   };
 
   return (
-    <>
+    <Stack direction="column" gap={2}>
       <Stack
         component="header"
         sx={{
@@ -96,12 +136,13 @@ export default function Evaluate({ evaluationData }) {
         <Button onClick={() => navigate(-1)}>Regresar</Button>
       </Stack>
       <Select
+        required
         sx={{
           width: "30%",
         }}
         size="sm"
         placeholder="Seleccione un compañero"
-        onChange={(e, value) => setSelectedPartner(value)}
+        onChange={(e, value) => setFormData({ ...formData, evaluated: value })}
       >
         {compañeros.map((compa) => (
           <Option key={compa.code} value={compa.code}>
@@ -117,7 +158,7 @@ export default function Evaluate({ evaluationData }) {
             borderRadius: "sm",
             boxShadow: "xs",
             overflow: "auto",
-            height: "calc(100vh - 150px)",
+            height: "100%",
           }}
         >
           <Table
@@ -159,99 +200,122 @@ export default function Evaluate({ evaluationData }) {
               </tr>
             </thead>
             <tbody>
-              {!loading
-                ? rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      <td>
-                        <IconButton
-                          size="sm"
-                          //   sx={{
-                          //     "--IconButton-size": "24px",
-                          //   }}
-                        >
-                          <HelpOutlineRoundedIcon />
-                        </IconButton>
-                        {row.description}
-                      </td>
-                      {scale.map((_, colIndex) => (
-                        <td
-                          key={colIndex}
-                          style={{
-                            padding: "8px",
-                            margin: "8px",
-                          }}
-                        >
-                          <Checkbox size="lg" />
+              {
+                !loading
+                  ? rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <td>
+                          <IconButton size="sm">
+                            <HelpOutlineRoundedIcon />
+                          </IconButton>
+                          {row.description}
                         </td>
-                      ))}
-                    </tr>
-                  ))
-                : Array.from({ length: 7 }, (_, index) => (
-                    <tr key={index}>
-                      <td>
-                        <Stack
-                          sx={{
-                            width: "100%",
-                            height: "5em",
-                            padding: "16px",
-                          }}
-                          direction="column"
-                          gap={1}
-                          justifyContent="baseline"
-                        >
-                          <Skeleton
-                            animation="wave"
-                            loading
-                            level="body-sm"
-                            variant="text"
-                            width="100%"
-                            height="1em"
-                          />
-                          <Skeleton
-                            animation="wave"
-                            loading
-                            level="body-sm"
-                            variant="text"
-                            width="80%"
-                            height="1em"
-                          />
-                        </Stack>
-                      </td>
-                      <td>
-                        <Stack
-                          sx={{
-                            width: "100%",
-                            height: "5em",
-                            padding: "16px",
-                          }}
-                          direction="column"
-                          gap={1}
-                          justifyContent="baseline"
-                        >
-                          <Skeleton
-                            animation="wave"
-                            loading
-                            level="body-sm"
-                            variant="text"
-                            width="100%"
-                            height="1em"
-                          />
-                          <Skeleton
-                            animation="wave"
-                            loading
-                            level="body-sm"
-                            variant="text"
-                            width="80%"
-                            height="1em"
-                          />
-                        </Stack>
-                      </td>
-                    </tr>
-                  ))}
+                        {scale.map((_, colIndex) => (
+                          <td
+                            key={colIndex}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                            }}
+                          >
+                            <Radio
+                              name={`row-${rowIndex}`}
+                              value={colIndex + 1}
+                              checked={selectedValues[rowIndex] == colIndex + 1}
+                              onChange={(e) => {
+                                const newValues = [...selectedValues];
+                                newValues[rowIndex] = e.target.value;
+                                setSelectedValues(newValues);
+                                setSelectedCriteria({
+                                  ...selectedCriteria,
+                                  [rowIndex + 1]: e.target.value,
+                                });
+                              }}
+                              size="lg"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  : null
+                // Array.from({ length: 7 }, (_, index) => (
+                //     <tr key={index}>
+                //       <td>
+                //         <Stack
+                //           sx={{
+                //             width: "100%",
+                //             height: "5em",
+                //             padding: "16px",
+                //           }}
+                //           direction="column"
+                //           gap={1}
+                //           justifyContent="baseline"
+                //         >
+                //           <Skeleton
+                //             animation="wave"
+                //             loading
+                //             level="body-sm"
+                //             variant="text"
+                //             width="100%"
+                //             height="1em"
+                //           />
+                //           <Skeleton
+                //             animation="wave"
+                //             loading
+                //             level="body-sm"
+                //             variant="text"
+                //             width="80%"
+                //             height="1em"
+                //           />
+                //         </Stack>
+                //       </td>
+                //       <td>
+                //         <Stack
+                //           sx={{
+                //             width: "100%",
+                //             height: "5em",
+                //             padding: "16px",
+                //           }}
+                //           direction="column"
+                //           gap={1}
+                //           justifyContent="baseline"
+                //         >
+                //           <Skeleton
+                //             animation="wave"
+                //             loading
+                //             level="body-sm"
+                //             variant="text"
+                //             width="100%"
+                //             height="1em"
+                //           />
+                //           <Skeleton
+                //             animation="wave"
+                //             loading
+                //             level="body-sm"
+                //             variant="text"
+                //             width="80%"
+                //             height="1em"
+                //           />
+                //         </Stack>
+                //       </td>
+                //     </tr>
+                //   ))
+              }
             </tbody>
           </Table>
         </Sheet>
+        <Stack justifyContent="end" width="100%" direction="row">
+          <Button
+            loading={loading}
+            sx={{
+              marginTop: "16px",
+            }}
+            type="submit"
+          >
+            Calificar
+          </Button>
+        </Stack>
       </form>
-    </>
+    </Stack>
   );
 }
