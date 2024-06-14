@@ -141,11 +141,11 @@ function Row(props) {
         <td style={{ height: 0, padding: 0 }} colSpan={3}>
           {open && (
             <Sheet
-              variant="soft"
-              sx={{
-                p: 1,
-                pl: 6,
-                boxShadow: "inset 0 3px 6px 0 rgba(0 0 0 / 0.08)",
+            variant="soft"
+            sx={{
+              p: 6, // Aumentar el valor de p (padding) para agregar más espacio alrededor
+              pl: 7, // Conservar el padding-left original
+              boxShadow: "inset 0 3px 6px 0 rgba(0 0 0 / 0.08)",
               }}
             >
               {/* <Typography level="title-md">
