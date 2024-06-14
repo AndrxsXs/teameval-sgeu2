@@ -314,11 +314,18 @@ class InfoRubricSerializer(serializers.ModelSerializer):
 class EvaluationSerializerE(serializers.ModelSerializer):
     course = CourseSerializer()
     rubric = RubricDetailSerializer(read_only=True)
+    teacher = serializers.SerializerMethodField()  # Nuevo campo
 
     class Meta: 
         model = Evaluation
-        fields = ['id', 'name', 'estado', 'course', 'rubric']
- 
+        fields = ['id', 'name', 'estado', 'course', 'rubric', 'teacher']  # Agrega 'teacher' a los campos
+
+    def get_teacher(self, obj):
+        # Obtén el profesor asociado al curso de la evaluación
+        teacher = Teacher.objects.get(user=obj.course.user_teacher)
+        # Serializa y devuelve los datos del profesor
+        return TeacherSerializer(teacher).data
+
 # class NoteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Note
