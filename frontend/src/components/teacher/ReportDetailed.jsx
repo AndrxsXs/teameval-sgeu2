@@ -23,12 +23,12 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useParams } from "react-router";
 
 const headCells = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: false,
-    label: "Nombre",
-  },
+//   {
+//     id: "name",
+//     numeric: false,
+//     disablePadding: false,
+//     label: "Nombre",
+//   },
   {
     id: "project",
     numeric: false,
@@ -40,6 +40,7 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: "Número de estudiantes",
+    align: "center",
   },
   //   {
   //     id: "actions",
@@ -106,14 +107,14 @@ function Row(props) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </td>
-        <td
+        {/* <td
           onClick={() => setOpen(!open)}
           style={{
             cursor: "pointer",
           }}
         >
           <Typography level="body-xs">{row.name}</Typography>
-        </td>
+        </td> */}
         <td
           onClick={() => setOpen(!open)}
           style={{
@@ -126,16 +127,18 @@ function Row(props) {
           onClick={() => setOpen(!open)}
           style={{
             cursor: "pointer",
+            
           }}
         >
           <Typography level="body-xs">{row.student_count}</Typography>
+          
         </td>
         {/* <td>
           <RowMenu target={row} />
         </td> */}
       </tr>
       <tr>
-        <td style={{ height: 0, padding: 0 }} colSpan={5}>
+        <td style={{ height: 0, padding: 0 }} colSpan={3}>
           {open && (
             <Sheet
               variant="soft"
@@ -145,9 +148,9 @@ function Row(props) {
                 boxShadow: "inset 0 3px 6px 0 rgba(0 0 0 / 0.08)",
               }}
             >
-              <Typography level="title-md">
+              {/* <Typography level="title-md">
                 Informe del proyecto {row.name}
-              </Typography>
+              </Typography> */}
               
 
 
@@ -160,9 +163,9 @@ function Row(props) {
                             <th colSpan={4} style={{ textAlign: 'center' , width: '15%'}}>Calificador 1</th>
                             <th colSpan={4} style={{ textAlign: 'center' , width: '15%'}}>Calificador 2</th>
                             <th colSpan={4} style={{ textAlign: 'center' , width: '15%'}}>Calificador 3</th>
-                            <th colSpan={4} style={{ textAlign: 'center' , width: '15%' }}>Calificador 4</th>
+                            {/* <th colSpan={4} style={{ textAlign: 'center' , width: '15%' }}>Calificador 4</th>
                             <th colSpan={4} style={{ textAlign: 'center' , width: '15%'}}>Calificador 5</th>
-                            <th colSpan={4} style={{ textAlign: 'center' , width: '15%' }}>Calificador 6</th>
+                            <th colSpan={4} style={{ textAlign: 'center' , width: '15%' }}>Calificador 6</th> */}
                             <th rowSpan={2} style={{ textAlign: 'center', width: '5%' }}>Nota</th>
                         </tr>
                         <tr>
@@ -181,7 +184,7 @@ function Row(props) {
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C3</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C4</th>
 
-                            <th style={{ minWidth: '100px', textAlign: 'center' }}>C1</th>
+                            {/* <th style={{ minWidth: '100px', textAlign: 'center' }}>C1</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C2</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C3</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C4</th>
@@ -194,7 +197,7 @@ function Row(props) {
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C1</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C2</th>
                             <th style={{ minWidth: '100px', textAlign: 'center' }}>C3</th>
-                            <th style={{ minWidth: '100px', textAlign: 'center' }}>C4</th>
+                            <th style={{ minWidth: '100px', textAlign: 'center' }}>C4</th> */}
                             
                         </tr>
                     </thead>
@@ -214,7 +217,7 @@ function Row(props) {
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>3</td>
-                            <td style={{ textAlign: 'center' }}>3</td>
+                            {/* <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
@@ -226,7 +229,7 @@ function Row(props) {
                             <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
-                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td style={{ textAlign: 'center' }}>4</td> */}
                             <td style={{ textAlign: 'center' }}>5.0</td>
                         </tr>
                         <tr>
@@ -244,19 +247,19 @@ function Row(props) {
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>3</td>
-                            <td style={{ textAlign: 'center' }}>3</td>
+                            {/* <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
-                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td style={{ textAlign: 'center' }}>4</td> */}
                             
-                            <td style={{ textAlign: 'center' }}>3</td>
+                            {/* <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
-                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td style={{ textAlign: 'center' }}>4</td> */}
                             <td style={{ textAlign: 'center' }}>3.5</td>
                         </tr>
                         <tr>
@@ -274,11 +277,11 @@ function Row(props) {
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
+                            {/* <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>3</td>
-                            <td style={{ textAlign: 'center' }}>3</td>
-                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td style={{ textAlign: 'center' }}>4</td> */}
                             
-                            <td style={{ textAlign: 'center' }}>3</td>
+                            {/* <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>3</td>
@@ -286,7 +289,7 @@ function Row(props) {
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
                             <td style={{ textAlign: 'center' }}>4</td>
-                            <td style={{ textAlign: 'center' }}>4</td>
+                            <td style={{ textAlign: 'center' }}>4</td> */}
                             <td style={{ textAlign: 'center' }}>3.5</td>
                         </tr>
                     </tbody>
