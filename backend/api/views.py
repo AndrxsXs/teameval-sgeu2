@@ -1839,6 +1839,10 @@ def group_members(request):
 
     # Obtener los integrantes del grupo
     group_members = group.students.all()
+
+    # Filtrar los miembros del grupo que aún no han sido evaluados por el estudiante
+    group_members = [member for member in group_members if not EvaluationCompleted.objects.filter(evaluated=member, evaluator=student, evaluation__course=course, completed=True).exists()]
+
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
