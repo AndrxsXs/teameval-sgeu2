@@ -128,6 +128,7 @@ urlpatterns = [
     path('start_evaluation/', views.start_evaluation, name='start_evaluation'),
     #cambia el estado de por iniciado a finalizado (finaliza una evaluacion)
     path('finish_evaluation/', views.finish_evaluation, name='finish_evaluation'),
-
+    #muestra la rubrica que va a usar para evaluar
+    path('rubric_evaluate', views.rubric_evaluate, name='rubric_evaluate'),
     
 ]
