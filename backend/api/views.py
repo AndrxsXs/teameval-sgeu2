@@ -2509,10 +2509,17 @@ def disable_course(request, course_code):
 
     serializer = CourseSerializer(course)
     return Response(
+<<<<<<< Updated upstream
         {"message": "Curso deshabilitado con exito."},
         serializer.data,
         status=status.HTTP_200_OK,
     )
+=======
+        {"message": "Curso deshabilitado con exito.", "data": serializer.data},
+        status=status.HTTP_200_OK,
+    )
+    
+>>>>>>> Stashed changes
 
 #Luisa
 #Habilitar curso
