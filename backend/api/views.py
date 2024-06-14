@@ -2499,7 +2499,9 @@ def disable_course(request, course_code):
         )
 
     # Verificar si el curso tiene evaluaciones en estado 'TO_START' o 'INITIATED'
-    evaluations = Evaluation.objects.filter(course=course).filter(estado__in=[Evaluation.TO_START, Evaluation.INITIATED])
+    evaluations = Evaluation.objects.filter(course=course).filter(
+        estado__in=[Evaluation.TO_START, Evaluation.INITIATED]
+    )
     if evaluations.exists():
         return Response(
             {
@@ -2517,10 +2519,10 @@ def disable_course(request, course_code):
         {"message": "Curso deshabilitado con exito.", "data": serializer.data},
         status=status.HTTP_200_OK,
     )
-    
 
-#Luisa
-#Habilitar curso
+
+# Luisa
+# Habilitar curso
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def enable_course(request, course_code):
@@ -2537,7 +2539,11 @@ def enable_course(request, course_code):
     course.save()
 
     serializer = CourseSerializer(course)
-    return Response({"message": "Curso habilitado con éxito.", "course": serializer.data}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Curso habilitado con éxito.", "course": serializer.data},
+        status=status.HTTP_200_OK,
+    )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -2696,10 +2702,10 @@ def generar_codigo_alfanumerico(longitud):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def main_report(request):
-
+    course_code = request.query_params.get("course_code")
     data = request.data
     try:
-        evaluations = Evaluation.objects.filter(course__code=data.get("course_code"))
+        evaluations = Evaluation.objects.filter(course__code=course_code)
     except Evaluation.DoesNotExist:
         return Response(
             {"info": "Aún no existen evaluaciones en este curso"},

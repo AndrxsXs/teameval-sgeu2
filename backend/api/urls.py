@@ -34,7 +34,7 @@ urlpatterns = [
     path('group_members', views.group_members, name='group_members'), #Luisa
 
     #Muestra la informacion de una rubrica
-    path('info_rubrics/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
+    path('info_rubric/<int:rubric_id>/', views.info_rubric, name='info_rubric'), #Luisa
     
     #Muestra la informacion completa del administrador
     path('admin_info/<str:admin_code>/', views.admin_info, name='admin_info'), #Luisa
