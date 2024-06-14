@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import StudentTable from "../teacher/StudentTable";
 import ManageCourse from "../admin/ManageCourse";
+import DisableCourse from "./DisableCourse";
+import EnableCourse from "./EnableCourse";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
@@ -23,13 +25,11 @@ function CourseActions(props) {
 
   return (
     <Stack className="course-details-button-group" direction="row" gap={2}>
-      <Button
-        startDecorator={<ArchiveRoundedIcon />}
-        variant="plain"
-        color="danger"
-      >
-        Deshabilitar
-      </Button>
+      {course.status == true ? (
+        <DisableCourse course={course} />
+      ) : (
+        <EnableCourse course={course} />
+      )}
       <ManageCourse editMode course={course} />
 
       <Button
@@ -101,11 +101,11 @@ export default function CourseDetailed() {
                 </Typography>
                 <Typography level="body-sm">
                   {" "}
-                  <strong>Código:</strong>
-                  {courseCode}
+                  <strong>Código:</strong> {courseCode}
                 </Typography>
                 <Typography level="body-sm">
-                  <strong>Docente:</strong> {courseInfo.teacher.name} {courseInfo.teacher.last_name}
+                  <strong>Docente:</strong> {courseInfo.teacher.name}{" "}
+                  {courseInfo.teacher.last_name}
                 </Typography>
               </Stack>
               <CourseActions course={courseInfo} />

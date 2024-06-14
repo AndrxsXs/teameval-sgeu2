@@ -17,6 +17,7 @@ import Chip from "@mui/joy/Chip";
 
 import { stableSort } from "../utils/stableSort";
 import { getComparator } from "../utils/getComparator";
+import { userStatus } from "../utils/userStatus";
 
 import EnhancedTableHead from "./EnhacedTableHead";
 
@@ -51,6 +52,12 @@ const headCells = [
     disablePadding: false,
     label: "Estudiantes",
   },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Estado",
+  },
 ];
 // function RowMenu(props) {
 //   const { course } = props;
@@ -74,6 +81,8 @@ export default function CourseTable(props) {
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  console.log(courses);
 
   const navigate = useNavigate();
 
@@ -127,17 +136,16 @@ export default function CourseTable(props) {
   useEffect(() => {
     fetchCourses();
 
-    // Escuchar el evento 'courseCreated'
-    const handleCourseCreated = () => {
-      fetchCourses(); // Llamar a la función para obtener la lista actualizada de cursos
-    };
+    window.addEventListener("course-disabled", fetchCourses);
+    window.addEventListener("course-enabled", fetchCourses);
+    window.addEventListener("course-updated", fetchCourses);
+    window.addEventListener("course-created", fetchCourses);
 
-    window.addEventListener("course-created", handleCourseCreated);
-    window.addEventListener("course-updated", fetchCourses());
-    // Limpiar el evento al desmontar el componente
     return () => {
-      window.removeEventListener("course-created", handleCourseCreated);
-      window.removeEventListener("course-updated", fetchCourses());
+      window.removeEventListener("course-disabled", fetchCourses);
+      window.removeEventListener("course-enabled", fetchCourses);
+      window.removeEventListener("course-updated", fetchCourses);
+      window.removeEventListener("course-created", fetchCourses);
     };
   }, []);
 
@@ -195,38 +203,56 @@ export default function CourseTable(props) {
           />
           <tbody>
             {stableSort(filteredRows, getComparator(order, orderBy)).map(
-              (row, index) => (
-                <tr
-                  key={index}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <td onClick={() => navigate(`./${row.code}`)}>
-                    <Typography level="body-xs">{row.code}</Typography>
-                  </td>
-                  <td onClick={() => navigate(`./${row.code}`)}>
-                    <Typography level="body-xs">{row.name}</Typography>
-                  </td>
-                  <td onClick={() => navigate(`./${row.code}`)}>
-                    {/* <Typography level="body-xs">
+              (row, index) => {
+                return (
+                  <tr
+                    key={index}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      <Typography level="body-xs">{row.code}</Typography>
+                    </td>
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      <Typography level="body-xs">{row.name}</Typography>
+                    </td>
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      {/* <Typography level="body-xs">
                       {row.academic_period}
                     </Typography> */}
-                    <Chip size="sm" color="primary">
-                      {row.academic_period}
-                    </Chip>
-                  </td>
-                  <td onClick={() => navigate(`./${row.code}`)}>
-                    <Typography level="body-xs">{row.teacher}</Typography>
-                  </td>
-                  <td onClick={() => navigate(`./${row.code}`)}>
-                    <Typography level="body-xs">{row.student_count}</Typography>
-                  </td>
-                  {/* <td>
+                      <Chip size="sm" color="primary">
+                        {row.academic_period}
+                      </Chip>
+                    </td>
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      <Typography level="body-xs">{row.teacher}</Typography>
+                    </td>
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      <Typography level="body-xs">
+                        {row.student_count}
+                      </Typography>
+                    </td>
+                    <td onClick={() => navigate(`./${row.code}`)}>
+                      <Chip
+                        size="sm"
+                        color={
+                          row.course_status == true
+                            ? "success"
+                            : row.course_status == false
+                            ? "danger"
+                            : "primary"
+                        }
+                      >
+                        {userStatus(row.course_status)}
+                      </Chip>
+                    </td>
+                    {/* <td>
                     <RowMenu course={row} />
                   </td> */}
-                </tr>
-              )
+                  </tr>
+                );
+              }
             )}
           </tbody>
         </Table>
