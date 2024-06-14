@@ -2370,6 +2370,7 @@ def course_list(request):
                 "name": course.name,
                 "teacher": course.teacher_name,
                 "academic_period": course.academic_period,
+                "course_status": course.course_status,
                 "student_count": course.student_count,
                 "students": list(students),
             }
