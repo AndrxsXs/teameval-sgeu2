@@ -47,7 +47,7 @@ export default function EvaluationList() {
           overflow: "hidden",
         }}
       >
-        {loading
+        {!loading
           ? evaluations.map((evaluation) => {
               const id = crypto.randomUUID();
               return <CourseCard key={id} info={evaluation} isReviewing />;
@@ -63,7 +63,7 @@ export default function EvaluationList() {
                 sx={{ borderRadius: "sm" }}
               />
             ))}
-        {evaluations.length === 0 && loading && (
+        {evaluations.length === 0 && !loading && (
           <Box
             sx={{
               display: "flex",
