@@ -2345,7 +2345,7 @@ def disable_course(request, course_code):
     course.save()
 
     serializer = CourseSerializer(course)
-    return Response({"message": "Curso deshabilitado con éxito.", "course": serializer.data}, status=status.HTTP_200_OK)
+    return Response({"message": "Curso deshabilitado con exito."},serializer.data, status=status.HTTP_200_OK)
 
 #Luisa
 #Habilitar curso
