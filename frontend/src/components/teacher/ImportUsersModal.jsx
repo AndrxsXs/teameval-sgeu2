@@ -7,6 +7,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 // import UploadIcon from "@mui/icons-material/Upload";
 
 import api from "../../api";
+import eventDispatcher from "../../utils/eventDispacher";
 
 export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,45 +33,27 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
 
   const handleSubmitStudent = async () => {
     setLoading(true);
-    const token = localStorage.getItem("ACCESS_TOKEN");
 
     if (selectedFile) {
       const formData = new FormData();
       formData.append("csv_file", selectedFile);
 
-      try {
-        const response = await api.post(`/api/${route}/`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      await api
+        .post(`/api/${route}/`, formData, {
           params: {
             course_code: course_code,
           },
-        });
-        if (response.status === 201) {
+        })
+        .then((response) => {
+          window.dispatchEvent(new Event("user-created"));
           setIsModalOpen(false);
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: response.data.message,
-                severity: "success",
-              },
-            })
-          );
           setLoading(false);
-        }
-        // Handle the response here
-      } catch (error) {
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: error.response.data.message,
-              severity: "danger",
-            },
-          })
-        );
-        setLoading(false);
-      }
+          eventDispatcher("responseEvent", response);
+        })
+        .catch((error) => {
+          eventDispatcher("responseEvent", error, "danger");
+          setLoading(false);
+        });
     }
   };
 
