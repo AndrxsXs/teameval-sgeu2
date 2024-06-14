@@ -1,11 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import {
-  useNavigate,
-  redirect,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import Stack from "@mui/joy/Stack";
 import Sheet from "@mui/joy/Sheet";
@@ -16,70 +11,91 @@ import Typography from "@mui/joy/Typography";
 import Radio from "@mui/joy/Radio";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
-import IconButton from "@mui/joy/IconButton";
+// import IconButton from "@mui/joy/IconButton";
+import Tooltip from "@mui/joy/Tooltip";
 
-import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+// import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 
 import api from "../../../api";
 import eventDispatcher from "../../../utils/eventDispacher";
 
 export default function Evaluate({ evaluationData }) {
+  const evalData = evaluationData;
   const userData = useOutletContext();
-  //   const curso = useParams().curso;
+  const curso = useParams().curso;
+  const [data, setData] = useState();
+  const [scale, setScale] = useState();
+  const [rows, setRows] = useState();
 
   //   console.log(curso);
 
-  const data = evaluationData;
-  const scale = data.rubric.scale;
-  const rows = data.rubric.standards;
+  //   const data = evaluationData;
+  //   const scale = data.rubric.scale;
+  //   const rows = data.rubric.standards;
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [compañeros, setCompañeros] = useState([]);
-  const [selectedValues, setSelectedValues] = useState(rows.map(() => null));
+  //   const [selectedValues, setSelectedValues] = useState(rows.map(() => null));
+  const [selectedValues, setSelectedValues] = useState();
   const [selectedCriteria, setSelectedCriteria] = useState({});
   //   console.log(selectedValues);
 
-  const [formData, setFormData] = useState({
-    id_evaluation: data.id,
-    evaluator: userData.code,
-  });
+  const [formData, setFormData] = useState({});
 
-  console.log(selectedCriteria);
+  //   console.log(selectedCriteria);
 
   const navigate = useNavigate();
   //   console.log(data);
 
   useEffect(() => {
-    if (!evaluationData) {
-      console.log("No evaluation data");
-      redirect("/estudiante/");
-    }
+    const fetchEvaluationInfo = async () => {
+      await api
+        .get(`api/rubric_evaluate`, {
+          params: {
+            course_code: curso,
+          },
+        })
+        .then((response) => {
+          const data = response.data.data;
+          setData(data);
+          setScale(data.rubric.scale);
+          setRows(data.rubric.standards);
+          setSelectedValues(data.rubric.standards.map(() => null));
+          setFetching(false);
+          console.log(response.data.data);
+        })
+        .catch((error) => {
+          eventDispatcher("responseEvent", error);
+          setFetching(false);
+        });
+    };
 
     const fetchPartners = async () => {
-      setLoading(true);
       await api
         .get(`api/group_members`, {
           params: {
             student_code: userData.code,
-            course_code: data.course.code,
+            course_code: curso,
           },
         })
         .then((response) => {
           setCompañeros(response.data);
-          setLoading(false);
+          setFetching(false);
         })
         .catch((error) => {
           eventDispatcher("responseEvent", error);
-          setLoading(false);
+          setFetching(false);
         });
     };
+    fetchEvaluationInfo();
     fetchPartners();
 
-    window.addEventListener("user-evaluated", fetchPartners());
+    window.addEventListener("user-evaluated", fetchPartners);
 
     return () => {
-      window.removeEventListener("user-evaluated", fetchPartners());
+      window.removeEventListener("user-evaluated", fetchPartners);
     };
-  }, [evaluationData, userData.code, data.course.code]);
+  }, [curso, userData.code]);
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -90,10 +106,7 @@ export default function Evaluate({ evaluationData }) {
       .then((response) => {
         window.dispatchEvent(new Event("user-evaluated"));
         eventDispatcher("responseEvent", response);
-        setFormData({
-          id_evaluation: data.id,
-          evaluator: userData.code,
-        });
+        setFormData({});
         setSelectedCriteria({}); // Resetear selectedCriteria
         setSelectedValues(rows.map(() => null)); // Resetear selectedValues
         setLoading(false);
@@ -126,30 +139,69 @@ export default function Evaluate({ evaluationData }) {
             maxWidth: "60%",
           }}
         >
-          <Typography level="h2" component="h1">
-            {data.name}
-          </Typography>
-          <Typography level="body-md">
-            {data.course.name} - {data.course.code}
-          </Typography>
+          {!fetching ? (
+            <>
+              <Typography level="h2" component="h1">
+                {data.name}
+              </Typography>
+
+              <Typography level="body-md">
+                {data.course.name} - {data.course.code}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Skeleton
+                variant="text"
+                level="h1"
+                animation="wave"
+                loading
+                width={400}
+                height={40}
+              />
+              <Skeleton
+                variant="text"
+                level="body-md"
+                animation="wave"
+                loading
+                width={300}
+                height="1.5em"
+              />
+            </>
+          )}
         </Stack>
         <Button onClick={() => navigate(-1)}>Regresar</Button>
       </Stack>
-      <Select
-        required
-        sx={{
-          width: "30%",
-        }}
-        size="sm"
-        placeholder="Seleccione un compañero"
-        onChange={(e, value) => setFormData({ ...formData, evaluated: value })}
-      >
-        {compañeros.map((compa) => (
-          <Option key={compa.code} value={compa.code}>
-            {compa.name} {compa.last_name}
-          </Option>
-        ))}
-      </Select>
+      {!fetching ? (
+        <>
+          <Select
+            required
+            sx={{
+              width: "30%",
+            }}
+            size="sm"
+            placeholder="Seleccione un compañero"
+            onChange={(e, value) =>
+              setFormData({ ...formData, evaluated: value })
+            }
+          >
+            {compañeros.map((compa) => (
+              <Option key={compa.code} value={compa.code}>
+                {compa.name} {compa.last_name}
+              </Option>
+            ))}
+          </Select>
+        </>
+      ) : (
+        <Skeleton
+          animation="wave"
+          loading
+          level="h2"
+          variant="text"
+          width="30%"
+          //   height="1em"
+        />
+      )}
       <form onSubmit={handleSubmit}>
         <Sheet
           className="TableContainer"
@@ -177,37 +229,70 @@ export default function Evaluate({ evaluationData }) {
               "& thead th": {
                 paddingY: "12px",
                 paddingX: "16px",
+                textAlign: "center",
               },
-              "& thead th:nth-of-type(1)": { width: "80%" },
+              "& thead th:nth-of-type(1)": { width: "70%" },
 
               "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
             }}
           >
             <thead>
-              <tr>
-                <th rowSpan={2}>Criterio</th>
-                <th
-                  colSpan={data.rubric.scale.length}
-                  style={{ textAlign: "center" }}
-                >
-                  Calificación
-                </th>
-              </tr>
-              <tr>
-                {scale.map((_, index) => (
-                  <th key={index}>{index + 1}</th>
-                ))}
-              </tr>
+              {!fetching ? (
+                <>
+                  <tr>
+                    <th rowSpan={2}>Criterio</th>
+                    <th colSpan={scale.length} style={{ textAlign: "center" }}>
+                      Calificación
+                    </th>
+                  </tr>
+                  <tr>
+                    {scale.map((_, index) => (
+                      <th key={index}>{index + 1}</th>
+                    ))}
+                  </tr>
+                </>
+              ) : (
+                <>
+                  <tr>
+                    <th>
+                      <Skeleton
+                        animation="wave"
+                        loading
+                        level="body-sm"
+                        variant="text"
+                        width="100%"
+                        height="1em"
+                      />
+                    </th>
+                    <th>
+                      <Skeleton
+                        animation="wave"
+                        loading
+                        level="body-sm"
+                        variant="text"
+                        width="100%"
+                        height="1em"
+                      />
+                    </th>
+                  </tr>
+                </>
+              )}
             </thead>
             <tbody>
-              {
-                !loading
-                  ? rows.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
+              {!fetching
+                ? rows.map((row, rowIndex) => (
+                    <Tooltip
+                      title={row.scale_description}
+                      key={rowIndex}
+                      placement="top-start"
+                      size="lg"
+                      variant="outlined"
+                    >
+                      <tr>
                         <td>
-                          <IconButton size="sm">
+                          {/* <IconButton size="sm">
                             <HelpOutlineRoundedIcon />
-                          </IconButton>
+                          </IconButton> */}
                           {row.description}
                         </td>
                         {scale.map((_, colIndex) => (
@@ -236,71 +321,70 @@ export default function Evaluate({ evaluationData }) {
                           </td>
                         ))}
                       </tr>
-                    ))
-                  : null
-                // Array.from({ length: 7 }, (_, index) => (
-                //     <tr key={index}>
-                //       <td>
-                //         <Stack
-                //           sx={{
-                //             width: "100%",
-                //             height: "5em",
-                //             padding: "16px",
-                //           }}
-                //           direction="column"
-                //           gap={1}
-                //           justifyContent="baseline"
-                //         >
-                //           <Skeleton
-                //             animation="wave"
-                //             loading
-                //             level="body-sm"
-                //             variant="text"
-                //             width="100%"
-                //             height="1em"
-                //           />
-                //           <Skeleton
-                //             animation="wave"
-                //             loading
-                //             level="body-sm"
-                //             variant="text"
-                //             width="80%"
-                //             height="1em"
-                //           />
-                //         </Stack>
-                //       </td>
-                //       <td>
-                //         <Stack
-                //           sx={{
-                //             width: "100%",
-                //             height: "5em",
-                //             padding: "16px",
-                //           }}
-                //           direction="column"
-                //           gap={1}
-                //           justifyContent="baseline"
-                //         >
-                //           <Skeleton
-                //             animation="wave"
-                //             loading
-                //             level="body-sm"
-                //             variant="text"
-                //             width="100%"
-                //             height="1em"
-                //           />
-                //           <Skeleton
-                //             animation="wave"
-                //             loading
-                //             level="body-sm"
-                //             variant="text"
-                //             width="80%"
-                //             height="1em"
-                //           />
-                //         </Stack>
-                //       </td>
-                //     </tr>
-                //   ))
-              }
+                    </Tooltip>
+                  ))
+                : Array.from({ length: 4 }, (_, index) => (
+                    <tr key={index}>
+                      <td>
+                        <Stack
+                          sx={{
+                            width: "100%",
+                            height: "5em",
+                            padding: "16px",
+                          }}
+                          direction="column"
+                          gap={1}
+                          justifyContent="baseline"
+                        >
+                          <Skeleton
+                            animation="wave"
+                            loading
+                            level="body-sm"
+                            variant="text"
+                            width="100%"
+                            height="1em"
+                          />
+                          <Skeleton
+                            animation="wave"
+                            loading
+                            level="body-sm"
+                            variant="text"
+                            width="80%"
+                            height="1em"
+                          />
+                        </Stack>
+                      </td>
+                      <td>
+                        <Stack
+                          sx={{
+                            width: "100%",
+                            height: "5em",
+                            padding: "16px",
+                          }}
+                          direction="column"
+                          gap={1}
+                          justifyContent="baseline"
+                        >
+                          <Skeleton
+                            animation="wave"
+                            loading
+                            level="body-sm"
+                            variant="text"
+                            width="100%"
+                            height="1em"
+                          />
+                          <Skeleton
+                            animation="wave"
+                            loading
+                            level="body-sm"
+                            variant="text"
+                            width="80%"
+                            height="1em"
+                          />
+                        </Stack>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </Table>
         </Sheet>
