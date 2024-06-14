@@ -129,18 +129,16 @@ export default function StudentTable(props) {
 
     fetchData();
 
-    const handleUserCreated = () => {
-      fetchData();
-    };
-
-    window.addEventListener("user-created", handleUserCreated);
     window.addEventListener("user-disabled", fetchData);
+    window.addEventListener("user-enabled", fetchData);
     window.addEventListener("user-updated", fetchData);
+    window.addEventListener("user-created", fetchData);
 
     return () => {
-      window.removeEventListener("user-created", handleUserCreated);
       window.removeEventListener("user-disabled", fetchData);
+      window.removeEventListener("user-enabled", fetchData);
       window.removeEventListener("user-updated", fetchData);
+      window.removeEventListener("user-created", fetchData);
     };
   }, [course]);
 

@@ -73,11 +73,34 @@ function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
                 {rubric.standards.length === 1 ? "criterio:" : "criterios:"}
               </Typography>
               <Typography>
-                {rubric.standards.map((standard, index) => (
-                  <Typography key={index} level="body-xs" color="textSecondary">
-                    {standard.description}
-                  </Typography>
-                ))}
+                <Stack
+                  direction="column"
+                  sx={{
+                    maxHeight: "3.6em", // Altura máxima deseada para el contenido de texto
+                    overflow: "hidden",
+                    position: "relative",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: "3.2em", // Altura del efecto de desvanecimiento
+                      backgroundImage:
+                        "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))",
+                    },
+                  }}
+                >
+                  {rubric.standards.map((standard, index) => (
+                    <Typography
+                      key={index}
+                      level="body-xs"
+                      color="textSecondary"
+                    >
+                      {standard.description}
+                    </Typography>
+                  ))}
+                </Stack>
               </Typography>
             </CardContent>
           </Card>

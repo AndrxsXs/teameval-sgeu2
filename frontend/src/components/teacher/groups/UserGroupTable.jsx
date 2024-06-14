@@ -102,6 +102,19 @@ export default function UserGroupTable(props) {
     };
 
     fetchData();
+
+    window.addEventListener("user-disabled", fetchData);
+    window.addEventListener("user-enabled", fetchData);
+    window.addEventListener("user-updated", fetchData);
+    window.addEventListener("user-created", fetchData);
+
+    return () => {
+      window.removeEventListener("user-disabled", fetchData);
+      window.removeEventListener("user-enabled", fetchData);
+      window.removeEventListener("user-updated", fetchData);
+      window.removeEventListener("user-created", fetchData);
+    };
+
   };
 
   useEffect(() => {

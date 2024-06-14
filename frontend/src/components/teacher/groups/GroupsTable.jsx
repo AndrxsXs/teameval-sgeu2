@@ -84,6 +84,18 @@ function Row(props) {
 
     if (open) {
       fetchStudents();
+
+      window.addEventListener("group-disabled", fetchStudents);
+      window.addEventListener("group-enabled", fetchStudents);
+      window.addEventListener("group-updated", fetchStudents);
+      window.addEventListener("group-created", fetchStudents);
+
+      return () => {
+        window.removeEventListener("group-disabled", fetchStudents);
+        window.removeEventListener("group-enabled", fetchStudents);
+        window.removeEventListener("group-updated", fetchStudents);
+        window.removeEventListener("group-created", fetchStudents);
+      };
     }
   }, [open, courseId, row.id]);
 
@@ -163,6 +175,7 @@ function Row(props) {
                   <tr>
                     <th>Código</th>
                     <th>Nombre</th>
+                    <th>Correo electrónico</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -170,6 +183,7 @@ function Row(props) {
                     <tr key={row.student_code}>
                       <th scope="row">{row.student_code}</th>
                       <td>{row.student_name}</td>
+                      <td>{row.student_email}</td>
                     </tr>
                   ))}
                 </tbody>

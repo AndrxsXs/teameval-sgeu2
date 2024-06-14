@@ -101,6 +101,7 @@ def student_courses(request):
             {"status": "No hay cursos inscritos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
+
 def validate_email_format(email):
     """
     Valida que el email siga el formato correcto.
@@ -111,6 +112,7 @@ def validate_email_format(email):
     except ValidationError:
         return False
 
+
 def validate_name(name):
     """
     Valida que el nombre solo contenga letras y espacios.
@@ -119,22 +121,30 @@ def validate_name(name):
 
 
 def validate_name(value):
-    if not re.match(r'^[a-zA-Z\s]+$', value):
-        raise serializers.ValidationError("El campo solo debe contener letras y espacios")
+    if not re.match(r"^[a-zA-Z\s]+$", value):
+        raise serializers.ValidationError(
+            "El campo solo debe contener letras y espacios"
+        )
+
 
 def validate_code(value):
     if not value.isdigit():
         raise serializers.ValidationError("El código debe ser solo números")
 
+
 def validate_email(value):
     try:
         serializers.EmailField().run_validation(value)
     except serializers.ValidationError:
-        raise serializers.ValidationError("El email debe seguir el formato correcto (@example.com)")
-    
+        raise serializers.ValidationError(
+            "El email debe seguir el formato correcto (@example.com)"
+        )
+
+
 def validate_phone(value):
     if value is not None and not value.isdigit():
         raise serializers.ValidationError("El teléfono debe ser solo números")
+
 
 # Luisa
 # Editar profesor y administrador
@@ -214,6 +224,7 @@ def update_user(request):
         return Response(
             {"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND
         )
+
 
 # Luisa
 # Informacion profesor
@@ -419,7 +430,7 @@ def info_rubric(request, rubric_id):
 
 
 # Luisa
-#Obtener rubricas profesor
+# Obtener rubricas profesor
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_teacher_rubrics(request):
@@ -448,9 +459,12 @@ def get_teacher_rubrics(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_evaluations(request):
-    student_code = request.query_params.get('student_code')
+    student_code = request.query_params.get("student_code")
     if not student_code:
-        return Response({'error': 'No se proporcionó el código del estudiante.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se proporcionó el código del estudiante."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         # Obtener el estudiante por código
@@ -462,8 +476,7 @@ def available_evaluations(request):
 
     # Filtrar las evaluaciones que están en estado "iniciado" para el estudiante
     evaluations = Evaluation.objects.filter(
-        course__user_students=student,
-        estado=Evaluation.INITIATED
+        course__user_students=student, estado=Evaluation.INITIATED
     )
 
     # Preparar los datos para la respuesta
@@ -478,12 +491,16 @@ def available_evaluations(request):
         # Serializar el profesor
         teacher_serializer = TeacherSerializer(teacher)
 
-        data.append({
-            'evaluation': evaluation_serializer.data,
-            'teacher': teacher_serializer.data
-        })
+        data.append(
+            {
+                "evaluation": evaluation_serializer.data,
+                "teacher": teacher_serializer.data,
+            }
+        )
 
-    return Response({"message": "Evaluaciones disponibles", "data": data}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Evaluaciones disponibles", "data": data}, status=status.HTTP_200_OK
+    )
 
 
 # Luisa
@@ -491,10 +508,13 @@ def available_evaluations(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def completed_evaluations(request):
-    student_code = request.query_params.get('student_code')
-    course_code = request.query_params.get('course_code')
+    student_code = request.query_params.get("student_code")
+    course_code = request.query_params.get("course_code")
     if not student_code or not course_code:
-        return Response({'error': 'No se proporcionó el código del estudiante o del curso.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se proporcionó el código del estudiante o del curso."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         # Obtener el estudiante y el curso por código
@@ -502,14 +522,13 @@ def completed_evaluations(request):
         course = Course.objects.get(code=course_code)
     except (Student.DoesNotExist, Course.DoesNotExist):
         return Response(
-            {"error": "Estudiante o curso no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            {"error": "Estudiante o curso no encontrado."},
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     # Filtrar las evaluaciones que están en estado "finalizado" para el estudiante en el curso
     evaluations = Evaluation.objects.filter(
-        course=course,
-        course__user_students=student,
-        estado=Evaluation.FINISHED
+        course=course, course__user_students=student, estado=Evaluation.FINISHED
     )
 
     # Preparar los datos para la respuesta
@@ -524,12 +543,16 @@ def completed_evaluations(request):
         # Serializar el profesor
         teacher_serializer = TeacherSerializer(teacher)
 
-        data.append({
-            'evaluation': evaluation_serializer.data,
-            'teacher': teacher_serializer.data
-        })
+        data.append(
+            {
+                "evaluation": evaluation_serializer.data,
+                "teacher": teacher_serializer.data,
+            }
+        )
 
-    return Response({"message": "Evaluaciones finalizadas", "data": data}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Evaluaciones finalizadas", "data": data}, status=status.HTTP_200_OK
+    )
 
 
 @api_view(["POST"])
@@ -583,11 +606,17 @@ def import_student(request):
         # if not student_data["last_name"].isalpha():
         #     return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
         if not student_data["code"].isdigit() or int(student_data["code"]) <= 0:
-            return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El código debe ser solo números mayores a cero"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             serializers.EmailField().run_validation(student_data["email"])
         except serializers.ValidationError:
-            return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El email debe seguir el formato correcto (@email.co)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             student = Student.objects.get(user__code=student_data["code"])
@@ -658,17 +687,34 @@ def import_teacher(request):
 
         # Validaciones
         if not teacher_data["name"].isalpha():
-            return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El nombre debe ser solo letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not teacher_data["last_name"].isalpha():
-            return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El apellido debe ser solo letras"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not teacher_data["code"].isdigit() or int(teacher_data["code"]) <= 0:
-            return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El código debe ser solo números mayores a cero"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             serializers.EmailField().run_validation(teacher_data["email"])
         except serializers.ValidationError:
-            return Response({"error": "El email debe seguir el formato correcto (@xxxxx.co)"}, status=status.HTTP_400_BAD_REQUEST)
-        if teacher_data["phone"] and (not teacher_data["phone"].isdigit() or int(teacher_data["phone"]) <= 0):
-            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El email debe seguir el formato correcto (@xxxxx.co)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if teacher_data["phone"] and (
+            not teacher_data["phone"].isdigit() or int(teacher_data["phone"]) <= 0
+        ):
+            return Response(
+                {"error": "El teléfono debe ser solo números mayores a cero"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             user = User.objects.get(code=teacher_data["code"])
@@ -871,27 +917,27 @@ def register_student_params(request):
         {"message": "Estudiante agregado exitosamente"}, status=status.HTTP_201_CREATED
     )
 
-#Luisa
-#Edita estudainte
+
+# Luisa
+# Edita estudainte
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_student(request):
-    student_code = request.query_params.get('student_code')
+    student_code = request.query_params.get("student_code")
 
     if not student_code:
         return Response(
             {"error": "El parámetro 'student_code' es requerido en la URL."},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     try:
         user = User.objects.get(code=student_code)
     except User.DoesNotExist:
         return Response(
-            {"error": "Estudiante no encontrado"},
-            status=status.HTTP_404_NOT_FOUND
+            {"error": "Estudiante no encontrado"}, status=status.HTTP_404_NOT_FOUND
         )
-    
+
     data = request.data
     user_data = {
         "name": data.get("name", user.name),
@@ -912,13 +958,16 @@ def update_student(request):
     if serializer_user.is_valid():
         serializer_user.save()
         return Response(
-            {"message": "Estudiante actualizado exitosamente", "data": serializer_user.data},
-            status=status.HTTP_200_OK
+            {
+                "message": "Estudiante actualizado exitosamente",
+                "data": serializer_user.data,
+            },
+            status=status.HTTP_200_OK,
         )
     return Response(
-        {"error": serializer_user.errors},
-        status=status.HTTP_400_BAD_REQUEST
+        {"error": serializer_user.errors}, status=status.HTTP_400_BAD_REQUEST
     )
+
 
 # crea la escala de la rubrica
 @api_view(["POST"])
@@ -960,13 +1009,14 @@ def create_rubric1(request, course_id):
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#Luisa
-#Editar rubrica global
+
+# Luisa
+# Editar rubrica global
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_global_rubric(request):
     try:
-        rubric_id = request.query_params.get('rubric_id')
+        rubric_id = request.query_params.get("rubric_id")
         rubric = Rubric.objects.get(pk=rubric_id, is_global=True)
     except Rubric.DoesNotExist:
         return Response(
@@ -976,40 +1026,49 @@ def update_global_rubric(request):
     rubric_data = request.data
 
     # Actualizar el nombre de la rúbrica si se proporciona
-    if 'name' in rubric_data:
-        rubric.name = rubric_data['name']
+    if "name" in rubric_data:
+        rubric.name = rubric_data["name"]
 
     # Actualizar la escala de la rúbrica si se proporciona
-    if 'scale' in rubric_data:
-        scale_data = rubric_data['scale']
+    if "scale" in rubric_data:
+        scale_data = rubric_data["scale"]
         scale_serializer = ScaleSerialiazer(rubric.scale, data=scale_data)
         if scale_serializer.is_valid():
             scale_serializer.save()
         else:
             return Response(
-                {"error": "Error al actualizar la escala.", "details": scale_serializer.errors}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "error": "Error al actualizar la escala.",
+                    "details": scale_serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     # Actualizar los estándares de la rúbrica
-    if 'standards' in rubric_data:
-        standards_data = rubric_data['standards']
+    if "standards" in rubric_data:
+        standards_data = rubric_data["standards"]
         existing_standard_ids = [standard.id for standard in rubric.standards.all()]
         updated_standards = []
 
         for standard_data in standards_data:
-            if 'id' in standard_data:
+            if "id" in standard_data:
                 # Si el estándar ya existe, actualizarlo
                 try:
-                    standard = Standard.objects.get(pk=standard_data['id'])
-                    standard.description = standard_data.get('description', standard.description)
-                    standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                    standard = Standard.objects.get(pk=standard_data["id"])
+                    standard.description = standard_data.get(
+                        "description", standard.description
+                    )
+                    standard.scale_description = standard_data.get(
+                        "scale_description", standard.scale_description
+                    )
                     standard.save()
                     updated_standards.append(standard)
                 except Standard.DoesNotExist:
                     return Response(
-                        {"error": f'No se encontró el estándar con id {standard_data["id"]}.'}, 
-                        status=status.HTTP_404_NOT_FOUND
+                        {
+                            "error": f'No se encontró el estándar con id {standard_data["id"]}.'
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
                     )
             else:
                 # Si no tiene ID, es un nuevo estándar que se va a crear
@@ -1019,8 +1078,11 @@ def update_global_rubric(request):
                     updated_standards.append(standard)
                 else:
                     return Response(
-                        {"error": "Error al crear un nuevo estándar.", "details": standard_serializer.errors}, 
-                        status=status.HTTP_400_BAD_REQUEST
+                        {
+                            "error": "Error al crear un nuevo estándar.",
+                            "details": standard_serializer.errors,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
 
         # Eliminar estándares que ya no están en la nueva lista
@@ -1037,12 +1099,16 @@ def update_global_rubric(request):
     # Serializar y devolver la rúbrica actualizada
     rubric_serializer = GlobalRubricSerializer(rubric)
     return Response(
-        {"message": "Rúbrica global actualizada con éxito.", "rubric": rubric_serializer.data}, 
-        status=status.HTTP_200_OK
+        {
+            "message": "Rúbrica global actualizada con éxito.",
+            "rubric": rubric_serializer.data,
+        },
+        status=status.HTTP_200_OK,
     )
 
-#Luisa
-#Mostrar rubrica global al administrador
+
+# Luisa
+# Mostrar rubrica global al administrador
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_global_rubric(request, rubric_id):
@@ -1051,14 +1117,15 @@ def get_global_rubric(request, rubric_id):
     except Rubric.DoesNotExist:
         return Response(
             {"error": "La rúbrica global solicitada no existe."},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     rubric_serializer = GlobalRubricSerializer(rubric)
     return Response(rubric_serializer.data, status=status.HTTP_200_OK)
 
-#Luisa
-#Crear rubrica global
+
+# Luisa
+# Crear rubrica global
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_global_rubric(request):
@@ -1071,7 +1138,7 @@ def create_global_rubric(request):
     else:
         return Response(
             {"error": "Error al crear la escala.", "details": scale_serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     # Crear los estándares (criterios) asociados a la escala
@@ -1085,8 +1152,11 @@ def create_global_rubric(request):
             standards.append(standard)
         else:
             return Response(
-                {"error": "Error al crear un estándar.", "details": standard_serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "error": "Error al crear un estándar.",
+                    "details": standard_serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     # Crear la rúbrica global sin asociar cursos aún
@@ -1094,7 +1164,7 @@ def create_global_rubric(request):
         "name": rubric_data.get("name"),
         "scale": scale.id,
         "standards": [standard.id for standard in standards],  # Asociar los estándares
-        "is_global": True  # Establecer is_global en True
+        "is_global": True,  # Establecer is_global en True
     }
     rubric_serializer = GlobalRubricSerializer(data=rubric_creation_data)
     if rubric_serializer.is_valid():
@@ -1106,13 +1176,19 @@ def create_global_rubric(request):
             course.rubrics.add(rubric)
 
         return Response(
-            {"message": "Rúbrica global creada y asignada a todos los cursos con éxito.", "rubric": rubric_serializer.data},
+            {
+                "message": "Rúbrica global creada y asignada a todos los cursos con éxito.",
+                "rubric": rubric_serializer.data,
+            },
             status=status.HTTP_201_CREATED,
         )
     else:
         return Response(
-            {"error": "Error al crear la rúbrica global.", "details": rubric_serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            {
+                "error": "Error al crear la rúbrica global.",
+                "details": rubric_serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -1177,7 +1253,7 @@ def create_rubric(request):
 @permission_classes([IsAuthenticated])
 def update_rubric(request):
     try:
-        rubric_id = request.query_params.get('rubric_id')
+        rubric_id = request.query_params.get("rubric_id")
         rubric = Rubric.objects.get(pk=rubric_id)
     except Rubric.DoesNotExist:
         return Response(
@@ -1187,28 +1263,29 @@ def update_rubric(request):
     # Verificar si la rúbrica ha sido usada en alguna evaluación
     if Evaluation.objects.filter(rubric=rubric).exists():
         return Response(
-            {"error": "No se puede modificar la rúbrica porque ya ha sido utilizada en una evaluación."},
-            status=status.HTTP_400_BAD_REQUEST
+            {
+                "error": "No se puede modificar la rúbrica porque ya ha sido utilizada en una evaluación."
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     rubric_data = request.data
 
     # Verificar si la rúbrica es global
     if rubric.is_global:
         # Crear una nueva rúbrica basada en la original pero con los cambios aplicados
         new_rubric = Rubric.objects.create(
-            name=rubric_data.get('name', rubric.name),
-            scale=rubric.scale
+            name=rubric_data.get("name", rubric.name), scale=rubric.scale
         )
         new_rubric.is_global = False  # La nueva rúbrica no es global
 
         # Clonar y actualizar los estándares
-        standards_data = rubric_data.get('standards', [])
+        standards_data = rubric_data.get("standards", [])
         for standard in rubric.standards.all():
             new_standard = Standard.objects.create(
                 description=standard.description,
                 rubric=new_rubric,
-                scale_description=standard.scale_description
+                scale_description=standard.scale_description,
             )
 
         for standard_data in standards_data:
@@ -1216,7 +1293,9 @@ def update_rubric(request):
             if standard_serializer.is_valid():
                 new_standard = standard_serializer.save(rubric=new_rubric)
             else:
-                return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
 
         new_rubric.save()
         # Asociar la nueva rúbrica a los cursos que tenía la original
@@ -1227,39 +1306,53 @@ def update_rubric(request):
         return Response(rubric_serializer.data, status=status.HTTP_201_CREATED)
     else:
         # Si la rúbrica no es global, actualizar la rúbrica existente
-        if 'name' in rubric_data:
-            rubric.name = rubric_data['name']
+        if "name" in rubric_data:
+            rubric.name = rubric_data["name"]
 
-        if 'scale' in rubric_data:
-            scale_data = rubric_data['scale']
+        if "scale" in rubric_data:
+            scale_data = rubric_data["scale"]
             scale_serializer = ScaleSerialiazer(data=scale_data)
             if scale_serializer.is_valid():
                 scale = scale_serializer.save()
                 rubric.scale = scale
             else:
-                return Response(scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    scale_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
 
-        if 'standards' in rubric_data:
-            standards_data = rubric_data['standards']
+        if "standards" in rubric_data:
+            standards_data = rubric_data["standards"]
             updated_standards = []
 
             for standard_data in standards_data:
-                if 'id' in standard_data:
+                if "id" in standard_data:
                     try:
-                        standard = Standard.objects.get(pk=standard_data['id'])
-                        standard.description = standard_data.get('description', standard.description)
-                        standard.scale_description = standard_data.get('scale_description', standard.scale_description)
+                        standard = Standard.objects.get(pk=standard_data["id"])
+                        standard.description = standard_data.get(
+                            "description", standard.description
+                        )
+                        standard.scale_description = standard_data.get(
+                            "scale_description", standard.scale_description
+                        )
                         standard.save()
                         updated_standards.append(standard)
                     except Standard.DoesNotExist:
-                        return Response({'error': f'No se encontró el estándar con id {standard_data["id"]}.'}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {
+                                "error": f'No se encontró el estándar con id {standard_data["id"]}.'
+                            },
+                            status=status.HTTP_404_NOT_FOUND,
+                        )
                 else:
                     standard_serializer = StandardSerializer(data=standard_data)
                     if standard_serializer.is_valid():
                         standard = standard_serializer.save(rubric=rubric)
                         updated_standards.append(standard)
                     else:
-                        return Response(standard_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                        return Response(
+                            standard_serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
 
             rubric.standards.set(updated_standards)
 
@@ -1307,6 +1400,7 @@ def update_rubric(request):
 #     else:
 #         return Response(rubric_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 # crea la evaluacion que se realiza a los estudiantes
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -1320,26 +1414,39 @@ def create_evaluation(request):
         )
 
     data = request.data
-    rubric_name = data.get('rubric_name')
-    name = data.get('name')
-    estado = data.get('estado')
+    rubric_name = data.get("rubric_name")
+    name = data.get("name")
+    estado = data.get("estado")
 
     if not rubric_name or not name or not estado:
-        return Response({'error': 'Faltan datos necesarios.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Faltan datos necesarios."}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     if estado == Evaluation.FINISHED:
-        return Response({'error': 'No se puede crear una evaluación en estado finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se puede crear una evaluación en estado finalizado."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     if estado == Evaluation.INITIATED:
-        initiated_evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+        initiated_evaluations = Evaluation.objects.filter(
+            course=course, estado=Evaluation.INITIATED
+        )
         if initiated_evaluations.exists():
-            return Response({'error': 'Ya existe una evaluación en estado "iniciado" para este curso.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": 'Ya existe una evaluación en estado "iniciado" para este curso.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     try:
         rubric = Rubric.objects.get(name=rubric_name)
         if rubric.is_global:
             return Response(
-                {"error": "No puede seleccionar una rúbrica global, intente con otra."}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "No puede seleccionar una rúbrica global, intente con otra."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
     except Rubric.DoesNotExist:
         return Response(
@@ -1347,12 +1454,12 @@ def create_evaluation(request):
         )
 
     evaluation_data = {
-        'estado': estado,
-        'name': name,
-        'rubric': rubric.id,
-        'course': course.id, 
-        'report': None,
-        'completed': False
+        "estado": estado,
+        "name": name,
+        "rubric": rubric.id,
+        "course": course.id,
+        "report": None,
+        "completed": False,
     }
 
     serializer = EvaluationSerializer(data=evaluation_data)
@@ -1368,52 +1475,77 @@ def create_evaluation(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#una evaluacion por iniciar cambia a iniciada
+# una evaluacion por iniciar cambia a iniciada
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def start_evaluation(request):
-    evaluation_id = request.query_params.get('evaluation_id')
+    evaluation_id = request.query_params.get("evaluation_id")
     if not evaluation_id:
-        return Response({'error': 'No se proporcionó el ID de la evaluación.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se proporcionó el ID de la evaluación."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         evaluation = Evaluation.objects.get(id=evaluation_id)
     except Evaluation.DoesNotExist:
-        return Response({'error': 'Evaluación no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Evaluación no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     if evaluation.estado != Evaluation.TO_START:
-        return Response({'error': 'La evaluación no está en estado "por iniciar".'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": 'La evaluación no está en estado "por iniciar".'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    initiated_evaluations = Evaluation.objects.filter(course=evaluation.course, estado=Evaluation.INITIATED)
+    initiated_evaluations = Evaluation.objects.filter(
+        course=evaluation.course, estado=Evaluation.INITIATED
+    )
     if initiated_evaluations.exists():
-        return Response({'error': 'Ya existe una evaluación en estado "iniciado" para este curso.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": 'Ya existe una evaluación en estado "iniciado" para este curso.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     evaluation.estado = Evaluation.INITIATED
     evaluation.save()
 
-    return Response({'message': 'Evaluación iniciada con éxito.'}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Evaluación iniciada con éxito."}, status=status.HTTP_200_OK
+    )
 
 
-#una evaluacion iniciada cambia a finalizada
+# una evaluacion iniciada cambia a finalizada
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def finish_evaluation(request):
-    evaluation_id = request.query_params.get('evaluation_id')
+    evaluation_id = request.query_params.get("evaluation_id")
     if not evaluation_id:
-        return Response({'error': 'No se proporcionó el ID de la evaluación.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "No se proporcionó el ID de la evaluación."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         evaluation = Evaluation.objects.get(id=evaluation_id)
     except Evaluation.DoesNotExist:
-        return Response({'error': 'Evaluación no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Evaluación no encontrada."}, status=status.HTTP_404_NOT_FOUND
+        )
 
     if evaluation.estado != Evaluation.INITIATED:
-        return Response({'error': 'La evaluación no está en estado "iniciado".'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": 'La evaluación no está en estado "iniciado".'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     evaluation.estado = Evaluation.FINISHED
     evaluation.save()
 
-    return Response({'message': 'Evaluación finalizada con éxito.'}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Evaluación finalizada con éxito."}, status=status.HTTP_200_OK
+    )
 
 
 @api_view(["POST"])
@@ -1525,6 +1657,7 @@ def list_rubric(request, course_code):
 
     return Response(serializer.data)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_admin(request):
@@ -1542,24 +1675,39 @@ def register_admin(request):
 
     # Validar que el nombre y apellido sean solo letras
     if not name.isalpha():
-        return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El nombre debe ser solo letras"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     if not last_name.isalpha():
-        return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El apellido debe ser solo letras"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el código sean solo números mayores a cero
     if not code.isdigit() or int(code) <= 0:
-        return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El código debe ser solo números mayores a cero"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el email siga el formato correcto
     try:
         serializers.EmailField().run_validation(email)
     except serializers.ValidationError:
-        return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El email debe seguir el formato correcto (@email.co)"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el teléfono sean solo números mayores a cero (si se proporciona)
     if phone is not None:
         if not phone.isdigit() or int(phone) <= 0:
-            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El teléfono debe ser solo números mayores a cero"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     admin_data = {
         "name": name,
@@ -1575,7 +1723,8 @@ def register_admin(request):
         try:
             serializer_admin.save()
             return Response(
-                {"message": "Administrador creado exitosamente"}, status=status.HTTP_201_CREATED
+                {"message": "Administrador creado exitosamente"},
+                status=status.HTTP_201_CREATED,
             )
         except:
             return Response(
@@ -1604,24 +1753,39 @@ def register_teacher(request):
 
     # Validar que el nombre y apellido sean solo letras
     if not name.isalpha():
-        return Response({"error": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El nombre debe ser solo letras"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     if not last_name.isalpha():
-        return Response({"error": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El apellido debe ser solo letras"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el código sean solo números mayores a cero
     if not code.isdigit() or int(code) <= 0:
-        return Response({"error": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El código debe ser solo números mayores a cero"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el email siga el formato correcto
     try:
         serializers.EmailField().run_validation(email)
     except serializers.ValidationError:
-        return Response({"error": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "El email debe seguir el formato correcto (@email.co)"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Validar que el teléfono sean solo números mayores a cero
     if phone is not None:
         if not phone.isdigit() or int(phone) <= 0:
-            return Response({"error": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "El teléfono debe ser solo números mayores a cero"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     teacher_data = {
         "name": name,
@@ -1999,7 +2163,7 @@ def group_detail(request, course_code, group_id):
         {
             "student_code": student.user.code,
             "student_name": f"{student.user.name} {student.user.last_name}",
-            "student_email": student.user.email, 
+            "student_email": student.user.email,
         }
         for student in group.students.all()
     ]
@@ -2161,7 +2325,6 @@ def user_list(request):
     return Response(user_data)
 
 
-
 # obtiene una lista de estudiantes
 # gets a list of students
 @api_view(["GET"])
@@ -2206,8 +2369,8 @@ def course_list(request):
                 "code": course.code,
                 "name": course.name,
                 "teacher": course.teacher_name,
-                "course_status": course.course_status,
                 "academic_period": course.academic_period,
+                "course_status": course.course_status,
                 "student_count": course.student_count,
                 "students": list(students),
             }
@@ -2235,17 +2398,17 @@ def user_data(request):
 @permission_classes([IsAuthenticated])
 def main_teacher(request):
     user = request.user
-    
+
     try:
         courses = Course.objects.filter(user_teacher=user.id)
     except Course.DoesNotExist:
         return Response(
-        {"status": "El docente actualmente no tiene cursos"},
-        status=status.HTTP_400_BAD_REQUEST,
-    )
-    
+            {"status": "El docente actualmente no tiene cursos"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     course_data = []
-    
+
     for course in courses:
         students = course.user_students.values(
             "user__name", "user__last_name", "user__code", "user__email"
@@ -2299,7 +2462,7 @@ def update_course(request):
 
     # Eliminando la validación del código del curso
     course = Course.objects.get(code=course_code)
-    
+
     # Actualiza el campo 'user_teacher' sin validaciones adicionales
     user_teacher_code = data.get("user_teacher")
     if user_teacher_code:
@@ -2330,23 +2493,46 @@ def disable_course(request, course_code):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    # Verificar si el curso tiene evaluaciones en estado 'INITIATED'
-    evaluations = Evaluation.objects.filter(course=course, estado=Evaluation.INITIATED)
+    # Verificar si el curso tiene evaluaciones en estado 'TO_START' o 'INITIATED'
+    evaluations = Evaluation.objects.filter(course=course).filter(estado__in=[Evaluation.TO_START, Evaluation.INITIATED])
     if evaluations.exists():
         return Response(
             {
-                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones iniciadas."
+                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones en estado 'Por iniciar' o 'Iniciado'."
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Si no tiene evaluaciones en estado 'INITIATED', deshabilitar el curso
+    # Si no tiene evaluaciones en estado 'TO_START' ni 'INITIATED', deshabilitar el curso
     course.course_status = False
     course.save()
 
     serializer = CourseSerializer(course)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "Curso deshabilitado con exito."},
+        serializer.data,
+        status=status.HTTP_200_OK,
+    )
 
+#Luisa
+#Habilitar curso
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def enable_course(request, course_code):
+    try:
+        course = Course.objects.get(code=course_code)
+    except Course.DoesNotExist:
+        return Response(
+            {"error": "El curso no existe."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Habilitar el curso
+    course.course_status = True
+    course.save()
+
+    serializer = CourseSerializer(course)
+    return Response({"message": "Curso habilitado con éxito.", "course": serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -2514,17 +2700,16 @@ def main_report(request):
             {"info": "Aún no existen evaluaciones en este curso"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-        
-    evaluation_data= []
-    
+
+    evaluation_data = []
+
     for evaluation in evaluations:
-        
+
         evaluation_data.append(
             {
                 "estado": evaluation.estado,
                 "name": evaluation.name,
-                "rubric": evaluation.rubric.name
-                
+                "rubric": evaluation.rubric.name,
             }
         )
 
@@ -2559,63 +2744,66 @@ def report_detailed(request):
 
     return Response(report_data)
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def report_general(request):
 
     data = request.data
 
-    evaluations = EvaluationCompleted.objects.filter(evaluation__id=data.get("id_evaluation"))
+    evaluations = EvaluationCompleted.objects.filter(
+        evaluation__id=data.get("id_evaluation")
+    )
 
     report_data = []
-    
+
     qualifications = []
-    
-    standards= []
-    
+
+    standards = []
+
     for evaluation in evaluations:
-        
-        code_student= evaluation.evaluated.user.code
-        
+
+        code_student = evaluation.evaluated.user.code
+
         if code_student not in report_data:
             report_data.append(code_student)
         else:
             continue
-        
+
     for code in report_data:
-        
-        student= Student.objects.get(user__code= code)
-        
+
+        student = Student.objects.get(user__code=code)
+
         ratings = Rating.objects.filter(evaluationCompleted__evaluated=student)
-     
+
         for rating in ratings:
-            
-            standard= rating.standard.id
-            
+
+            standard = rating.standard.id
+
             if standard not in standards:
                 standards.append(standard)
             else:
                 continue
-        
+
         for standard in standards:
-            
-            ratings1= ratings.filter(standard_id = standard) 
-        
-            average= 0
-        
+
+            ratings1 = ratings.filter(standard_id=standard)
+
+            average = 0
+
             count = 0
-        
+
             for rating in ratings1:
-            
+
                 average += rating.qualification
                 count += 1
-            
+
             qualifications.append(
                 {
                     "standard": rating.standard.description,
                     "nota": average / count,
-                    "evaluated": student.user.name + ' ' + student.user.last_name
+                    "evaluated": student.user.name + " " + student.user.last_name,
                 }
             )
-        
+
     return Response(qualifications)
