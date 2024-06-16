@@ -50,8 +50,8 @@ export default function DisableCourse(props) {
       <Button
         // disabled
         size="sm"
-        variant="plain"
-        color="danger"
+        variant="outlined"
+        color="neutral"
         onClick={handleOpenModal}
         startDecorator={<ArchiveRoundedIcon />}
       >
