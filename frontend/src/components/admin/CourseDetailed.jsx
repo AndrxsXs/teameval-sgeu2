@@ -6,15 +6,21 @@ import StudentTable from "../teacher/StudentTable";
 import ManageCourse from "../admin/ManageCourse";
 import DisableCourse from "./DisableCourse";
 import EnableCourse from "./EnableCourse";
+import ImportUsersModal from "../teacher/ImportUsersModal";
+import CreateStudent from "../teacher/CreateStudent";
+import GroupsTable from "../teacher/groups/GroupsTable";
+import CreateGroup from "../teacher/groups/CreateGroup";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import Button from "@mui/joy/Button";
 import Skeleton from "@mui/joy/Skeleton";
+import Tabs from "@mui/joy/Tabs";
+import TabList from "@mui/joy/TabList";
+import Tab, { tabClasses } from "@mui/joy/Tab";
+import TabPanel from "@mui/joy/TabPanel";
 
-import ArchiveRoundedIcon from "@mui/icons-material/ArchiveRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import api from "../../api";
@@ -24,7 +30,7 @@ function CourseActions(props) {
   const navigate = useNavigate();
 
   return (
-    <Stack className="course-details-button-group" direction="row" gap={2}>
+    <Stack className="course-details-button-group" direction="row" gap={1}>
       {course.course_status == true ? (
         <DisableCourse course={course} />
       ) : (
@@ -83,7 +89,6 @@ export default function CourseDetailed() {
           p: 2,
           width: "clamp(100%, 100%, 1000px)",
           height: "100%",
-          maxHeight: "82dvh",
           boxShadow: "md",
           "&:hover": {
             boxShadow: "none",
@@ -101,20 +106,185 @@ export default function CourseDetailed() {
             >
               <Stack className="course-details-info">
                 <Typography level="h3" component="h2">
-                  {courseInfo.name}
-                </Typography>
-                <Typography level="body-sm">
-                  {" "}
-                  <strong>Código:</strong> {courseCode}
+                  {courseInfo.name} - {courseCode}
                 </Typography>
                 <Typography level="body-sm">
                   <strong>Docente:</strong> {courseInfo.teacher.name}{" "}
                   {courseInfo.teacher.last_name}
                 </Typography>
+                <Typography level="body-xs">
+                  Periodo {courseInfo.academic_period}
+                </Typography>
               </Stack>
               <CourseActions course={courseInfo} />
             </Stack>
-            <StudentTable admin course={courseInfo.code} />
+            <Stack
+              className="course-details-body"
+              sx={{
+                height: "100%",
+              }}
+            >
+              <Tabs
+                variant="plain"
+                aria-label="Contenedor principal"
+                defaultValue={0}
+                sx={{
+                  // width: 343,
+                  borderRadius: "lg",
+                  // boxShadow: "sm",
+                  // "&:hover": {
+                  //   boxShadow: "none",
+                  // },
+                  // transition: "box-shadow 0.3s",
+                  // overflow: "clip",
+                  height: "100%",
+                  width: "100%",
+                  gap: 1,
+                  py: 0,
+                  // overflow: "auto",
+                }}
+              >
+                <TabList
+                  size="sm"
+                  sticky="top"
+                  tabFlex={1}
+                  // sx={{
+                  //   [`& .${tabClasses.root}`]: {
+                  //     fontSize: "sm",
+                  //     fontWeight: "lg",
+                  //     [`&[aria-selected="true"]`]: {
+                  //       color: "primary.500",
+                  //       bgcolor: "background.surface",
+                  //     },
+                  //     [`&.${tabClasses.focusVisible}`]: {
+                  //       outlineOffset: "-4px",
+                  //     },
+                  //   },
+                  //   zIndex: 11,
+                  // }}
+                  sx={{
+                    width: "85%",
+                    alignSelf: "center",
+                    p: 0.5,
+                    gap: 1,
+                    borderRadius: "lg",
+                    bgcolor: "background.level1",
+                    [`& .${tabClasses.root}[aria-selected="true"]`]: {
+                      boxShadow: "sm",
+                      bgcolor: "background.surface",
+                    },
+                    boxShadow: "md",
+                    "&:hover": {
+                      boxShadow: "sm",
+                    },
+                    transition: "box-shadow 0.3s",
+                    zIndex: 11,
+                    // paddingBottom: 0,
+                  }}
+                >
+                  <Tab disableIndicator variant="soft" sx={{ flexGrow: 1 }}>
+                    Estudiantes
+                  </Tab>
+                  <Tab disableIndicator variant="soft" sx={{ flexGrow: 1 }}>
+                    Grupos
+                  </Tab>
+                  <Tab disableIndicator variant="soft" sx={{ flexGrow: 1 }}>
+                    Rúbricas
+                  </Tab>
+                  <Tab disableIndicator variant="soft" sx={{ flexGrow: 1 }}>
+                    Evaluaciones
+                  </Tab>
+                  <Tab disableIndicator variant="soft" sx={{ flexGrow: 1 }}>
+                    Informes
+                  </Tab>
+                </TabList>
+                <TabPanel
+                  value={0}
+                  sx={{
+                    padding: 0,
+                    height: "50dvh",
+                    overflow: "auto",
+                  }}
+                >
+                  <Stack
+                    direction="column"
+                    gap={1}
+                    sx={{
+                      height: "100%",
+                    }}
+                  >
+                    <StudentTable admin course={courseInfo.code} />
+                    <Stack direction="row" gap={1}>
+                      <ImportUsersModal courseId={courseCode} isStudent />
+                      <CreateStudent course={courseCode} />
+                    </Stack>
+                  </Stack>
+                </TabPanel>
+                <TabPanel
+                  value={1}
+                  sx={{
+                    padding: 0,
+                    height: "50dvh",
+                    overflow: "auto",
+                  }}
+                >
+                  <Stack
+                    direction="column"
+                    gap={1}
+                    sx={{
+                      height: "100%",
+                    }}
+                  >
+                    <GroupsTable course={courseInfo.code} />
+                    <Stack direction="row">
+                      <CreateGroup course={courseInfo.code} />
+                    </Stack>
+                  </Stack>
+                </TabPanel>
+                <TabPanel
+                  value={2}
+                  sx={{
+                    padding: 0,
+                    height: "50dvh",
+                    overflow: "auto",
+                  }}
+                >
+                  <Typography level="inherit">
+                    The most advanced features for data-rich applications, as
+                    well as the highest priority for support.
+                  </Typography>
+                  <Typography
+                    textColor="primary.400"
+                    fontSize="xl3"
+                    fontWeight="xl"
+                    mt={1}
+                  >
+                    <Typography
+                      fontSize="xl"
+                      borderRadius="sm"
+                      px={0.5}
+                      mr={0.5}
+                      sx={(theme) => ({
+                        ...theme.variants.soft.danger,
+                        color: "danger.400",
+                        verticalAlign: "text-top",
+                        textDecoration: "line-through",
+                      })}
+                    >
+                      $49
+                    </Typography>
+                    $37*{" "}
+                    <Typography
+                      fontSize="sm"
+                      textColor="text.secondary"
+                      fontWeight="md"
+                    >
+                      / dev / month
+                    </Typography>
+                  </Typography>
+                </TabPanel>
+              </Tabs>
+            </Stack>
           </Fragment>
         ) : (
           <Fragment>
@@ -153,20 +323,18 @@ export default function CourseDetailed() {
                 direction="row"
                 gap={2}
               >
-                <Button
-                  startDecorator={<ArchiveRoundedIcon />}
-                  variant="soft"
-                  color="danger"
-                >
-                  Deshabilitar
-                </Button>
-                <Button
-                  startDecorator={<EditRoundedIcon />}
-                  variant="soft"
-                  color="neutral"
-                >
-                  Editar
-                </Button>
+                <Skeleton
+                  animation="wave"
+                  variant="rectangular"
+                  width={120}
+                  height={36}
+                />
+                <Skeleton
+                  animation="wave"
+                  variant="rectangular"
+                  width={120}
+                  height={36}
+                />
                 <Button
                   onClick={() => navigate(-1)}
                   startDecorator={<CloseRoundedIcon />}
