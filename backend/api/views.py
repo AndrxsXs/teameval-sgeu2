@@ -676,6 +676,10 @@ def import_teacher(request):
     omitted_teachers = []
 
     for row in reader:
+        # Omitir filas vacías
+        if not any(row):
+            continue
+
         try:
             teacher_data = {
                 "name": row[0],
