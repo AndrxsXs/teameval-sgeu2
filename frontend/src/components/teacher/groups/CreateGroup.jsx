@@ -15,6 +15,8 @@ import Input from "@mui/joy/Input";
 
 import Add from "@mui/icons-material/Add";
 
+import eventDispatcher from "../../../utils/eventDispacher";
+
 export default function CreateGroup({ course }) {
   const [selectedStudents, setSelectedStudents] = useState([]);
 
@@ -34,6 +36,15 @@ export default function CreateGroup({ course }) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleResetForm = () => {
+    setFormData({
+      name: "",
+      code: "",
+      assigned_project: "",
+      student_codes: [],
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -58,28 +69,15 @@ export default function CreateGroup({ course }) {
       })
       .then((response) => {
         setFormData(response.data);
+        eventDispatcher("responseEvent", response);
+        window.dispatchEvent(new Event("group-created"));
         setLoading(false);
         setOpen(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: "Grupo creado exitosamente",
-              severity: "success",
-            },
-          })
-        );
-        window.dispatchEvent(new CustomEvent("group-created"));
+        handleResetForm();
       })
       .catch((error) => {
+        eventDispatcher("responseEvent", error, "danger");
         setLoading(false);
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${error.response.data.error}`,
-              severity: "danger",
-            },
-          })
-        );
       });
   };
 
