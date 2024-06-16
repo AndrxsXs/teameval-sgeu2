@@ -114,7 +114,6 @@ export default function UserGroupTable(props) {
       window.removeEventListener("user-updated", fetchData);
       window.removeEventListener("user-created", fetchData);
     };
-
   };
 
   useEffect(() => {
@@ -177,15 +176,11 @@ export default function UserGroupTable(props) {
     };
 
     fetchData();
-    // console.log(course);
-    const handleUserCreated = () => {
-      fetchData();
-    };
 
-    window.addEventListener("userCreated", handleUserCreated);
+    window.addEventListener("user-created", fetchData);
 
     return () => {
-      window.removeEventListener("userCreated", handleUserCreated);
+      window.removeEventListener("user-created", fetchData);
     };
   }, [role, sortOrder, filters, course]);
 
@@ -237,13 +232,7 @@ export default function UserGroupTable(props) {
           <thead>
             <tr>
               {columns &&
-                columns.map((column, index) => (
-                  <th
-                    key={index}
-                  >
-                    {column}
-                  </th>
-                ))}
+                columns.map((column, index) => <th key={index}>{column}</th>)}
             </tr>
           </thead>
           <tbody>
