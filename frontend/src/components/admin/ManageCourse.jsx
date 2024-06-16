@@ -69,7 +69,7 @@ export default function ManageCourse(props) {
         },
       });
       setTeachers(response.data.filter((teacher) => teacher.status === true));
-      console.log("Docentes:", response.data);
+      // console.log("Docentes:", response.data);
     } catch (error) {
       console.error("Error obteniendo datos de docentes:", error);
     }
