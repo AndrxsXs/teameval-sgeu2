@@ -26,7 +26,7 @@ export default function CreateAdmin() {
     name: "",
     last_name: "",
     email: "",
-    phone: null,
+    phone: undefined,
   });
 
   const handleResetFormData = () => {
@@ -35,7 +35,7 @@ export default function CreateAdmin() {
       name: "",
       last_name: "",
       email: "",
-      phone: null,
+      phone: undefined,
     });
   };
 
