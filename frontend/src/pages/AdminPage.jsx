@@ -61,7 +61,7 @@ function AdminPage({ userData }) {
               <Route index element={<ManageAdmin />} />
               <Route path="teachers" element={<ManageTeachers />} />
               <Route path="courses" element={<ManageCourses />}>
-                <Route path=":courseCode" element={<CourseDetailed />} />
+                <Route path=":courseId" element={<CourseDetailed />} />
               </Route>
               <Route path="scales" element={<ManageScales />} />
             </Route>

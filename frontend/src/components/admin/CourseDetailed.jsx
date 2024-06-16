@@ -10,6 +10,7 @@ import ImportUsersModal from "../teacher/ImportUsersModal";
 import CreateStudent from "../teacher/CreateStudent";
 import GroupsTable from "../teacher/groups/GroupsTable";
 import CreateGroup from "../teacher/groups/CreateGroup";
+import RubricList from "../teacher/RubricList";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
@@ -50,7 +51,7 @@ function CourseActions(props) {
 }
 
 export default function CourseDetailed() {
-  const { courseCode } = useParams();
+  const { courseId } = useParams();
   const [loading, setLoading] = useState(true);
   const [courseInfo, setCourseInfo] = useState({});
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function CourseDetailed() {
   useEffect(() => {
     const fetchGroupInfo = async () => {
       await api
-        .get(`api/course_info/${courseCode}/`)
+        .get(`api/course_info/${courseId}/`)
         .then((response) => {
           setCourseInfo(response.data);
           // console.log(response.data);
@@ -80,7 +81,7 @@ export default function CourseDetailed() {
       window.removeEventListener("course-enabled", fetchGroupInfo);
       window.removeEventListener("course-disabled", fetchGroupInfo);
     };
-  }, [courseCode]);
+  }, [courseId]);
 
   return (
     <>
@@ -106,7 +107,7 @@ export default function CourseDetailed() {
             >
               <Stack className="course-details-info">
                 <Typography level="h3" component="h2">
-                  {courseInfo.name} - {courseCode}
+                  {courseInfo.name} - {courseId}
                 </Typography>
                 <Typography level="body-sm">
                   <strong>Docente:</strong> {courseInfo.teacher.name}{" "}
@@ -215,8 +216,8 @@ export default function CourseDetailed() {
                   >
                     <StudentTable admin course={courseInfo.code} />
                     <Stack direction="row" gap={1}>
-                      <ImportUsersModal courseId={courseCode} isStudent />
-                      <CreateStudent course={courseCode} />
+                      <ImportUsersModal courseId={courseId} isStudent />
+                      <CreateStudent course={courseId} />
                     </Stack>
                   </Stack>
                 </TabPanel>
@@ -249,8 +250,7 @@ export default function CourseDetailed() {
                     overflow: "auto",
                   }}
                 >
-                    queso
-                  
+                  <RubricList />
                 </TabPanel>
               </Tabs>
             </Stack>
