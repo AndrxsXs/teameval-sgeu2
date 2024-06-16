@@ -121,6 +121,11 @@ export default function UngroupedStudentsTable({
   //   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   useEffect(() => {
+    const handleResetSelection = () => {
+      setSelectedStudents([]);
+      // onSelectedStudentsChange([]);
+    };
+
     const fetchData = () => {
       setLoading(true);
       const token = localStorage.getItem(ACCESS_TOKEN);
@@ -157,12 +162,16 @@ export default function UngroupedStudentsTable({
     window.addEventListener("user-enabled", fetchData);
     window.addEventListener("user-updated", fetchData);
     window.addEventListener("user-created", fetchData);
+    window.addEventListener("group-created", fetchData);
+    window.addEventListener("group-created", handleResetSelection);
 
     return () => {
       window.removeEventListener("user-disabled", fetchData);
       window.removeEventListener("user-enabled", fetchData);
       window.removeEventListener("user-updated", fetchData);
       window.removeEventListener("user-created", fetchData);
+      window.removeEventListener("group-created", fetchData);
+      window.removeEventListener("group-created", handleResetSelection);
     };
   }, [course_code]);
 
