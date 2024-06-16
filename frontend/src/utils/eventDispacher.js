@@ -3,6 +3,8 @@ export default function eventDispatcher(event, response, severity = "success") {
   let message;
   if (typeof response === "string") {
     message = response;
+  } else if (response.includes("[HTTP")) {
+    message = "Error interno del servidor, inténtelo de nuevo más tarde.";
   } else {
     message =
       response.response &&
