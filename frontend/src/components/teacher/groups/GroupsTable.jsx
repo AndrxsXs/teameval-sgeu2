@@ -364,7 +364,7 @@ export default function GroupsTable({ course }) {
             }}
           >
             {rows && rows.length === 0 ? (
-              <Fragment>No hay usuarios</Fragment>
+              <Fragment>No hay grupos</Fragment>
             ) : (
               <Fragment>Nada más por aquí</Fragment>
             )}
