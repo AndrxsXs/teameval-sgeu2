@@ -45,16 +45,18 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           },
         })
         .then((response) => {
-          window.dispatchEvent(new Event("user-created"));
           setIsModalOpen(false);
           setLoading(false);
           eventDispatcher("responseEvent", response);
+          window.dispatchEvent(new Event("user-created"));
         })
         .catch((error) => {
+          console.log(error);
           eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         });
     }
+    eventDispatcher("responseEvent", "Seleccione un archivo", "danger");
   };
 
   const handleSubmitTeacher = async () => {
@@ -72,6 +74,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           },
         })
         .then((response) => {
+          window.dispatchEvent(new Event("user-created"));
           setIsModalOpen(false);
           window.dispatchEvent(
             new CustomEvent("responseEvent", {
