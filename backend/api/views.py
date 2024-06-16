@@ -657,6 +657,7 @@ def import_student(request):
     )
 
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def import_teacher(request):
@@ -689,36 +690,6 @@ def import_teacher(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Validaciones
-        # if not teacher_data["name"].isalpha():
-        #     return Response(
-        #         {"error": "El nombre debe ser solo letras"},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        # if not teacher_data["last_name"].isalpha():
-        #     return Response(
-        #         {"error": "El apellido debe ser solo letras"},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        # if not teacher_data["code"].isdigit() or int(teacher_data["code"]) <= 0:
-        #     return Response(
-        #         {"error": "El código debe ser solo números mayores a cero"},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        # try:
-        #     serializers.EmailField().run_validation(teacher_data["email"])
-        # except serializers.ValidationError:
-        #     return Response(
-        #         {"error": "El email debe seguir el formato correcto (@xxxxx.co)"},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        # if teacher_data["phone"] and (
-        #     not teacher_data["phone"].isdigit() or int(teacher_data["phone"]) <= 0
-        # ):
-        #     return Response(
-        #         {"error": "El teléfono debe ser solo números mayores a cero"},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
 
         try:
             user = User.objects.get(code=teacher_data["code"])
