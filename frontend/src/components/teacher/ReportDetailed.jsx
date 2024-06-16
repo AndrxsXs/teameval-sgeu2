@@ -264,7 +264,7 @@ function Row(props) {
                         </tr>
                         <tr>
                             <th scope="row">Luisa Castro</th>
-                            <td style={{ textAlign: 'center' }}>2</td>
+                            <td style={{ textAlign: 'center' }}>1</td>
                             <td style={{ textAlign: 'center' }}>5</td>
                             <td style={{ textAlign: 'center' }}>3</td>
                             <td style={{ textAlign: 'center' }}>2</td>
