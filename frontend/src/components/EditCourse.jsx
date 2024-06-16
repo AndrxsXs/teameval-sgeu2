@@ -50,8 +50,8 @@ export default function EditCourse(props) {
     //     if (response.status === 201) {
     //         const data = await response.json();
     //         console.log(data);
-    //         // Emitir el evento 'userCreated' después de crear un nuevo curso
-    //         window.dispatchEvent(new Event('userCreated'));
+    //         // Emitir el evento 'user-created' después de crear un nuevo curso
+    //         window.dispatchEvent(new Event('user-created'));
     //     } else {
     //         console.error('Error:', response.status, response.statusText);
     //     }
