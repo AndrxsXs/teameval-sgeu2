@@ -249,39 +249,8 @@ export default function CourseDetailed() {
                     overflow: "auto",
                   }}
                 >
-                  <Typography level="inherit">
-                    The most advanced features for data-rich applications, as
-                    well as the highest priority for support.
-                  </Typography>
-                  <Typography
-                    textColor="primary.400"
-                    fontSize="xl3"
-                    fontWeight="xl"
-                    mt={1}
-                  >
-                    <Typography
-                      fontSize="xl"
-                      borderRadius="sm"
-                      px={0.5}
-                      mr={0.5}
-                      sx={(theme) => ({
-                        ...theme.variants.soft.danger,
-                        color: "danger.400",
-                        verticalAlign: "text-top",
-                        textDecoration: "line-through",
-                      })}
-                    >
-                      $49
-                    </Typography>
-                    $37*{" "}
-                    <Typography
-                      fontSize="sm"
-                      textColor="text.secondary"
-                      fontWeight="md"
-                    >
-                      / dev / month
-                    </Typography>
-                  </Typography>
+                    queso
+                  
                 </TabPanel>
               </Tabs>
             </Stack>
