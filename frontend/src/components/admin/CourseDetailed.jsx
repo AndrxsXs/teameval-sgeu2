@@ -11,6 +11,7 @@ import CreateStudent from "../teacher/CreateStudent";
 import GroupsTable from "../teacher/groups/GroupsTable";
 import CreateGroup from "../teacher/groups/CreateGroup";
 import RubricList from "../teacher/RubricList";
+import CreateRubric from "../teacher/CreateRubric";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
@@ -146,6 +147,7 @@ export default function CourseDetailed() {
                 }}
               >
                 <TabList
+                  variant="outlined"
                   size="sm"
                   sticky="top"
                   tabFlex={1}
@@ -250,7 +252,18 @@ export default function CourseDetailed() {
                     overflow: "auto",
                   }}
                 >
-                  <RubricList />
+                  <Stack
+                    direction="column"
+                    gap={1}
+                    sx={{
+                      height: "100%",
+                    }}
+                  >
+                    <RubricList />
+                    <Stack direction="row">
+                      <CreateRubric />
+                    </Stack>
+                  </Stack>
                 </TabPanel>
               </Tabs>
             </Stack>
