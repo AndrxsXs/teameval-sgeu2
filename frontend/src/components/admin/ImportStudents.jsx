@@ -26,16 +26,26 @@ const VisuallyHiddenInput = styled("input")`
   width: 1px;
 `;
 
-export default function ImportStudents({ onFileChange, isStudent }) {
+export default function ImportStudents({ onFileChange, isStudent, file }) {
   const [csvData, setCsvData] = useState([]);
-
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(file || null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
-    onFileChange(file); // Llama a la función de devolución de llamada con el archivo seleccionado
+    onFileChange(file); // Llamar a la función de devolución de llamada con el archivo seleccionado
   };
+
+  const handleButtonClick = (event) => {
+    // Restablecer el valor del input de archivo
+    event.target.value = null;
+  };
+
+  useEffect(() => {
+    if (file === null) {
+      setSelectedFile(null);
+    }
+  }, [file]);
 
   useEffect(() => {
     if (selectedFile) {
@@ -64,7 +74,7 @@ export default function ImportStudents({ onFileChange, isStudent }) {
           // size="sm"
           variant="soft"
           startDecorator={<FileUploadRoundedIcon />}
-          onClick={() => setSelectedFile(null)}
+          onClick={handleButtonClick}
           onChange={handleFileChange}
         >
           Importar {isStudent ? "estudiantes" : "docentes"}
