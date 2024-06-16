@@ -64,10 +64,10 @@ function RowMenu(props) {
 }
 
 function Row(props) {
-  const { row } = props;
+  const { row, courseId } = props;
   const [students, setStudents] = useState([]);
   const [open, setOpen] = useState(props.initialOpen || false);
-  const { courseId } = useParams();
+  // const { courseId } = useParams();
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -142,13 +142,13 @@ function Row(props) {
         >
           <Typography level="body-xs">{row.student_count}</Typography>
         </td>
-        <td>
+        {/* <td>
           <RowMenu target={row} />
-        </td>
+        </td> */}
       </tr>
-      <tr>
-        <td style={{ height: 0, padding: 0 }} colSpan={5}>
-          {open && (
+      {open && (
+        <tr>
+          <td style={{ height: 0, padding: 0 }} colSpan={4}>
             <Sheet
               variant="soft"
               sx={{
@@ -189,9 +189,9 @@ function Row(props) {
                 </tbody>
               </Table>
             </Sheet>
-          )}
-        </td>
-      </tr>
+          </td>
+        </tr>
+      )}
     </Fragment>
   );
 }
@@ -307,7 +307,6 @@ export default function GroupsTable({ course }) {
             "& thead th": {
               paddingY: "12px",
             },
-
             "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
           }}
         >
@@ -319,12 +318,12 @@ export default function GroupsTable({ course }) {
             onRequestSort={handleRequestSort}
             rowCount={rows.length}
             headCells={headCells}
-            showActions
+            // showActions
             showEmptyColumn
           />
           <tbody>
             {stableSort(rows, getComparator(order, orderBy)).map((row) => {
-              return <Row key={row.id} row={row} />;
+              return <Row key={row.id} row={row} courseId={course} />;
             })}
           </tbody>
         </Table>
