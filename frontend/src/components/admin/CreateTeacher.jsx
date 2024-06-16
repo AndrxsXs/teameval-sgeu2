@@ -47,8 +47,8 @@ export default function CreateTeacher() {
       if (response.status === 201) {
         const data = await response.data;
         console.log(data);
-        // Emitir el evento 'userCreated' después de crear un nuevo usuario
-        window.dispatchEvent(new Event("userCreated"));
+        // Emitir el evento 'user-created' después de crear un nuevo usuario
+        window.dispatchEvent(new Event("user-created"));
         setFormData({
           code: "",
           name: "",
@@ -56,7 +56,7 @@ export default function CreateTeacher() {
           email: "",
           phone: undefined,
         });
-        // Emitir el evento 'userCreated' después de crear un nuevo usuario
+        // Emitir el evento 'user-created' después de crear un nuevo usuario
         window.dispatchEvent(new Event("user-created"));
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
