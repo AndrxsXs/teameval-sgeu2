@@ -18,6 +18,7 @@ import Autocomplete from "@mui/joy/Autocomplete";
 import { Add } from "@mui/icons-material";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useNavigate } from "react-router";
+import eventDispatcher from "../../utils/eventDispacher";
 
 export default function ManageCourse(props) {
   const { course, editMode } = props;
@@ -68,7 +69,7 @@ export default function ManageCourse(props) {
         },
       });
       setTeachers(response.data.filter((teacher) => teacher.status === true));
-      console.log('Docentes:', response.data);
+      console.log("Docentes:", response.data);
     } catch (error) {
       console.error("Error obteniendo datos de docentes:", error);
     }
@@ -89,6 +90,61 @@ export default function ManageCourse(props) {
 
   const handleFileChange = (file) => {
     setSelectedFile(file);
+  };
+
+  const handleResetFormData = () => {
+    setFormData({
+      code: "",
+      name: "",
+      academic_period: "",
+      user_teacher: "",
+    });
+    setTeachers([]);
+    setYear(undefined);
+    setCycle(undefined);
+    if (selectedFile) {
+      handleFileChange(null);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    eventDispatcher(
+      "responseEvent",
+      "Cargando archivo, en breve verá los usuarios importados."
+    );
+    const file = new FormData();
+    file.append("csv_file", selectedFile);
+    await api
+      .post("/api/import_student/", file, {
+        params: {
+          course_code: formData.code,
+        },
+      })
+      .then((response) => {
+        window.dispatchEvent(new Event("user-created"));
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: response.data.message,
+              severity: "success",
+            },
+          })
+        );
+        window.dispatchEvent(new Event("course-created"));
+        setLoading(false);
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message: error.response.data.error,
+              severity: "danger",
+            },
+          })
+        );
+        setLoading(false);
+      });
   };
 
   const handleSubmit = async (event) => {
@@ -120,15 +176,12 @@ export default function ManageCourse(props) {
             },
           })
         );
-        setFormData({
-          code: "",
-          name: "",
-          academic_period: "",
-          user_teacher: "",
-        });
+        handleResetFormData();
+        if (selectedFile) handleFileUpload();
         setLoading(false);
         !editMode && navigate(`/admin/manage/courses`);
         editMode && window.dispatchEvent(new Event("course-updated"));
+        handleCloseModal(false);
       })
       .catch((error) => {
         window.dispatchEvent(
@@ -142,47 +195,8 @@ export default function ManageCourse(props) {
         setLoading(false);
       });
 
-    setLoading(false);
-    handleCloseModal(false);
-
-    if (selectedFile) {
-      const file = new FormData();
-      file.append("csv_file", selectedFile);
-
-      api
-        .post("/api/import_student/", file, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            course_code: formData.code,
-          },
-        })
-        .then((response) => {
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: response.data.message,
-                severity: "success",
-              },
-            })
-          );
-          window.dispatchEvent(new Event("course-created"));
-          setLoading(false);
-          setIsModalOpen(false);
-        })
-        .catch((error) => {
-          window.dispatchEvent(
-            new CustomEvent("responseEvent", {
-              detail: {
-                message: error.response.data.error,
-                severity: "danger",
-              },
-            })
-          );
-          setLoading(false);
-        });
-    }
+    // setLoading(false);
+    // handleCloseModal(false);
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -211,7 +225,7 @@ export default function ManageCourse(props) {
       ) : (
         <Button
           startDecorator={<EditRoundedIcon />}
-          variant="plain"
+          variant="outlined"
           color="neutral"
           onClick={handleOpenModal}
         >
@@ -382,7 +396,11 @@ export default function ManageCourse(props) {
                 </Stack>
               </Stack>
             </Stack>
-            <ImportStudents isStudent onFileChange={handleFileChange} />
+            <ImportStudents
+              isStudent
+              onFileChange={handleFileChange}
+              file={selectedFile}
+            />
             <Box
               sx={{
                 display: "flex",

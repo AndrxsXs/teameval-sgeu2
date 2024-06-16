@@ -82,7 +82,7 @@ export default function CourseTable(props) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(courses);
+  // console.log(courses);
 
   const navigate = useNavigate();
 
