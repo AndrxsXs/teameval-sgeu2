@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
+import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
 import Sheet from "@mui/joy/Sheet";
 import Table from "@mui/joy/Table";
@@ -45,7 +46,7 @@ export default function Evaluate({ evaluationData }) {
   //   console.log(selectedCriteria);
 
   const navigate = useNavigate();
-  //   console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     const fetchEvaluationInfo = async () => {
@@ -62,7 +63,7 @@ export default function Evaluate({ evaluationData }) {
           setRows(data.rubric.standards);
           setSelectedValues(data.rubric.standards.map(() => null));
           setFetching(false);
-          console.log(response.data.data);
+          // console.log(response.data.data);
         })
         .catch((error) => {
           eventDispatcher("responseEvent", error);
@@ -101,8 +102,13 @@ export default function Evaluate({ evaluationData }) {
     setLoading(true);
     e.preventDefault();
     const data = { ...formData, ...selectedCriteria };
+    console.log(data);
     await api
-      .post(`api/evaluate_student/`, data)
+      .post(`api/evaluate_student/`, {
+        ...data,
+        id_evaluation: evalData.id,
+        evaluator: userData.code,
+      })
       .then((response) => {
         window.dispatchEvent(new Event("user-evaluated"));
         eventDispatcher("responseEvent", response);
@@ -110,15 +116,22 @@ export default function Evaluate({ evaluationData }) {
         setSelectedCriteria({}); // Resetear selectedCriteria
         setSelectedValues(rows.map(() => null)); // Resetear selectedValues
         setLoading(false);
-        if (compañeros.length < 1) {
-          navigate(-1);
-        }
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error, "danger");
       });
     setLoading(false);
   };
+
+  useMemo(() => {
+    if (compañeros.length < 1) {
+      navigate(-1);
+      eventDispatcher(
+        "responseEvent",
+        "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+      );
+    }
+  }, [compañeros, navigate]);
 
   return (
     <Stack direction="column" gap={2}>
@@ -204,7 +217,12 @@ export default function Evaluate({ evaluationData }) {
           //   height="1em"
         />
       )}
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          height: "calc(100% - 230px)",
+        }}
+      >
         <Sheet
           className="TableContainer"
           variant="outlined"
@@ -212,7 +230,7 @@ export default function Evaluate({ evaluationData }) {
             borderRadius: "sm",
             boxShadow: "xs",
             overflow: "auto",
-            height: "min-content",
+            height: "100%",
           }}
         >
           <Table
@@ -233,9 +251,16 @@ export default function Evaluate({ evaluationData }) {
                 paddingX: "16px",
                 textAlign: "center",
               },
-              "& thead th:nth-of-type(1)": { width: "70%" },
+              "& thead th:nth-of-type(1)": { width: "65%" },
 
               "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
+              "& td ": {
+                textAlign: "center", // Centra el contenido horizontalmente
+                verticalAlign: "middle", // Centra el contenido verticalmente
+              },
+              "& td:first-of-type": {
+                textAlign: "start", // Centra el contenido horizontalmente
+              },
             }}
           >
             <thead>
@@ -284,18 +309,53 @@ export default function Evaluate({ evaluationData }) {
               {!fetching
                 ? rows.map((row, rowIndex) => (
                     <Tooltip
-                      title={row.scale_description}
+                      // title={row.scale_description}
                       key={rowIndex}
                       placement="top-start"
-                      size="lg"
                       variant="outlined"
+                      title={
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            maxWidth: 600,
+                            justifyContent: "center",
+                            p: 1,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              width: "100%",
+                              mt: 1,
+                            }}
+                          >
+                            {/* <AdjustIcon color="success" /> */}
+                            <div>
+                              {/* <Typography fontWeight="lg" fontSize="sm">
+                [system] grey is no more recognized as color with the sx prop
+              </Typography> */}
+                              <Typography
+                                textColor="text.secondary"
+                                fontSize="sm"
+                                sx={{ mb: 1 }}
+                              >
+                                {row.scale_description}
+                              </Typography>
+                            </div>
+                          </Box>
+                        </Box>
+                      }
                     >
                       <tr>
                         <td>
                           {/* <IconButton size="sm">
                             <HelpOutlineRoundedIcon />
                           </IconButton> */}
-                          {row.description}
+                          <Typography level="body-sm">
+                            {row.description}
+                          </Typography>
                         </td>
                         {scale.map((_, colIndex) => (
                           <td
@@ -306,6 +366,7 @@ export default function Evaluate({ evaluationData }) {
                             }}
                           >
                             <Radio
+                              required
                               name={`row-${rowIndex}`}
                               value={colIndex + 1}
                               checked={selectedValues[rowIndex] == colIndex + 1}
@@ -406,7 +467,11 @@ export default function Evaluate({ evaluationData }) {
           >
             Calificar
           </Button>
-          <Button color="neutral" variant="outlined" onClick={() => navigate(-1)}>
+          <Button
+            color="neutral"
+            variant="outlined"
+            onClick={() => navigate(-1)}
+          >
             Regresar
           </Button>
         </Stack>
