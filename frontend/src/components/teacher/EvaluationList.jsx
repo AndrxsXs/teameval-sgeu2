@@ -110,13 +110,13 @@ export default function EvaluationList() {
           </Box>
         )}
       </Box>
-      {
+      {isModalOpen && (
         <ViewEvaluationModal
           data={selectedEvaluation}
           open={isModalOpen}
           setOpen={setIsModalOpen}
         />
-      }
+      )}
     </>
   );
 }
