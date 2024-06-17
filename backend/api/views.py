@@ -2683,7 +2683,8 @@ def main_report(request):
                 "estado": evaluation.estado,
                 "name": evaluation.name,
                 "rubric": evaluation.rubric.name,
-                "id_rubric": evaluation.rubric.id
+                "id_rubric": evaluation.rubric.id,
+                "id_evaluation": evaluation.id
             }
         )
 
