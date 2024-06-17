@@ -3,7 +3,7 @@ import Box from "@mui/joy/Box";
 import Typography from "@mui/joy/Typography";
 import Skeleton from "@mui/joy/Skeleton";
 import CourseCard from "./Grades";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import api from "../../api";
 import { useOutletContext } from "react-router-dom";
@@ -14,8 +14,27 @@ export default function Result() {
   const [loading, setLoading] = useState(true);
   const [evaluations, setEvaluations] = useState([]);
   const userData = useOutletContext();
-
+  const [courses, setCourses] = useState();
   console.log(userData);
+
+  useMemo(() => {
+    const fetchUserCourses = async () => {
+      await api
+        .get(`api/student_courses/`, {
+          params: {
+            student_code: userData.code,
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          setCourses(response.data);
+        })
+        .catch((error) => {
+          eventDispatcher("responseEvent", error, "danger");
+        });
+    };
+    fetchUserCourses();
+  }, [userData]);
 
   useEffect(() => {
     const fetchEvaluations = async () => {
@@ -23,7 +42,7 @@ export default function Result() {
         .get(`api/completed_evaluations`, {
           params: {
             student_code: userData.code,
-            course_code: userData.course_code,
+            course_code: courses.code,
           },
         })
         .then((response) => {
