@@ -554,8 +554,7 @@ def completed_evaluations(request):
     # Preparar los datos para la respuesta
     data = [EvaluationSerializerE(evaluation).data for evaluation in evaluations]
 
-    return Response(
-        {"data": data}, status=status.HTTP_200_OK
+    return Response(data, status=status.HTTP_200_OK
     )
 
 
