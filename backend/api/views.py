@@ -1318,7 +1318,7 @@ def update_rubric(request):
                     except Standard.DoesNotExist:
                         return Response(
                             {
-                                "error": f'No se encontró el estándar con id {standard_data["id"]}.'
+                                "error": f'No se encontró el criterio con id {standard_data["id"]}.'
                             },
                             status=status.HTTP_404_NOT_FOUND,
                         )
@@ -2467,7 +2467,7 @@ def disable_course(request, course_code):
     if evaluations.exists():
         return Response(
             {
-                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones en estado 'Por iniciar' o 'Iniciado'."
+                "error": "El curso no puede ser deshabilitado porque tiene evaluaciones en curso o pendientes de iniciar."
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
