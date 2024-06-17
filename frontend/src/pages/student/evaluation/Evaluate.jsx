@@ -81,7 +81,7 @@ export default function Evaluate({ evaluationData }) {
         })
         .then((response) => {
           setCompañeros(response.data);
-          console.log(response.data)
+          // console.log(response.data)
           setFetching(false);
           if (compañeros.length < 1) {
             navigate("/estudiante");
