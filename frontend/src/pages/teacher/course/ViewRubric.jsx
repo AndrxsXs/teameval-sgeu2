@@ -18,6 +18,11 @@ export default function ViewRubric() {
   const [loading, setLoading] = useState(true);
   const [rubric, setRubric] = useState({});
   const navigate = useNavigate();
+  const [changesMade, setChangesMade] = useState(false);
+  const [updatedData, setUpdatedData] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  // const [originalRubric, setOriginalRubric] = useState({});
+
   // console.log(rubric)
   useEffect(() => {
     const fetchRubric = async () => {
@@ -25,6 +30,7 @@ export default function ViewRubric() {
         .get(`api/info_rubric/${rubricId}/`)
         .then((response) => {
           setRubric(response.data);
+          // setOriginalRubric(response.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -34,6 +40,36 @@ export default function ViewRubric() {
     };
     fetchRubric();
   }, [rubricId]);
+
+  const editRubric = async () => {
+    setSubmitting(true);
+
+    // Crear una nueva estructura de datos para los estándares actualizados
+    const updatedStandards = updatedData;
+
+    // Crear una nueva estructura de datos para la rúbrica actualizada
+    const updatedRubric = {
+      ...rubric, // Copiar todas las propiedades originales de la rúbrica
+      standards: updatedStandards, // Reemplazar solo los estándares con los datos actualizados
+    };
+
+    await api
+      .put(`api/update_rubric`, updatedRubric, {
+        params: {
+          rubric_id: rubricId,
+        },
+      })
+      .then((response) => {
+        setRubric(response.data); // Actualizar el estado rubric con la respuesta del servidor
+        setChangesMade(false);
+        eventDispatcher("responseEvent", response);
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        eventDispatcher("responseEvent", error, "danger");
+        setSubmitting(false);
+      });
+  };
 
   return (
     <Fragment>
@@ -79,12 +115,35 @@ export default function ViewRubric() {
             flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <Button variant="outlined" color="neutral" onClick={() => navigate(-1)}>Volver</Button>
+          {changesMade && (
+            <>
+              <Button
+                  variant="soft"
+                  color="success"
+                onClick={editRubric}
+                loading={submitting}
+              >
+                Guardar cambios
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outlined"
+            color="neutral"
+            onClick={() => navigate(-1)}
+          >
+            {changesMade ? "Descartar y volver" : "Volver"}
+          </Button>
           {/* <CreateStudent course={courseId} />
-          <ImportUsersModal courseId={courseId} isStudent /> */}
+              <ImportUsersModal courseId={courseId} isStudent /> */}
         </Box>
       </Box>
-      <CriteriaTableInfo />
+      <CriteriaTableInfo
+        data={rubric}
+        updatedData={setUpdatedData}
+        setChangesMade={setChangesMade}
+        onStandardsChange={setUpdatedData}
+      />
     </Fragment>
   );
 }
