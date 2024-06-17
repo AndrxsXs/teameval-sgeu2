@@ -73,6 +73,7 @@ export default function CreateEvaluation() {
           },
         })
         .then((response) => {
+          window.dispatchEvent(new Event("load"));
           eventDispacher("responseEvent", response);
           handleClose();
           handleResetFormData();
