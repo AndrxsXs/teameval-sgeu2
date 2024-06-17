@@ -49,7 +49,7 @@ export default function CreateStudent(props) {
         setLoading(false);
         handleCloseModal(false);
         handleResetFormData();
-        window.dispatchEvent(new Event("user-created"));
+        window.dispatchEvent(new Event("load"));
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error, "danger");
@@ -72,7 +72,7 @@ export default function CreateStudent(props) {
   //     // console.log(response);
   //     switch (response.status) {
   //       case 201:
-  //         window.dispatchEvent(new Event("user-created"));
+  //         window.dispatchEvent(new Event("load"));
   //         window.dispatchEvent(
   //           new CustomEvent("responseEvent", {
   //             detail: {
