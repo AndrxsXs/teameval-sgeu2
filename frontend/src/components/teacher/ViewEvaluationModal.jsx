@@ -52,6 +52,7 @@ export default function ViewEvaluationModal({ data, open, setOpen }) {
       .then((response) => {
         setOpen(false);
         eventDispatcher("responseEvent", response);
+        window.dispatchEvent(new Event("load"));
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error, "danger");
