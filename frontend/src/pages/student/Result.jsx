@@ -1,65 +1,128 @@
+/* eslint-disable react/prop-types */
 import Stack from "@mui/joy/Stack";
 import Box from "@mui/joy/Box";
 import Typography from "@mui/joy/Typography";
 import Skeleton from "@mui/joy/Skeleton";
-import CourseCard from "./Grades";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
+import Chip from "@mui/joy/Chip";
+
+import interpretEvaluationState from "../../utils/interpretEvaluationState";
 
 import api from "../../api";
 import { useOutletContext } from "react-router-dom";
 
 import eventDispatcher from "../../utils/eventDispacher";
 
+function CourseCard({ info }) {
+  return (
+    <Link
+      to={`./${info.code}`}
+      style={{
+        textDecoration: "none",
+        color: "inherit",
+      }}
+      // onClick={() => {
+      //   setEvaluationData(info);
+      // }}
+    >
+      <Card
+        sx={{
+          // width: 300,
+          // height: 150,
+          width: "100%",
+          height: "100%",
+          borderRadius: "sm",
+          boxShadow: "md",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: 2,
+          transition: "box-shadow 0.3s, transform 0.1s",
+          "&:hover": {
+            boxShadow: "sm",
+            transform: "scale(0.99)",
+          },
+          "&:active": {
+            boxShadow: "none",
+            transform: "scale(0.98)",
+          },
+          overflow: "hidden",
+        }}
+      >
+        <CardContent
+          sx={{
+            alignItems: "flex-start",
+          }}
+        >
+          <Stack
+            width="100%"
+            direction="row"
+            justifyContent="space-between"
+            gap={1}
+            alignItems="baseline"
+          >
+            <Typography level="title-md">
+              {info.name} - {info.code}
+            </Typography>
+            <Chip
+              size="sm"
+              color={
+                info.estado === 2
+                  ? "success"
+                  : info.estado === 1
+                  ? "warning"
+                  : info.estado === 3
+                  ? "danger"
+                  : "primary"
+              }
+            >
+              {interpretEvaluationState(info.estado)}
+            </Chip>
+          </Stack>
+          <Typography level="body-xs">{info.name}</Typography>
+          <Typography level="body-xs">
+            {info.user_teacher.name} {info.user_teacher.last_name}
+          </Typography>
+          <Typography level="body-xs">{info.academic_period}</Typography>
+          {/* <Typography level="body-xs">
+            Disponible hasta {info.date_end}
+          </Typography> */}
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 export default function Result() {
   const [loading, setLoading] = useState(true);
-  const [evaluations, setEvaluations] = useState([]);
   const userData = useOutletContext();
-  const [courses, setCourses] = useState();
-  console.log(userData);
+  const userCode = userData.code;
+  const [courses, setCourses] = useState([]);
+  // console.log(courses);
 
   useMemo(() => {
     const fetchUserCourses = async () => {
       await api
         .get(`api/courses_evaluations_completed`, {
           params: {
-            student_code: userData.code,
+            student_code: userCode,
           },
         })
         .then((response) => {
-          console.log(response.data);
-          setCourses(response.data);
+          setCourses(response.data.data);
+          console.log(response.data.data);
+          setLoading(false);
         })
         .catch((error) => {
           eventDispatcher("responseEvent", error, "danger");
+          setLoading(false);
         });
     };
     fetchUserCourses();
-  }, [userData]);
-
-  useEffect(() => {
-    const fetchEvaluations = async () => {
-      await api
-        .get(`api/completed_evaluations`, {
-          params: {
-            student_code: userData.code,
-            course_code: courses.code,
-          },
-        })
-        .then((response) => {
-          setEvaluations(response.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          eventDispatcher("responseEvent", error, "danger");
-          setLoading(false);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    };
-
-    fetchEvaluations();
-  }, [userData]);
+  }, [userCode]);
 
   return (
     <>
@@ -107,9 +170,9 @@ export default function Result() {
         }}
       >
         {!loading
-          ? evaluations.map((evaluation) => {
+          ? courses.map((courses) => {
               const id = crypto.randomUUID();
-              return <CourseCard key={id} info={evaluation} />;
+              return <CourseCard key={id} info={courses} />;
             })
           : Array.from(new Array(9)).map((_, index) => (
               <Skeleton
@@ -122,7 +185,7 @@ export default function Result() {
                 sx={{ borderRadius: "sm" }}
               />
             ))}
-        {evaluations.length === 0 && !loading && (
+        {courses.length === 0 && !loading && (
           <Box
             sx={{
               display: "flex",
