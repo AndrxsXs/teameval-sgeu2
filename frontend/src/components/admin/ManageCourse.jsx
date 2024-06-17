@@ -151,47 +151,31 @@ export default function ManageCourse(props) {
     // console.log(formData);
     setLoading(true);
     event.preventDefault();
-
-    const token = localStorage.getItem("ACCESS_TOKEN");
-
-    api
+    await api
       .request({
         method: editMode ? "put" : "post",
         url: route,
         data: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         params: {
           course_code: editMode ? course.code : formData.code,
         },
       })
       .then((response) => {
+        if (editMode && course.code != formData.code) {
+          navigate(`/admin/manage/courses/${formData.code}`);
+        } else {
+          editMode && window.dispatchEvent(new Event("course-updated"));
+        }
         window.dispatchEvent(new Event("course-created"));
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${response.data.message}`,
-              severity: "success",
-            },
-          })
-        );
+        eventDispatcher("responseEvent", response);
         handleResetFormData();
         if (selectedFile) handleFileUpload();
         setLoading(false);
         !editMode && navigate(`/admin/manage/courses`);
-        editMode && window.dispatchEvent(new Event("course-updated"));
         handleCloseModal(false);
       })
       .catch((error) => {
-        window.dispatchEvent(
-          new CustomEvent("responseEvent", {
-            detail: {
-              message: `${error.response.data.error}`,
-              severity: "danger",
-            },
-          })
-        );
+        eventDispatcher("responseEvent", error, "danger");
         setLoading(false);
       });
 
