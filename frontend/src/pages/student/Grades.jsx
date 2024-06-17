@@ -102,9 +102,9 @@ export function CourseCard({ info, isReviewing, setEvaluationData }) {
 export default function Grades({ setEvaluationData }) {
   const [loading, setLoading] = useState(true);
   const userData = useOutletContext();
-  console.log(userData);
+  // console.log(userData);
   const [evaluations, setEvaluations] = useState([]);
-  console.log(evaluations);
+  // console.log(evaluations);
   useEffect(() => {
     const fetchData = async () => {
       await api
