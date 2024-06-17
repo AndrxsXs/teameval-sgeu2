@@ -11,6 +11,7 @@ import CreateStudent from "../teacher/CreateStudent";
 import GroupsTable from "../teacher/groups/GroupsTable";
 import CreateGroup from "../teacher/groups/CreateGroup";
 import RubricList from "../teacher/RubricList";
+import CreateRubric from "../teacher/CreateRubric";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
@@ -25,6 +26,7 @@ import TabPanel from "@mui/joy/TabPanel";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import api from "../../api";
+import eventDispatcher from "../../utils/eventDispacher";
 
 function CourseActions(props) {
   const { course } = props;
@@ -57,7 +59,7 @@ export default function CourseDetailed() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGroupInfo = async () => {
+    const fetchCourseInfo = async () => {
       await api
         .get(`api/course_info/${courseId}/`)
         .then((response) => {
@@ -66,20 +68,20 @@ export default function CourseDetailed() {
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
+          eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         });
     };
-    fetchGroupInfo();
+    fetchCourseInfo();
 
-    window.addEventListener("course-updated", fetchGroupInfo);
-    window.addEventListener("course-enabled", fetchGroupInfo);
-    window.addEventListener("course-disabled", fetchGroupInfo);
+    window.addEventListener("course-updated", fetchCourseInfo);
+    window.addEventListener("course-enabled", fetchCourseInfo);
+    window.addEventListener("course-disabled", fetchCourseInfo);
 
     return () => {
-      window.removeEventListener("course-updated", fetchGroupInfo);
-      window.removeEventListener("course-enabled", fetchGroupInfo);
-      window.removeEventListener("course-disabled", fetchGroupInfo);
+      window.removeEventListener("course-updated", fetchCourseInfo);
+      window.removeEventListener("course-enabled", fetchCourseInfo);
+      window.removeEventListener("course-disabled", fetchCourseInfo);
     };
   }, [courseId]);
 
@@ -146,6 +148,7 @@ export default function CourseDetailed() {
                 }}
               >
                 <TabList
+                  variant="outlined"
                   size="sm"
                   sticky="top"
                   tabFlex={1}
@@ -250,7 +253,18 @@ export default function CourseDetailed() {
                     overflow: "auto",
                   }}
                 >
-                  <RubricList />
+                  <Stack
+                    direction="column"
+                    gap={1}
+                    sx={{
+                      height: "100%",
+                    }}
+                  >
+                    <RubricList />
+                    <Stack direction="row">
+                      <CreateRubric />
+                    </Stack>
+                  </Stack>
                 </TabPanel>
               </Tabs>
             </Stack>
