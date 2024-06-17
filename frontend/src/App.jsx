@@ -42,7 +42,7 @@ import Grades from "./pages/student/Grades";
 
 import Result from "./pages/student/Result";
 import Feedback from "./pages/student/Feedback";
-// import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
+import ViewEvaluations from "./pages/student/evaluation/ViewEvaluations";
 import ViewRubric from "./pages/student/evaluation/ViewRubric";
 import RubricResult from "./pages/student/RubricResult";
 import ViewFeedback from "./pages/student/ViewFeedback";
@@ -139,7 +139,7 @@ function App() {
             index
             element={<Grades setEvaluationData={setEvaluationData} />}
           />
-          {/* <Route path="evaluar/:curso" element={<ViewCursoStudent />} /> */}
+          {/* <Route path="evaluar/:curso" element={<ViewEvaluations />} /> */}
           <Route
             path="evaluar/:curso"
             element={<Evaluate evaluationData={evaluationData} />}
@@ -147,8 +147,11 @@ function App() {
           <Route path="./rubrica" element={<ViewRubric />} />
 
           <Route path="resultados" element={<Result />} />
-          <Route path="resultados/:calificación" element={<RubricResult />} />
-
+          <Route path="resultados/:courseId" element={<ViewEvaluations />} />
+          <Route
+            path="resultados/:courseId/:evalId"
+            element={<RubricResult />}
+          />
           <Route path="retroalimentacion" element={<Feedback />} />
           <Route path="retroalimentacion/feedback" element={<ViewFeedback />} />
         </Route>
