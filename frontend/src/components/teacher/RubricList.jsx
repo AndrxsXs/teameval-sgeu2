@@ -9,12 +9,22 @@ import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
 import Skeleton from "@mui/joy/Skeleton";
 import Stack from "@mui/joy/Stack";
+import ViewRubricModal from "./ViewRubricModal";
 
 import { Link, useParams } from "react-router-dom";
 
 import Radio from "@mui/joy/Radio";
 
-function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
+function RubricCard({
+  rubric,
+  selectMode,
+  onSelect,
+  selected,
+  handleSelect,
+  admin,
+  onClick,
+  // click,
+}) {
   const handleSelectRubric = () => {
     handleSelect(); // Llamar a la función pasada por el padre
     onSelect(rubric); // Llamar a la función de devolución de llamada onSelect
@@ -24,8 +34,13 @@ function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
     <Fragment>
       {!selectMode ? (
         <Link
-          to={`./${rubric.id}`}
-          // to="#"
+          to={!admin ? `./${rubric.id}` : "#"}
+          onClick={() => {
+            // Llamar a la función onClick cuando se hace clic en la tarjeta
+            if (typeof onClick === "function") {
+              onClick(rubric);
+            }
+          }}
           style={{
             textDecoration: "none",
             color: "inherit",
@@ -86,8 +101,9 @@ function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
                       left: 0,
                       right: 0,
                       height: "3.2em", // Altura del efecto de desvanecimiento
-                      backgroundImage:
-                        "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))",
+                      // backgroundImage:
+                      // "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))",
+                      // filter: "blur(5px)", // Add filter property with blur value
                     },
                   }}
                 >
@@ -160,11 +176,31 @@ function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
               {rubric.standards.length === 1 ? "criterio:" : "criterios:"}
             </Typography>
             <Typography>
-              {rubric.standards.map((standard, index) => (
-                <Typography key={index} level="body-xs" color="textSecondary">
-                  {standard.description}
-                </Typography>
-              ))}
+              <Stack
+                direction="column"
+                sx={{
+                  maxHeight: "3.6em", // Altura máxima deseada para el contenido de texto
+                  overflow: "hidden",
+                  position: "relative",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "3.2em", // Altura del efecto de desvanecimiento
+                    // backgroundImage:
+                    // "linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))",
+                    // filter: "blur(5px)", // Add filter property with blur value
+                  },
+                }}
+              >
+                {rubric.standards.map((standard, index) => (
+                  <Typography key={index} level="body-xs" color="textSecondary">
+                    {standard.description}
+                  </Typography>
+                ))}
+              </Stack>
             </Typography>
           </CardContent>
         </Card>
@@ -174,12 +210,20 @@ function RubricCard({ rubric, selectMode, onSelect, selected, handleSelect }) {
 }
 
 export default function RubricList(props) {
-  const { selectMode, onSelect } = props;
+  const { selectMode, onSelect, admin } = props;
   const { courseId } = useParams();
 
   const [rubrics, setRubrics] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedRubricId, setSelectedRubricId] = useState(null); // Nuevo estado
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRubric, setSelectedRubric] = useState(null);
+
+  const handleOpenRubricDetails = (rubric) => {
+    setSelectedRubric(rubric);
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchRubrics = async () => {
@@ -205,6 +249,12 @@ export default function RubricList(props) {
     };
 
     fetchRubrics();
+
+    window.addEventListener("load", fetchRubrics);
+
+    return () => {
+      window.removeEventListener("load", fetchRubrics);
+    };
   }, [courseId]);
 
   return (
@@ -220,7 +270,8 @@ export default function RubricList(props) {
           flexWrap: "wrap",
           gap: 2,
           overflow: "auto",
-          justifyContent: "flex-start",
+          // justifyContent: "flex-start",
+          justifyContent: "center",
           alignContent: "start",
           padding: 1,
         }}
@@ -228,6 +279,8 @@ export default function RubricList(props) {
         {!loading
           ? rubrics.map((rubric) => (
               <RubricCard
+                admin={admin}
+                onClick={handleOpenRubricDetails} // Pasar la función handleOpenRubricDetails
                 key={rubric.id}
                 rubric={rubric}
                 selectMode={selectMode}
@@ -239,7 +292,7 @@ export default function RubricList(props) {
                 }}
               />
             ))
-          : Array.from(new Array(9)).map((_, index) => (
+          : Array.from(new Array(6)).map((_, index) => (
               <Skeleton
                 key={index}
                 animation="wave"
@@ -272,6 +325,14 @@ export default function RubricList(props) {
           </Stack>
         ) : null}
       </Box>
+
+      {isModalOpen && selectedRubric && (
+        <ViewRubricModal
+          data={selectedRubric}
+          open={isModalOpen}
+          setOpen={setIsModalOpen}
+        />
+      )}
     </Fragment>
   );
 }

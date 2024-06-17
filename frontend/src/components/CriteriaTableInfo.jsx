@@ -11,10 +11,20 @@ import Stack from "@mui/joy/Stack";
 import Skeleton from "@mui/joy/Skeleton";
 
 export default function CriteriaTableInfo(props) {
-  const { onStandardsChange } = props;
+  const { data, onStandardsChange, setChangesMade } = props;
   const [loading, setLoading] = useState(true);
+  const [changesMade, setLocalChangesMade] = useState(false);
 
-  const rubricId = useParams().rubric;
+  const [rubricId, setRubricId] = useState(null);
+
+  const { rubric } = useParams();
+  useEffect(() => {
+    if (data && data.id) {
+      setRubricId(data.id);
+    } else {
+      setRubricId(rubric);
+    }
+  }, [data, rubric]);
 
   const [rows, setRows] = useState([
     {
@@ -22,6 +32,9 @@ export default function CriteriaTableInfo(props) {
       scale_description: "",
     },
   ]);
+
+  // console.log(data);
+  // console.log(rows);
 
   const headCells = [
     {
@@ -47,24 +60,46 @@ export default function CriteriaTableInfo(props) {
           setLoading(false);
         })
         .catch((error) => {
-          eventDispatcher("responseEvent", error);
+          eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         });
     };
-    fetchRubric();
+
+    if (rubricId != (null || undefined)) fetchRubric();
   }, [rubricId]);
 
   const handleDescriptionChange = (index, value) => {
     const updatedStandards = [...rows];
     updatedStandards[index].description = value;
-    onStandardsChange(updatedStandards);
+    onStandardsChange(updatedStandards); // Pasar solo los estándares editados
+    setLocalChangesMade(true);
+    setChangesMade(true);
   };
 
   const handleScaleDescriptionChange = (index, value) => {
     const updatedStandards = [...rows];
     updatedStandards[index].scale_description = value;
-    onStandardsChange(updatedStandards);
+    onStandardsChange(updatedStandards); // Pasar solo los estándares editados
+    setLocalChangesMade(true);
+    setChangesMade(true);
   };
+
+  // const handleDescriptionChange = (index, value) => {
+  //   const updatedStandards = [...rows];
+  //   updatedStandards[index].description = value;
+  //   onStandardsChange(updatedStandards);
+  //   setLocalChangesMade(true);
+  //   setChangesMade(true);
+  // };
+
+  // const handleScaleDescriptionChange = (index, value) => {
+  //   const updatedStandards = [...rows];
+  //   updatedStandards[index].scale_description = value;
+  //   onStandardsChange(updatedStandards);
+  //   setLocalChangesMade(true);
+  //   setChangesMade(true);
+  // };
+
   return (
     <Fragment>
       <Sheet
@@ -126,9 +161,9 @@ export default function CriteriaTableInfo(props) {
                         variant="plain"
                         minRows={3}
                         maxRows={5}
-                        onChange={(e) =>
-                          handleDescriptionChange(index, e.target.value)
-                        }
+                        onChange={(e) => {
+                          handleDescriptionChange(index, e.target.value);
+                        }}
                         placeholder="Descripción del criterio"
                       />
                     </td>
@@ -148,7 +183,7 @@ export default function CriteriaTableInfo(props) {
                     </td>
                   </tr>
                 ))
-              : Array.from({ length: 7 }, (_, index) => (
+              : Array.from({ length: 3 }, (_, index) => (
                   <tr key={index}>
                     <td>
                       <Stack

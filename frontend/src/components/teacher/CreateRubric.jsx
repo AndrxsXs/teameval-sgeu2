@@ -56,39 +56,38 @@ export default function CreateRubric(props) {
       Upper_limit: null,
     },
   });
-
-  const handleAddNewRow = () => {
-    const lastRow = rubric.standards[rubric.standards.length - 1];
-    if (
-      lastRow.description.trim() !== "" ||
-      lastRow.scale_description.trim() !== ""
-    ) {
-      setRubric((prevRubric) => ({
-        ...prevRubric,
-        standards: [
-          ...prevRubric.standards,
-          { description: "", scale_description: "" },
-        ],
-      }));
-    } else {
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message:
-              "Por favor, complete los campos de la última fila antes de agregar una nueva.",
-            severity: "warning",
-          },
-        })
-      );
-    }
-  };
-
   React.useEffect(() => {
+    const handleAddNewRow = () => {
+      const lastRow = rubric.standards[rubric.standards.length - 1];
+      if (
+        lastRow.description.trim() !== "" ||
+        lastRow.scale_description.trim() !== ""
+      ) {
+        setRubric((prevRubric) => ({
+          ...prevRubric,
+          standards: [
+            ...prevRubric.standards,
+            { description: "", scale_description: "" },
+          ],
+        }));
+      } else {
+        window.dispatchEvent(
+          new CustomEvent("responseEvent", {
+            detail: {
+              message:
+                "Por favor, complete los campos de la última fila antes de agregar una nueva.",
+              severity: "warning",
+            },
+          })
+        );
+      }
+    };
+
     if (addNewRow) {
       handleAddNewRow();
       setAddNewRow(false);
     }
-  }, [addNewRow]);
+  }, [addNewRow, rubric.standards]);
 
   const handleAddRow = () => {
     setAddNewRow(true);
@@ -118,6 +117,17 @@ export default function CreateRubric(props) {
     setIsModalOpen(value);
   };
 
+  const handleResetFormData = () => {
+    setRubric({
+      name: "",
+      standards: [{ description: "", scale_description: "" }],
+      scale: {
+        Lower_limit: 1,
+        Upper_limit: null,
+      },
+    });
+  };
+
   const handleCreateRubric = (e) => {
     setLoading(true);
     e.preventDefault();
@@ -135,8 +145,10 @@ export default function CreateRubric(props) {
       .then((response) => {
         // console.log(response);
         setIsModalOpen(false);
+        window.dispatchEvent(new Event("load"));
         eventDispatcher("responseEvent", response);
         setLoading(false);
+        handleResetFormData();
       })
       .catch((error) => {
         // console.error(error);
@@ -347,10 +359,7 @@ export default function CreateRubric(props) {
                 >
                   Cancelar
                 </Button>
-                <Button
-                  type="submit"
-                  //   loading={loading}
-                >
+                <Button type="submit" loading={loading}>
                   Crear
                 </Button>
               </Box>
