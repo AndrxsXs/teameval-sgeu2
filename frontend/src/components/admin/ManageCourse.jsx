@@ -121,7 +121,7 @@ export default function ManageCourse(props) {
         },
       })
       .then((response) => {
-        window.dispatchEvent(new Event("user-created"));
+        window.dispatchEvent(new Event("load"));
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
             detail: {
