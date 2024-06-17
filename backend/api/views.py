@@ -2506,6 +2506,38 @@ def enable_course(request, course_code):
         status=status.HTTP_200_OK,
     )
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def courses_evaluations_completed(request):
+    student_code = request.query_params.get("student_code")
+    if not student_code:
+        return Response(
+            {"error": "No se proporcionó el código del estudiante."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        # Obtener el estudiante por código
+        student = Student.objects.get(user__code=student_code)
+    except Student.DoesNotExist:
+        return Response(
+            {"error": "Estudiante no encontrado."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Obtener todos los cursos del estudiante que tienen al menos una evaluación finalizada
+    courses = Course.objects.filter(
+        evaluations__estado=Evaluation.FINISHED,
+        user_students=student
+    ).distinct()
+
+    # Preparar los datos para la respuesta
+    data = [CourseSerializer(course).data for course in courses]
+
+    return Response(
+        {"data": data}, status=status.HTTP_200_OK
+    )
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

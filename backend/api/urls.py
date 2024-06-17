@@ -130,5 +130,7 @@ urlpatterns = [
     path('finish_evaluation/', views.finish_evaluation, name='finish_evaluation'),
     #muestra la rubrica que va a usar para evaluar
     path('rubric_evaluate', views.rubric_evaluate, name='rubric_evaluate'),
+    #muestra los cursos con evaluaciones finalizadas
+    path('courses_evaluations_completed', views.courses_evaluations_completed, name='courses_evaluations_completed'),
     
 ]

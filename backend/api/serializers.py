@@ -275,8 +275,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model= Course
-        fields= ["name", "code", "academic_period", "user_teacher"]
-        
+        fields = ["name", "code", "academic_period", "student_status", "course_status", "user_teacher"]
     def create(self, validated_data):
         
         # Crear una nueva instancia del modelo con los datos validados 
