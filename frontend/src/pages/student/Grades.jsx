@@ -17,7 +17,7 @@ import eventDispatcher from "../../utils/eventDispacher";
 import interpretEvaluationState from "../../utils/interpretEvaluationState";
 
 export function CourseCard({ info, isReviewing, setEvaluationData }) {
-  // console.log(info);
+  // console.log(isReviewing);
 
   const route = isReviewing ? "./evaluar" : "./resultados";
   return (
