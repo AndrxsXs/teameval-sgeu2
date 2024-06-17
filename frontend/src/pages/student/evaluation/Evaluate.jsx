@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import Box from "@mui/joy/Box";
@@ -81,7 +81,15 @@ export default function Evaluate({ evaluationData }) {
         })
         .then((response) => {
           setCompañeros(response.data);
+          console.log(response.data)
           setFetching(false);
+          if (compañeros.length < 1) {
+            navigate("/estudiante");
+            eventDispatcher(
+              "responseEvent",
+              "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+            );
+          }
         })
         .catch((error) => {
           eventDispatcher("responseEvent", error);
@@ -96,7 +104,7 @@ export default function Evaluate({ evaluationData }) {
     return () => {
       window.removeEventListener("user-evaluated", fetchPartners);
     };
-  }, [curso, userData.code]);
+  }, [curso, userData.code, compañeros]);
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -123,15 +131,15 @@ export default function Evaluate({ evaluationData }) {
     setLoading(false);
   };
 
-  useMemo(() => {
-    if (compañeros.length < 1) {
-      navigate(-1);
-      eventDispatcher(
-        "responseEvent",
-        "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
-      );
-    }
-  }, [compañeros, navigate]);
+  // useMemo(() => {
+  //   if (compañeros.length < 1) {
+  //     navigate(-1);
+  //     eventDispatcher(
+  //       "responseEvent",
+  //       "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+  //     );
+  //   }
+  // }, [compañeros, navigate]);
 
   return (
     <Stack direction="column" gap={2}>

@@ -20,7 +20,7 @@ export default function Result() {
   useMemo(() => {
     const fetchUserCourses = async () => {
       await api
-        .get(`api/student_courses/`, {
+        .get(`api/courses_evaluations_completed`, {
           params: {
             student_code: userData.code,
           },
