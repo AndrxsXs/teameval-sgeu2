@@ -32,7 +32,7 @@ export default function EvaluationList() {
           },
         })
         .then((response) => {
-          // console.log("Evaluaciones: ", response.data);
+          console.log("Evaluaciones: ", response.data);
           setEvaluations(response.data);
           setLoading(false);
         })
@@ -110,13 +110,13 @@ export default function EvaluationList() {
           </Box>
         )}
       </Box>
-      {
+      {isModalOpen && (
         <ViewEvaluationModal
           data={selectedEvaluation}
           open={isModalOpen}
           setOpen={setIsModalOpen}
         />
-      }
+      )}
     </>
   );
 }

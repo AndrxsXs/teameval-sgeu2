@@ -1458,7 +1458,7 @@ def create_evaluation(request):
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def start_evaluation(request):
-    evaluation_id = request.query_params.get("evaluation_id")
+    evaluation_id = request.data.get("evaluation_id")
     if not evaluation_id:
         return Response(
             {"error": "No se proporcionó el ID de la evaluación."},
@@ -1499,7 +1499,7 @@ def start_evaluation(request):
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def finish_evaluation(request):
-    evaluation_id = request.query_params.get("evaluation_id")
+    evaluation_id = request.data.get("evaluation_id")
     if not evaluation_id:
         return Response(
             {"error": "No se proporcionó el ID de la evaluación."},

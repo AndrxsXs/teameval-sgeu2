@@ -47,13 +47,12 @@ export default function ViewEvaluationModal({ data, open, setOpen }) {
     e.preventDefault();
     await api
       .patch(`api/${state}_evaluation/`, {
-        params: {
-          evaluation_id: evaluation.id,
-        },
+        evaluation_id: evaluation.id_evaluation,
       })
       .then((response) => {
         setOpen(false);
         eventDispatcher("responseEvent", response);
+        window.dispatchEvent(new Event("load"));
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error, "danger");
@@ -98,7 +97,7 @@ export default function ViewEvaluationModal({ data, open, setOpen }) {
                 </Typography>
                 <Typography>
                   Estado:{" "}
-                  <Chip color={evaluation.estado === 2 && "success"}>
+                  <Chip color={evaluation.estado === 2 ? "success" : "primary"}>
                     {interpretEvaluationState(evaluation.estado)}
                   </Chip>
                 </Typography>
@@ -143,13 +142,15 @@ export default function ViewEvaluationModal({ data, open, setOpen }) {
           >
             Cerrar
           </Button>
-          <Button
-            variant="soft"
-            color={state === "start" ? "success" : "danger"}
-            onClick={changeState}
-          >
-            {state === "start" ? "Iniciar" : "Finalizar"} evaluación
-          </Button>
+          {evaluation.estado != 3 && (
+            <Button
+              variant="soft"
+              color={state === "start" ? "success" : "danger"}
+              onClick={changeState}
+            >
+              {state === "start" ? "Iniciar" : "Finalizar"} evaluación
+            </Button>
+          )}
           {/* <CreateStudent course={courseId} />
               <ImportUsersModal courseId={courseId} isStudent /> */}
         </Box>

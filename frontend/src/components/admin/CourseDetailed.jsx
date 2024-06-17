@@ -348,7 +348,7 @@ export default function CourseDetailed() {
                 />
                 <Button
                   variant="soft"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate("/admin/manage/courses")}
                   startDecorator={<CloseRoundedIcon />}
                 >
                   Cerrar
