@@ -12,6 +12,7 @@ import GroupsTable from "../teacher/groups/GroupsTable";
 import CreateGroup from "../teacher/groups/CreateGroup";
 import RubricList from "../teacher/RubricList";
 import CreateRubric from "../teacher/CreateRubric";
+import EvaluationList from "../teacher/EvaluationList";
 
 import Card from "@mui/joy/Card";
 import Stack from "@mui/joy/Stack";
@@ -27,6 +28,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import api from "../../api";
 import eventDispatcher from "../../utils/eventDispacher";
+import CreateEvaluation from "../teacher/CreateEvaluation";
 
 function CourseActions(props) {
   const { course } = props;
@@ -173,9 +175,14 @@ export default function CourseDetailed() {
                     gap: 1,
                     borderRadius: "lg",
                     bgcolor: "background.level1",
+                    [`& .${tabClasses.root}`]: {
+                      fontWeight: "md",
+                    },
                     [`& .${tabClasses.root}[aria-selected="true"]`]: {
+                      color: "primary.500",
                       boxShadow: "sm",
                       bgcolor: "background.surface",
+                      fontWeight: "lg",
                     },
                     boxShadow: "md",
                     "&:hover": {
@@ -260,9 +267,30 @@ export default function CourseDetailed() {
                       height: "100%",
                     }}
                   >
-                    <RubricList />
+                    <RubricList admin />
                     <Stack direction="row">
                       <CreateRubric />
+                    </Stack>
+                  </Stack>
+                </TabPanel>
+                <TabPanel
+                  value={3}
+                  sx={{
+                    padding: 0,
+                    height: "50dvh",
+                    overflow: "auto",
+                  }}
+                >
+                  <Stack
+                    direction="column"
+                    gap={1}
+                    sx={{
+                      height: "100%",
+                    }}
+                  >
+                    <EvaluationList />
+                    <Stack direction="row">
+                      <CreateEvaluation />
                     </Stack>
                   </Stack>
                 </TabPanel>
@@ -291,14 +319,14 @@ export default function CourseDetailed() {
                   level="body-sm"
                   animation="wave"
                   loading
-                  width={100}
+                  width={200}
                 />
                 <Skeleton
                   variant="text"
                   level="body-sm"
                   animation="wave"
                   loading
-                  width={200}
+                  width={100}
                 />
               </Stack>
               <Stack
@@ -319,6 +347,7 @@ export default function CourseDetailed() {
                   height={36}
                 />
                 <Button
+                  variant="soft"
                   onClick={() => navigate(-1)}
                   startDecorator={<CloseRoundedIcon />}
                 >
@@ -326,6 +355,17 @@ export default function CourseDetailed() {
                 </Button>
               </Stack>
             </Stack>
+            <Skeleton
+              sx={{
+                alignSelf: "center",
+                borderRadius: "md",
+              }}
+              variant="rectangular"
+              animation="wave"
+              width="85%"
+              height={50}
+              loading
+            />
             <Skeleton
               variant="rectangular"
               animation="wave"
