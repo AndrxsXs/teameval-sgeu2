@@ -58,7 +58,7 @@ export default function CreateAdmin() {
         setLoading(false);
         handleCloseModal(false);
         handleResetFormData();
-        window.dispatchEvent(new Event("user-created"));
+        window.dispatchEvent(new Event("load"));
       })
       .catch((error) => {
         window.dispatchEvent(
