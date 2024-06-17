@@ -32,7 +32,7 @@ export default function EvaluationList() {
           },
         })
         .then((response) => {
-          // console.log("Evaluaciones: ", response.data);
+          console.log("Evaluaciones: ", response.data);
           setEvaluations(response.data);
           setLoading(false);
         })
