@@ -48,7 +48,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           setIsModalOpen(false);
           setLoading(false);
           eventDispatcher("responseEvent", response);
-          window.dispatchEvent(new Event("user-created"));
+          window.dispatchEvent(new Event("load"));
         })
         .catch((error) => {
           console.log(error);
@@ -74,7 +74,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           },
         })
         .then((response) => {
-          window.dispatchEvent(new Event("user-created"));
+          window.dispatchEvent(new Event("load"));
           setIsModalOpen(false);
           window.dispatchEvent(
             new CustomEvent("responseEvent", {
