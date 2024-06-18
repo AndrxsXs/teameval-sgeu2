@@ -61,19 +61,19 @@ export default function Evaluate({ evaluationData }) {
         setCompañeros(response.data);
         // console.log(response.data)
         setFetching(false);
-        if (compañeros.length < 1) {
-          navigate("/estudiante");
-          eventDispatcher(
-            "responseEvent",
-            "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
-          );
-        }
+        // if (compañeros.length < 1) {
+        //   navigate("/estudiante");
+        //   eventDispatcher(
+        //     "responseEvent",
+        //     "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+        //   );
+        // }
       })
       .catch((error) => {
         eventDispatcher("responseEvent", error);
         setFetching(false);
       });
-  }, [userData.code, curso, setCompañeros, setFetching, compañeros.length]);
+  }, [userData.code, curso, setCompañeros, setFetching]);
 
   useEffect(() => {
     const fetchEvaluationInfo = async () => {
