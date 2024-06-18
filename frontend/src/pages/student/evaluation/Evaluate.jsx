@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import Box from "@mui/joy/Box";
@@ -43,10 +43,36 @@ export default function Evaluate({ evaluationData }) {
 
   const [formData, setFormData] = useState({});
 
-  //   console.log(selectedCriteria);
+  // console.log(selectedCriteria);
 
   const navigate = useNavigate();
   // console.log(data);
+
+  const fetchPartners = useCallback(async () => {
+    await api
+      .get(`api/group_members`, {
+        params: {
+          student_code: userData.code,
+          course_code: curso,
+        },
+      })
+      .then((response) => {
+        setCompañeros(response.data);
+        // console.log(response.data)
+        setFetching(false);
+        // if (compañeros.length < 1) {
+        //   navigate("/estudiante");
+        //   eventDispatcher(
+        //     "responseEvent",
+        //     "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+        //   );
+        // }
+      })
+      .catch((error) => {
+        eventDispatcher("responseEvent", error);
+        setFetching(false);
+      });
+  }, [userData.code, curso, setCompañeros, setFetching]);
 
   useEffect(() => {
     const fetchEvaluationInfo = async () => {
@@ -71,40 +97,23 @@ export default function Evaluate({ evaluationData }) {
         });
     };
 
-    const fetchPartners = async () => {
-      await api
-        .get(`api/group_members`, {
-          params: {
-            student_code: userData.code,
-            course_code: curso,
-          },
-        })
-        .then((response) => {
-          setCompañeros(response.data);
-          // console.log(response.data)
-          setFetching(false);
-          // if (compañeros.length < 1) {
-          //   navigate("/estudiante");
-          //   eventDispatcher(
-          //     "responseEvent",
-          //     "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
-          //   );
-          // }
-        })
-        .catch((error) => {
-          eventDispatcher("responseEvent", error);
-          setFetching(false);
-        });
-    };
-    fetchEvaluationInfo();
     fetchPartners();
+    fetchEvaluationInfo();
 
+    // window.addEventListener("user-evaluated", fetchPartners);
+
+    // return () => {
+    //   window.removeEventListener("user-evaluated", fetchPartners);
+    // };
+  }, [curso, userData.code, fetchPartners]);
+
+  useEffect(() => {
     window.addEventListener("user-evaluated", fetchPartners);
 
     return () => {
       window.removeEventListener("user-evaluated", fetchPartners);
     };
-  }, [curso, userData.code, compañeros]);
+  }, [fetchPartners]);
 
   const handleSubmit = async (e) => {
     setLoading(true);
