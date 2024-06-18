@@ -1965,6 +1965,64 @@ def create_group(request, course_code):
 
 
 # evalua a un estudiante
+#@api_view(["POST"])
+#@permission_classes([IsAuthenticated])
+#def evaluate_student(request):
+#    data = request.data
+#    try:
+#        evaluation = Evaluation.objects.get(id=data.get("id_evaluation"))
+#    except Evaluation.DoesNotExist:
+#        return Response(
+#            {"error": "No se encontró una evaluación pendiente."},
+#            status=status.HTTP_404_NOT_FOUND,
+#        )
+#
+#    standards = evaluation.rubric.standards.all()
+#
+#    evaluation_completed = EvaluationCompleted(
+#        evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
+#        evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
+#        evaluation=evaluation,
+#    )
+
+#    evaluation_completed.save()
+
+#    for standard in standards:
+#        score = request.data.get(str(standard.id))  # Buscar la calificación en el objeto principal
+#        if score is not None:
+#            rating_data = {
+#                "standard": standard.id,
+#                "evaluationCompleted": evaluation_completed.id,
+#                "qualification": int(score),
+#            }
+#            rating_serializer = RatingSerializer(data=rating_data)
+#            if rating_serializer.is_valid():
+#                rating_serializer.save()
+#            else:
+#                return Response(
+#                    rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+#                )
+
+#    comment = request.data.get("comment")
+#    if comment:
+#        evaluation_completed.comment = comment
+
+#    evaluation_completed.completed = True
+
+#    evaluation_completed.evaluated = get_object_or_404(
+#        Student, user__code=data.get("evaluated")
+#    )
+
+#    evaluation_completed.evaluator = get_object_or_404(
+#        Student, user__code=data.get("evaluator")
+#    )
+
+#    evaluation_completed.save()
+
+#    return Response(
+#        {"message": "Evaluación completada con éxito."}, status=status.HTTP_200_OK
+#    )
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def evaluate_student(request):
@@ -1977,18 +2035,16 @@ def evaluate_student(request):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    standards = evaluation.rubric.standards.all()
-
+    standards = list(evaluation.rubric.standards.all())
     evaluation_completed = EvaluationCompleted(
         evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
         evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
         evaluation=evaluation,
     )
-
     evaluation_completed.save()
 
-    for standard in standards:
-        score = request.data.get(str(standard.id))  # Buscar la calificación en el objeto principal
+    for index, standard in enumerate(standards, start=1):
+        score = data.get(str(index))  # Buscar la calificación por posición
         if score is not None:
             rating_data = {
                 "standard": standard.id,
@@ -2003,20 +2059,11 @@ def evaluate_student(request):
                     rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )
 
-    comment = request.data.get("comment")
+    comment = data.get("comment")
     if comment:
         evaluation_completed.comment = comment
 
     evaluation_completed.completed = True
-
-    evaluation_completed.evaluated = get_object_or_404(
-        Student, user__code=data.get("evaluated")
-    )
-
-    evaluation_completed.evaluator = get_object_or_404(
-        Student, user__code=data.get("evaluator")
-    )
-
     evaluation_completed.save()
 
     return Response(
