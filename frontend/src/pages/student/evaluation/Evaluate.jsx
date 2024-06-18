@@ -28,13 +28,14 @@ export default function Evaluate({ evaluationData }) {
   const [scale, setScale] = useState();
   const [rows, setRows] = useState();
 
-  //   console.log(curso);
+  // console.log(data);
 
   //   const data = evaluationData;
   //   const scale = data.rubric.scale;
   //   const rows = data.rubric.standards;
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
   const [compañeros, setCompañeros] = useState([]);
   //   const [selectedValues, setSelectedValues] = useState(rows.map(() => null));
   const [selectedValues, setSelectedValues] = useState();
@@ -88,12 +89,12 @@ export default function Evaluate({ evaluationData }) {
           setScale(data.rubric.scale);
           setRows(data.rubric.standards);
           setSelectedValues(data.rubric.standards.map(() => null));
-          setFetching(false);
+          setLoadingData(false);
           // console.log(response.data.data);
         })
         .catch((error) => {
           eventDispatcher("responseEvent", error);
-          setFetching(false);
+          setLoadingData(false);
         });
     };
 
@@ -172,7 +173,7 @@ export default function Evaluate({ evaluationData }) {
             maxWidth: "60%",
           }}
         >
-          {!fetching ? (
+          {!loadingData ? (
             <>
               <Typography level="h2" component="h1">
                 {data.name}
@@ -281,7 +282,7 @@ export default function Evaluate({ evaluationData }) {
             }}
           >
             <thead>
-              {!fetching ? (
+              {!loadingData ? (
                 <>
                   <tr>
                     <th rowSpan={2}>Criterio</th>
@@ -323,7 +324,7 @@ export default function Evaluate({ evaluationData }) {
               )}
             </thead>
             <tbody>
-              {!fetching
+              {!loadingData
                 ? rows.map((row, rowIndex) => (
                     <Tooltip
                       // title={row.scale_description}
