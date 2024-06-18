@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 from django.core.validators import validate_email
+from rest_framework.exceptions import AuthenticationFailed
 
 
 # from django.contrib.auth.models import User
@@ -728,19 +729,25 @@ def import_teacher(request):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
+        
+        if user.status == False:
+            return Response({"error": "Usuario deshabilitado"},
+                status=status.HTTP_400_BAD_REQUEST,)
+            #raise AuthenticationFailed("Usuario deshabilitado")
+        
         token = super().get_token(user)
 
         # Añade el rol del usuario al payload del token
         token["role"] = user.role
         token["first_login"] = user.first_login
 
+        return token
+
         # Puse lo siguiente para recibir info del usuario temporalmente
         # Esto debe ser otra api view, actualmente es la user_data()
         # token['name'] = user.name
         # token['last_name'] = user.last_name
         # token['email'] = user.email
-
-        return token
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -2697,17 +2704,24 @@ def enable_user(request):
         )
 
 
-# @permission_classes([IsAuthenticated])
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def restore_password(request):
-    q = request.data.get("mail", "")
+    
+    q = request.data.get("user_email", "")
     subject = "Restablecer contraseña"
 
     longitud_codigo = 6  # Puedes cambiar la longitud del código aquí
     codigo_aleatorio = generar_codigo_alfanumerico(longitud_codigo)
     print("Código alfanumérico aleatorio:", codigo_aleatorio)
 
-    usuario = models.User.objects.get(email=q)
+    try:
+        usuario = models.User.objects.get(email=q)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "No existe un usuario con esta direccion de correo electronico"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     usuario.set_password(codigo_aleatorio)
 
