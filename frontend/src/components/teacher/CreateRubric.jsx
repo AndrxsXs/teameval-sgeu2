@@ -41,21 +41,25 @@ const headCells = [
 ];
 
 export default function CreateRubric(props) {
-  const { adminMode } = props;
+  const { adminMode, editMode, data } = props;
   const courseId = useParams().courseId;
   const [loading, setLoading] = useState(false);
   // console.log(courseId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const action = React.useRef(null);
   const [addNewRow, setAddNewRow] = useState(false);
-  const [rubric, setRubric] = useState({
-    name: "",
-    standards: [{ description: "", scale_description: "" }],
-    scale: {
-      Lower_limit: 1,
-      Upper_limit: null,
-    },
-  });
+  const [rubric, setRubric] = useState(
+    editMode && data
+      ? data
+      : {
+          name: "",
+          standards: [{ description: "", scale_description: "" }],
+          scale: {
+            Lower_limit: 1,
+            Upper_limit: null,
+          },
+        }
+  );
   React.useEffect(() => {
     const handleAddNewRow = () => {
       const lastRow = rubric.standards[rubric.standards.length - 1];
@@ -136,12 +140,29 @@ export default function CreateRubric(props) {
       .post(
         `api/${!adminMode ? "create_rubric" : "create_global_rubric"}`,
         rubric,
-        {
-          params: {
-            course_code: courseId,
-          },
-        }
+        !adminMode ? { params: { course_code: courseId } } : null
       )
+      .then((response) => {
+        // console.log(response);
+        setIsModalOpen(false);
+        window.dispatchEvent(new Event("load"));
+        eventDispatcher("responseEvent", response);
+        setLoading(false);
+        handleResetFormData();
+      })
+      .catch((error) => {
+        // console.error(error);
+        eventDispatcher("responseEvent", error, "danger");
+        setLoading(false);
+      });
+  };
+
+  const handleEditRubric = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    // console.log(rubric);
+    api
+      .put(`api/edit_rubric/${data.id}`, rubric)
       .then((response) => {
         // console.log(response);
         setIsModalOpen(false);
@@ -165,14 +186,14 @@ export default function CreateRubric(props) {
         startDecorator={<Add />}
         onClick={handleOpenModal}
       >
-        Nueva rúbrica
+        {editMode ? "Editar" : "Nueva"} rúbrica {adminMode && "global"}
       </Button>
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
         ModalTitle="Crear rúbrica"
       >
-        <form onSubmit={handleCreateRubric}>
+        <form onSubmit={!editMode ? handleCreateRubric : handleEditRubric}>
           <Stack
             component="article"
             direction="column"
@@ -360,7 +381,7 @@ export default function CreateRubric(props) {
                   Cancelar
                 </Button>
                 <Button type="submit" loading={loading}>
-                  Crear
+                  {editMode ? "Guardar cambios" : "Crear rúbrica"}
                 </Button>
               </Box>
             </Stack>
