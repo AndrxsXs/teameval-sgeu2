@@ -59,6 +59,7 @@ export default function ViewResults() {
     };
 
     fetchEvaluation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.code, evalId]);
 
   return (
