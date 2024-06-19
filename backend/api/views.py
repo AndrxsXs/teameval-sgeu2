@@ -2216,18 +2216,16 @@ def evaluation_results(request):
 
     final_score = total_score / total_standards if total_standards > 0 else 0
 
-    # Concatenar comentarios
+    # Agregar comentarios
     for ec in evaluation_completed_list:
         if ec.comment:
             all_comments.append(ec.comment)
-
-    comments = "\n".join(all_comments)
 
     return Response(
         {
             "final_score": final_score,
             "standards": results,
-            "comments": comments,
+            "comments": all_comments,  # Devolver array de comentarios
             "total_count": total_standards,
             "partners": num_group_students,
         }
