@@ -1,12 +1,18 @@
 /* eslint-disable react/prop-types */
 import { useState, Fragment, useMemo } from "react";
-import { useOutletContext, useParams, Link } from "react-router-dom";
+import {
+  useOutletContext,
+  useParams,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import api from "../../../api";
 import eventDispatcher from "../../../utils/eventDispacher";
 import interpretEvaluationState from "../../../utils/interpretEvaluationState";
 
 import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import Card from "@mui/joy/Card";
@@ -23,6 +29,7 @@ export default function ViewEvaluations() {
   const userData = useOutletContext();
   const [courseData, setCourseData] = useState({});
   const [evaluations, setEvaluations] = useState([]);
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(true);
@@ -83,7 +90,26 @@ export default function ViewEvaluations() {
           overflow: "hidden",
         }}
       >
-        <Typography level="h2">Resultados disponibles</Typography>
+        <Stack
+          direction="row"
+          sx={{
+            width: "100%",
+            justifyContent: "space-between",
+            alignItems: "start",
+          }}
+        >
+          <Typography level="h2">Resultados disponibles</Typography>
+
+          <Button
+            variant="outlined"
+            color="neutral"
+            onClick={() => {
+              navigate(-1);
+            }}
+          >
+            Volver
+          </Button>
+        </Stack>
         {!loading ? (
           <>
             <Typography level="h4">
