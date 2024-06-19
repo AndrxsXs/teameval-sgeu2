@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Box from "@mui/joy/Box";
@@ -6,11 +7,13 @@ import EvaluationCard from "./EvaluationCard";
 import Skeleton from "@mui/joy/Skeleton";
 
 import ViewEvaluationModal from "./ViewEvaluationModal";
+import ViewReportDetailedModal from "./ViewReportDetailedModal";
 
 import api from "../../api";
 import eventDispatcher from "../../utils/eventDispacher";
 
-export default function EvaluationList() {
+export default function EvaluationList(props) {
+  const { reportMode } = props;
   const [loading, setLoading] = useState(true);
   const [evaluations, setEvaluations] = useState([]);
   const course_code = useParams().courseId;
@@ -33,7 +36,13 @@ export default function EvaluationList() {
         })
         .then((response) => {
           console.log("Evaluaciones: ", response.data);
-          setEvaluations(response.data);
+
+          !reportMode
+            ? setEvaluations(response.data)
+            : setEvaluations(
+                response.data.filter((evaluation) => evaluation.estado === 3)
+              );
+
           setLoading(false);
         })
         .catch((error) => {
@@ -48,7 +57,7 @@ export default function EvaluationList() {
     return () => {
       window.removeEventListener("load", fetchEvaluations);
     };
-  }, [course_code]);
+  }, [course_code, reportMode]);
 
   return (
     <>
@@ -110,13 +119,22 @@ export default function EvaluationList() {
           </Box>
         )}
       </Box>
-      {isModalOpen && (
-        <ViewEvaluationModal
-          data={selectedEvaluation}
-          open={isModalOpen}
-          setOpen={setIsModalOpen}
-        />
-      )}
+      {isModalOpen &&
+        (!reportMode ? (
+          <ViewEvaluationModal
+            data={selectedEvaluation}
+            open={isModalOpen}
+            setOpen={setIsModalOpen}
+          />
+        ) : (
+          isModalOpen && (
+            <ViewReportDetailedModal
+              data={selectedEvaluation}
+              open={isModalOpen}
+              setOpen={setIsModalOpen}
+            />
+          )
+        ))}
     </>
   );
 }
