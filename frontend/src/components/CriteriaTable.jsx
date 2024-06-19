@@ -72,10 +72,11 @@ export default function CriteriaTable(props) {
               <tr key={index}>
                 <td>
                   <Textarea
+                  defaultValue={row.description}
                     required
                     size="sm"
                     variant="plain"
-                    minRows={3}
+                    // minRows={3}
                     maxRows={5}
                     onChange={(e) =>
                       handleDescriptionChange(index, e.target.value)
@@ -85,10 +86,11 @@ export default function CriteriaTable(props) {
                 </td>
                 <td>
                   <Textarea
+                  defaultValue={row.scale_description}
                     // required
                     size="sm"
                     variant="plain"
-                    minRows={3}
+                    // minRows={3}
                     maxRows={5}
                     onChange={(e) =>
                       handleScaleDescriptionChange(index, e.target.value)

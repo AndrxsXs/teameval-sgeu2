@@ -84,10 +84,10 @@ urlpatterns = [
     path('create_global_rubric', views.create_global_rubric, name='create_global_rubric'), #Luisa
 
     #Editar rubrica global por parte del admin
-    path('update_global_rubric', views.update_global_rubric, name='update_global_rubric'),
+    path('update_global_rubric/<int:rubric_id>', views.update_global_rubric, name='update_global_rubric'),
 
     #Mostrar rubrica global al administrador
-    path('get_global_rubric/<int:rubric_id>/', views.get_global_rubric, name='get_global_rubric'), #Luisa
+    path('get_global_rubric/', views.get_global_rubric, name='get_global_rubric'), #Luisa
 
     #Habilitar curso
     path('enable_course/<str:course_code>/', views.enable_course, name='enable_course'),
