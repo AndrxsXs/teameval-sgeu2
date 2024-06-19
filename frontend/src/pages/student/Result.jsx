@@ -67,7 +67,7 @@ function CourseCard({ info }) {
             <Typography level="title-md">
               {info.name} - {info.code}
             </Typography>
-            <Chip
+            {/* <Chip
               size="sm"
               color={
                 info.estado === 2
@@ -80,7 +80,7 @@ function CourseCard({ info }) {
               }
             >
               {interpretEvaluationState(info.estado)}
-            </Chip>
+            </Chip> */}
           </Stack>
           <Typography level="body-xs">{info.name}</Typography>
           <Typography level="body-xs">
