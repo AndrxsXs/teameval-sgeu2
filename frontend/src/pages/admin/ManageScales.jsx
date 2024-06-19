@@ -1,10 +1,11 @@
-import { Fragment } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import GlobalCriteriaTable from "../../components/admin/GlobalCriteriaTable";
 
 import Typography from "@mui/joy/Typography";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
+import Skeleton from "@mui/joy/Skeleton";
 // import FormControl from "@mui/joy/FormControl";
 // import FormLabel from "@mui/joy/FormLabel";
 // import Select from "@mui/joy/Select";
@@ -14,7 +15,8 @@ import Stack from "@mui/joy/Stack";
 // import CloseRounded from "@mui/icons-material/CloseRounded";
 
 // import RubricList from "../../components/teacher/RubricList";
-import CreateRubric from "../../components/teacher/CreateRubric";
+import ManageRubric from "../../components/teacher/ManageRubric";
+// import eventDispatcher from "../../utils/eventDispacher";
 
 const headCells = [
   {
@@ -32,6 +34,23 @@ const headCells = [
 ];
 
 export default function ManageScales() {
+  const [editMode, setEditMode] = useState(false);
+  const [rubricInfo, setRubricInfo] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useMemo(() => {
+    if (rubricInfo.id) {
+      setEditMode(true);
+      setLoading(false);
+    } else {
+      // eventDispatcher(
+      //   "responseEvent",
+      //   "No se ha encontrado la rúbrica",
+      //   "danger"
+      // );
+    }
+  }, [rubricInfo]);
+
   return (
     <Fragment>
       <Box
@@ -71,7 +90,7 @@ export default function ManageScales() {
             flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <CreateRubric adminMode />
+          <ManageRubric adminMode editMode={editMode} data={rubricInfo} />
         </Box>
       </Box>
       {/* <FormControl>
@@ -131,7 +150,36 @@ export default function ManageScales() {
           Seleccione el límite superior de la escala de la rúbrica.
         </FormHelperText>
       </FormControl> */}
-      <GlobalCriteriaTable headCells={headCells} />
+      <Stack component="section">
+        {!loading && rubricInfo.id ? (
+          <>
+            <Typography level="title-md">Nombre: {rubricInfo.name}</Typography>
+            <Typography level="body-sm">
+              escala: {rubricInfo.scale.Lower_limit} -{" "}
+              {rubricInfo.scale.Upper_limit}
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Skeleton
+              variant="text"
+              level="title-md"
+              width={200}
+              animation="wave"
+            />
+            <Skeleton
+              variant="text"
+              level="body-sm"
+              width={100}
+              animation="wave"
+            />
+          </>
+        )}
+      </Stack>
+      <GlobalCriteriaTable
+        setRubricInfo={setRubricInfo}
+        headCells={headCells}
+      />
       {/* <RubricList /> */}
     </Fragment>
   );

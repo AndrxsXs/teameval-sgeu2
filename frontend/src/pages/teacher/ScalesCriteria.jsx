@@ -1,6 +1,6 @@
 import { Box } from "@mui/joy";
 import { Typography } from "@mui/joy";
-import CreateRubric from "../../components/teacher/CreateRubric";
+import ManageRubric from "../../components/teacher/ManageRubric";
 // import SearchRubric from "../../components/teacher/SearchRubric"
 import RubricList from "../../components/teacher/RubricList";
 
@@ -25,7 +25,7 @@ export default function ScalesCriteria() {
           Escalas y criterios
         </Typography>
 
-        <CreateRubric />
+        <ManageRubric />
       </Box>
       <RubricList />
     </>
