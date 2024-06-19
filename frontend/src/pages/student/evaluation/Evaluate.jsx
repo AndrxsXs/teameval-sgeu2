@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
@@ -65,15 +66,16 @@ export default function Evaluate({ evaluationData }) {
         setCompañeros(response.data);
         // console.log(response.data)
         setFetching(false);
-        // if (compañeros.length < 1) {
-        //   navigate("/estudiante");
-        //   eventDispatcher(
-        //     "responseEvent",
-        //     "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
-        //   );
-        // }
+        if (response.data.length < 1) {
+          navigate("/estudiante");
+          eventDispatcher(
+            "responseEvent",
+            "No hay más compañeros para evaluar, espere a que su docente publique los resultados."
+          );
+        }
       })
       .catch((error) => {
+        navigate(-1);
         eventDispatcher("responseEvent", error);
         setFetching(false);
       });
@@ -97,6 +99,7 @@ export default function Evaluate({ evaluationData }) {
           // console.log(response.data.data);
         })
         .catch((error) => {
+          navigate(-1);
           eventDispatcher("responseEvent", error);
           setLoadingData(false);
         });
@@ -556,7 +559,7 @@ export default function Evaluate({ evaluationData }) {
                   maxRows={3}
                   placeholder="Escriba aquí sus comentarios"
                   onChange={(e) =>
-                    setFormData({ ...formData, comments: e.target.value })
+                    setFormData({ ...formData, comment: e.target.value })
                   }
                 />
               </FormControl>

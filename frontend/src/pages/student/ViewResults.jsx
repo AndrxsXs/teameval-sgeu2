@@ -20,7 +20,7 @@ export default function ViewResults() {
   const [fetching, setFetching] = useState(true);
   const [rows, setRows] = useState([]);
   const [scale, setScale] = useState([]);
-  const [comments, setComments] = useState("");
+  const [comments, setComments] = useState();
   const [finalScore, setFinalScore] = useState(0);
   const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ export default function ViewResults() {
           },
         })
         .then((response) => {
-          console.log(response.data);
+          // console.log(response.data);
           const { final_score, standards, comments, partners } = response.data;
           const scale = Array.from(
             { length: partners },
@@ -45,7 +45,6 @@ export default function ViewResults() {
             scale_description: standard.standard_description,
             individual_ratings: standard.individual_ratings,
           }));
-
           setRows(rows);
           setScale(scale);
           setFetching(false);
@@ -59,7 +58,7 @@ export default function ViewResults() {
     };
 
     fetchEvaluation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.code, evalId]);
 
   return (
@@ -387,7 +386,7 @@ export default function ViewResults() {
                   userSelect: "none",
                 }}
               >
-                {comments ? (
+                {comments.length > 0 ? (
                   <ul>
                     {comments.map((comment) => {
                       const id = crypto.randomUUID();
