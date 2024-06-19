@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
-import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef, Fragment, useMemo } from "react";
 import Button from "@mui/joy/Button";
 import Add from "@mui/icons-material/Add";
 import ModalFrame from "../ModalFrame";
@@ -16,6 +15,7 @@ import { useParams } from "react-router-dom";
 
 import IconButton from "@mui/joy/IconButton";
 import CloseRounded from "@mui/icons-material/CloseRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
@@ -40,27 +40,52 @@ const headCells = [
   },
 ];
 
-export default function CreateRubric(props) {
+export default function ManageRubric(props) {
   const { adminMode, editMode, data } = props;
   const courseId = useParams().courseId;
   const [loading, setLoading] = useState(false);
   // console.log(courseId);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const action = React.useRef(null);
+  const action = useRef(null);
   const [addNewRow, setAddNewRow] = useState(false);
-  const [rubric, setRubric] = useState(
-    editMode && data
-      ? data
-      : {
-          name: "",
-          standards: [{ description: "", scale_description: "" }],
-          scale: {
-            Lower_limit: 1,
-            Upper_limit: null,
-          },
-        }
-  );
-  React.useEffect(() => {
+  const [rubric, setRubric] = useState({
+    name: "",
+    standards: [{ description: "", scale_description: "" }],
+    scale: {
+      Lower_limit: 1,
+      Upper_limit: null,
+    },
+  });
+
+  // useEffect(() => {
+  //   if (editMode && data) {
+  //     setRubric({
+  //       id: data.id,
+  //       name: data.name,
+  //       standards: data.standards,
+  //       scale: {
+  //         Lower_limit: data.scale.Lower_limit,
+  //         Upper_limit: data.scale.Upper_limit,
+  //       },
+  //     });
+  //   }
+  // }, [editMode, data]);
+
+  useMemo(() => {
+    if (editMode && data) {
+      setRubric({
+        id: data.id,
+        name: data.name,
+        standards: data.standards,
+        scale: {
+          Lower_limit: data.scale.Lower_limit,
+          Upper_limit: data.scale.Upper_limit,
+        },
+      });
+    }
+  }, [editMode, data]);
+
+  useEffect(() => {
     const handleAddNewRow = () => {
       const lastRow = rubric.standards[rubric.standards.length - 1];
       if (
@@ -74,6 +99,7 @@ export default function CreateRubric(props) {
             { description: "", scale_description: "" },
           ],
         }));
+        window.dispatchEvent(new Event("load"));
       } else {
         window.dispatchEvent(
           new CustomEvent("responseEvent", {
@@ -84,6 +110,8 @@ export default function CreateRubric(props) {
             },
           })
         );
+
+        window.dispatchEvent(new Event("load"));
       }
     };
 
@@ -94,8 +122,34 @@ export default function CreateRubric(props) {
   }, [addNewRow, rubric.standards]);
 
   const handleAddRow = () => {
-    setAddNewRow(true);
+    const lastRow = rubric.standards[rubric.standards.length - 1];
+    if (
+      lastRow.description.trim() !== "" ||
+      lastRow.scale_description.trim() !== ""
+    ) {
+      setRubric((prevRubric) => ({
+        ...prevRubric,
+        standards: [
+          ...prevRubric.standards,
+          { description: "", scale_description: "" },
+        ],
+      }));
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("responseEvent", {
+          detail: {
+            message:
+              "Por favor, complete los campos de la última fila antes de agregar una nueva.",
+            severity: "warning",
+          },
+        })
+      );
+    }
   };
+
+  // const handleAddRow = () => {
+  //   setAddNewRow(true);
+  // };
 
   const handleRemoveLastRow = () => {
     if (rubric.standards.length > 1) {
@@ -132,7 +186,7 @@ export default function CreateRubric(props) {
     });
   };
 
-  const handleCreateRubric = (e) => {
+  const handleManageRubric = (e) => {
     setLoading(true);
     e.preventDefault();
     // console.log(rubric);
@@ -162,7 +216,12 @@ export default function CreateRubric(props) {
     e.preventDefault();
     // console.log(rubric);
     api
-      .put(`api/edit_rubric/${data.id}`, rubric)
+      .put(
+        `api/${!editMode ? "edit_rubric" : "update_global_rubric"}/${
+          rubric.id
+        }`,
+        rubric
+      )
       .then((response) => {
         // console.log(response);
         setIsModalOpen(false);
@@ -179,11 +238,11 @@ export default function CreateRubric(props) {
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Button
         color="primary"
         // size="sm"
-        startDecorator={<Add />}
+        startDecorator={!editMode ? <Add /> : <EditRoundedIcon />}
         onClick={handleOpenModal}
       >
         {editMode ? "Editar" : "Nueva"} rúbrica {adminMode && "global"}
@@ -191,9 +250,9 @@ export default function CreateRubric(props) {
       <ModalFrame
         open={isModalOpen}
         onClose={handleCloseModal}
-        ModalTitle="Crear rúbrica"
+        ModalTitle={!editMode ? "Crear rúbrica" : "editar rúbrica"}
       >
-        <form onSubmit={!editMode ? handleCreateRubric : handleEditRubric}>
+        <form onSubmit={!editMode ? handleManageRubric : handleEditRubric}>
           <Stack
             component="article"
             direction="column"
@@ -388,6 +447,6 @@ export default function CreateRubric(props) {
           </Stack>
         </form>
       </ModalFrame>
-    </React.Fragment>
+    </Fragment>
   );
 }
