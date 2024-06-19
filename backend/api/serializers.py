@@ -183,15 +183,34 @@ class StandardSerializer(serializers.ModelSerializer):
         model = Standard
         fields = ['description', 'scale_description']
 
+class ScaleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scale
+        fields = ['Lower_limit', 'Upper_limit']
+
 class GlobalRubricSerializer(serializers.ModelSerializer):
-    standards = StandardSerializer(many=True, read_only=True)
-    
+    standards = StandardSerializer(many=True)
+    scale = ScaleSerializer()
+
     class Meta:
         model = Rubric
-        fields = ['name', 'scale', 'standards', 'is_global']
+        fields = ['id', 'name', 'scale', 'standards', 'is_global']
         extra_kwargs = {
             'is_global': {'default': True}
         }
+
+    def create(self, validated_data):
+        standards_data = validated_data.pop('standards')
+        scale_data = validated_data.pop('scale')
+
+        scale = ScaleSerializer().create(scale_data)
+
+        rubric = Rubric.objects.create(scale=scale, **validated_data)
+
+        for standard_data in standards_data:
+            Standard.objects.create(rubric=rubric, **standard_data)
+
+        return rubric
 
         
 class RubricDetailSerializer(serializers.ModelSerializer):
@@ -204,7 +223,10 @@ class RubricDetailSerializer(serializers.ModelSerializer):
 
     def get_scale(self, obj):
         scale = obj.scale
-        return list(range(scale.Lower_limit, scale.Upper_limit + 1))
+        if scale:
+            return list(range(scale.Lower_limit, scale.Upper_limit + 1))
+        else:
+            return []  # O cualquier otro valor predeterminado que desees
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:

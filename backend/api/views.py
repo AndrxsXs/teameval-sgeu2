@@ -49,6 +49,7 @@ from .serializers import (
     EvaluationSerializerE,
     TeacherSerializerUpdate,
     AdminSerializerUpdate,
+    ScaleSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -999,9 +1000,9 @@ def create_rubric1(request, course_id):
 # Editar rubrica global
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_global_rubric(request):
+def update_global_rubric(request, rubric_id):
     try:
-        rubric_id = request.query_params.get("rubric_id")
+        # rubric_id = request.query_params.get("rubric_id")
         rubric = Rubric.objects.get(pk=rubric_id, is_global=True)
     except Rubric.DoesNotExist:
         return Response(
@@ -1096,9 +1097,9 @@ def update_global_rubric(request):
 # Mostrar rubrica global al administrador
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_global_rubric(request, rubric_id):
+def get_global_rubric(request):
     try:
-        rubric = Rubric.objects.get(id=rubric_id, is_global=True)
+        rubric = Rubric.objects.get(is_global=True)
     except Rubric.DoesNotExist:
         return Response(
             {"error": "La rúbrica global solicitada no existe."},
@@ -1111,13 +1112,79 @@ def get_global_rubric(request, rubric_id):
 
 # Luisa
 # Crear rubrica global
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def create_global_rubric(request):
+#     rubric_data = request.data
+
+#     # Crear la escala primero
+#     scale_serializer = ScaleSerialiazer(data=rubric_data.get("scale"))
+#     if scale_serializer.is_valid():
+#         scale = scale_serializer.save()
+#     else:
+#         return Response(
+#             {"error": "Error al crear la escala.", "details": scale_serializer.errors},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
+
+#     # Crear los estándares (criterios) asociados a la escala
+#     standards_data = rubric_data.get("standards")
+#     standards = []
+#     for standard_data in standards_data:
+#         standard_data["scale"] = scale.id  # Asociar la escala a cada estándar
+#         standard_serializer = StandardSerializer(data=standard_data)
+#         if standard_serializer.is_valid():
+#             standard = standard_serializer.save()
+#             standards.append(standard)
+#         else:
+#             return Response(
+#                 {
+#                     "error": "Error al crear un criterio.",
+#                     "details": standard_serializer.errors,
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#     # Crear la rúbrica global sin asociar cursos aún
+#     rubric_creation_data = {
+#         "name": rubric_data.get("name"),
+#         "scale": scale.id,
+#         "standards": [standard.id for standard in standards],  # Asociar los estándares
+#         "is_global": True,  # Establecer is_global en True
+#     }
+#     rubric_serializer = GlobalRubricSerializer(data=rubric_creation_data)
+#     if rubric_serializer.is_valid():
+#         rubric = rubric_serializer.save()
+
+#         # Asociar la rúbrica a todos los cursos
+#         all_courses = Course.objects.all()
+#         for course in all_courses:
+#             course.rubrics.add(rubric)
+
+#         return Response(
+#             {
+#                 "message": "Rúbrica global creada y asignada a todos los cursos con éxito.",
+#                 "rubric": rubric_serializer.data,
+#             },
+#             status=status.HTTP_201_CREATED,
+#         )
+#     else:
+#         return Response(
+#             {
+#                 "error": "Error al crear la rúbrica global.",
+#                 "details": rubric_serializer.errors,
+#             },
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_global_rubric(request):
     rubric_data = request.data
 
     # Crear la escala primero
-    scale_serializer = ScaleSerialiazer(data=rubric_data.get("scale"))
+    scale_data = rubric_data.get("scale")
+    scale_serializer = ScaleSerializer(data=scale_data)
     if scale_serializer.is_valid():
         scale = scale_serializer.save()
     else:
@@ -1126,30 +1193,12 @@ def create_global_rubric(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Crear los estándares (criterios) asociados a la escala
-    standards_data = rubric_data.get("standards")
-    standards = []
-    for standard_data in standards_data:
-        standard_data["scale"] = scale.id  # Asociar la escala a cada estándar
-        standard_serializer = StandardSerializer(data=standard_data)
-        if standard_serializer.is_valid():
-            standard = standard_serializer.save()
-            standards.append(standard)
-        else:
-            return Response(
-                {
-                    "error": "Error al crear un estándar.",
-                    "details": standard_serializer.errors,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    # Crear la rúbrica global sin asociar cursos aún
+    # Crear la rúbrica global con la escala y los estándares
     rubric_creation_data = {
         "name": rubric_data.get("name"),
-        "scale": scale.id,
-        "standards": [standard.id for standard in standards],  # Asociar los estándares
-        "is_global": True,  # Establecer is_global en True
+        "scale": scale_serializer.data,
+        "standards": rubric_data.get("standards"),
+        "is_global": True,
     }
     rubric_serializer = GlobalRubricSerializer(data=rubric_creation_data)
     if rubric_serializer.is_valid():
@@ -2849,7 +2898,7 @@ def generar_codigo_alfanumerico(longitud):
 @permission_classes([IsAuthenticated])
 def main_report(request):
     course_code = request.query_params.get("course_code")
-    data = request.data
+    #data = request.data
     try:
         evaluations = Evaluation.objects.filter(course__code=course_code)
     except Evaluation.DoesNotExist:
