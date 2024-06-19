@@ -2,7 +2,7 @@
 import { Fragment, useMemo, useState } from "react";
 
 import api from "../../api";
-import eventDispatcher from "../../utils/eventDispacher";
+// import eventDispatcher from "../../utils/eventDispacher";
 
 import Sheet from "@mui/joy/Sheet";
 import Table from "@mui/joy/Table";
@@ -25,9 +25,9 @@ export default function GlobalCriteriaTable(props) {
           setRows(response.data.standards);
           setLoading(false);
         })
-        .catch((error) => {
+        .catch(() => {
           // console.error(error);
-          eventDispatcher("responseEvent", error, "danger");
+          // eventDispatcher("responseEvent", error, "danger");
           setEmpty(true);
           setLoading(false);
         });
@@ -39,7 +39,7 @@ export default function GlobalCriteriaTable(props) {
     return () => {
       window.removeEventListener("load", fetchGlobalRubric);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
