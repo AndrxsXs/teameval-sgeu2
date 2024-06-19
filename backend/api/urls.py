@@ -19,7 +19,7 @@ urlpatterns = [
     
     path('restore_password/', views.restore_password, name='restore_password'), #Enviar correo para restablecer contraseña
     
-    path('report_datailed/', views.report_detailed , name='report_detailed'), #Informe detallado
+    path('report_datailed/<int:evaluation_id>', views.report_detailed , name='report_detailed'), #Informe detallado
     
     path('main_report', views.main_report, name='main_report'), #Main informes
     
