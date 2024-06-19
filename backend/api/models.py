@@ -124,21 +124,10 @@ class Admi(models.Model):
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
-    # status = models.BooleanField(default=False)
     phone = models.BigIntegerField(null=True)
-
-    #   def create_user_admin(sender, instance, created, **kwargs):
-    #      if created:
-    #         Admi.objects.create(user=instance)
-
-    #   def save_user_admin(sender, instance, **kwargs):
-    #      instance.admi.save()
-
     def _str_(self):
         return self.user.name + " " + self.user.last_name
 
-
-# post_save.connect(Admi.create_user_admin, sender=User)
 
 
 class Student(models.Model):
@@ -153,7 +142,6 @@ class Student(models.Model):
 
 class Teacher(models.Model):
 
-        #status = models.BooleanField(default=False)
     user = models.OneToOneField(
         User, null=False, on_delete=models.PROTECT, primary_key=True
     )
@@ -181,7 +169,7 @@ class Course(models.Model):
     academic_period = models.CharField(max_length=10)
     student_status = models.BooleanField(default=True)
     course_status = models.BooleanField(default=True)
-    #   teacher = models.ForeignKey(Teacher, null=True,on_delete=models.PROTECT, related_name='courses_taught') #cursos impartidos por profesor
+    
 
     user_students = models.ManyToManyField(
         Student,
@@ -195,9 +183,6 @@ class Course(models.Model):
         on_delete=models.PROTECT,
         related_name="courses_user_teacher",
     )
-
-
-    #   student = models.ForeignKey(Student, null=True,on_delete=models.PROTECT, related_name='courses_enrolled') #cursos incritos por estudiante
     
 
     # obtiene el nombre del profesor
@@ -209,12 +194,6 @@ class Course(models.Model):
     @property
     def student_count(self):
         return Student.objects.filter(courses_user_student=self).count()
-
-
-# option 2 for academic period
-# academic_year = models.DateTimeField(auto_now_add=True)
-# semester = models.IntegerField(choices=[(1, 'Semestre 1'), (2, 'Semestre 2')])
-
 
 class Rubric(models.Model):
     name = models.CharField(max_length=60)
@@ -235,17 +214,6 @@ class Standard(models.Model):
     )
     scale_description = models.TextField(default=False, null=True, blank=True) # describe la escala
 
- #   nota = models.PositiveIntegerField(default=False) #no va aqui, sino en rating
-
-#class Description(models.Model):
- #   text = models.TextField()
-  #  scale = models.ForeignKey(
-   #     Scale, null=True, on_delete=models.PROTECT, related_name="descriptions"
-  #  )
- #   standard = models.ForeignKey(
- #       Standard, null=True, on_delete=models.PROTECT, related_name="descriptions"
- #   )
-
 
 class Report(models.Model):
     course = models.ForeignKey(
@@ -263,11 +231,8 @@ class Evaluation(models.Model):
         (INITIATED, "Iniciado"),
         (FINISHED, "Finalizado"),
     ]
-    #evaluator = models.CharField(max_length=60)
-    #evaluated = models.CharField(max_length=60)
+
     estado = models.IntegerField(choices=STATUS_CHOICES)
-  #  date_start = models.DateTimeField(auto_now_add=False)
-  #  date_end = models.DateTimeField(auto_now_add=False)
     name = models.CharField(max_length=60)
     comment = models.TextField(max_length=100)
     #una evaluacion tiene un rubrica y una rubrica puede pertenecer a muchas evaluaciones
@@ -281,18 +246,6 @@ class Evaluation(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="evaluations")
 
-    
-    #al que evaluo
-'''
-    evaluated = models.ForeignKey( 
-        Student, null=True, on_delete=models.PROTECT, related_name="evaluations_student"    #uno a muchos
-    )
-
-    evaluator = models.ForeignKey(
-        Student, null=True, on_delete=models.PROTECT, related_name="evaluations_user"   #uno a uno
-    )
-'''
-    
 class EvaluationCompleted(models.Model):
     
     evaluated = models.ForeignKey( 
@@ -312,7 +265,6 @@ class EvaluationCompleted(models.Model):
     comment = models.TextField(max_length=100)
 
 class Rating(models.Model):
-    #average = models.DecimalField(max_digits=10, decimal_places=3) # Creo que este atributo iria en evaluation
     qualification= models.BigIntegerField(null=False) #esta da la nota del criterio
     
     standard = models.ForeignKey(
