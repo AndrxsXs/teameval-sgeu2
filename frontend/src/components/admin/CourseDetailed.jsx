@@ -11,7 +11,7 @@ import CreateStudent from "../teacher/CreateStudent";
 import GroupsTable from "../teacher/groups/GroupsTable";
 import CreateGroup from "../teacher/groups/CreateGroup";
 import RubricList from "../teacher/RubricList";
-import CreateRubric from "../teacher/CreateRubric";
+import ManageRubric from "../teacher/ManageRubric";
 import EvaluationList from "../teacher/EvaluationList";
 
 import Card from "@mui/joy/Card";
@@ -269,7 +269,7 @@ export default function CourseDetailed() {
                   >
                     <RubricList admin />
                     <Stack direction="row">
-                      <CreateRubric />
+                      <ManageRubric />
                     </Stack>
                   </Stack>
                 </TabPanel>
