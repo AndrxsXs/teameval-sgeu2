@@ -1793,10 +1793,11 @@ def register_teacher(request):
 def group_members(request):
     student_code = request.query_params.get("student_code")
     course_code = request.query_params.get("course_code")
+    evaluation_id = request.query_params.get("evaluation_id")
 
-    if not student_code or not course_code:
+    if not student_code or not course_code or not evaluation_id:
         return Response(
-            {"error": "Falta student_code o course_code"},
+            {"error": "Falta student_code, course_code o evaluation_id"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -1828,12 +1829,22 @@ def group_members(request):
     # Obtener los integrantes del grupo
     group_members = group.students.all()
 
-    # Filtrar los miembros del grupo que aún no han sido evaluados por el estudiante y que no son el estudiante que hace la solicitud
-    group_members = [member for member in group_members if member != student and not EvaluationCompleted.objects.filter(evaluated=member, evaluator=student, evaluation__course=course, completed=True).exists()]
+    # Filtrar los miembros del grupo que aún no han sido evaluados en la evaluación específica
+    group_members = [
+        member
+        for member in group_members
+        if member != student
+        and not EvaluationCompleted.objects.filter(
+            evaluated=member,
+            evaluator=student,
+            evaluation__course=course,
+            evaluation_id=evaluation_id,  # Filtra por la evaluación específica
+            completed=True,
+        ).exists()
+    ]
 
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 # obtener estudiantes del grupo
 @api_view(["GET"])
@@ -2216,16 +2227,18 @@ def evaluation_results(request):
 
     final_score = total_score / total_standards if total_standards > 0 else 0
 
-    # Agregar comentarios
+    # Concatenar comentarios
     for ec in evaluation_completed_list:
         if ec.comment:
             all_comments.append(ec.comment)
+
+    comments = "\n".join(all_comments)
 
     return Response(
         {
             "final_score": final_score,
             "standards": results,
-            "comments": all_comments,  # Devolver array de comentarios
+            "comments": comments,
             "total_count": total_standards,
             "partners": num_group_students,
         }
