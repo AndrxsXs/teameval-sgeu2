@@ -33,8 +33,11 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
 
   const handleSubmitStudent = async () => {
     setLoading(true);
-
     if (selectedFile) {
+      eventDispatcher(
+        "responseEvent",
+        "Cargando archivo, en breve verá los usuarios importados."
+      );
       const formData = new FormData();
       formData.append("csv_file", selectedFile);
 
@@ -55,8 +58,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           eventDispatcher("responseEvent", error, "danger");
           setLoading(false);
         });
-    }
-    eventDispatcher("responseEvent", "Seleccione un archivo", "danger");
+    } else eventDispatcher("responseEvent", "Seleccione un archivo", "danger");
   };
 
   const handleSubmitTeacher = async () => {
@@ -64,6 +66,10 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
     const token = localStorage.getItem("ACCESS_TOKEN");
 
     if (selectedFile) {
+      eventDispatcher(
+        "responseEvent",
+        "Cargando archivo, en breve verá los usuarios importados."
+      );
       const formData = new FormData();
       formData.append("csv_file", selectedFile);
 
@@ -98,7 +104,7 @@ export default function ImportUsersModal({ courseId, isStudent, ...styles }) {
           );
           setLoading(false);
         });
-    }
+    } else eventDispatcher("responseEvent", "Seleccione un archivo", "danger");
   };
 
   return (

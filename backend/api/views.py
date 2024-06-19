@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 from django.core.validators import validate_email
+from rest_framework.exceptions import AuthenticationFailed
 
 
 # from django.contrib.auth.models import User
@@ -554,8 +555,7 @@ def completed_evaluations(request):
     # Preparar los datos para la respuesta
     data = [EvaluationSerializerE(evaluation).data for evaluation in evaluations]
 
-    return Response(
-        {"data": data}, status=status.HTTP_200_OK
+    return Response(data, status=status.HTTP_200_OK
     )
 
 
@@ -729,19 +729,25 @@ def import_teacher(request):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
+        
+        if user.status == False:
+            return Response({"error": "Usuario deshabilitado"},
+                status=status.HTTP_400_BAD_REQUEST,)
+            #raise AuthenticationFailed("Usuario deshabilitado")
+        
         token = super().get_token(user)
 
         # Añade el rol del usuario al payload del token
         token["role"] = user.role
         token["first_login"] = user.first_login
 
+        return token
+
         # Puse lo siguiente para recibir info del usuario temporalmente
         # Esto debe ser otra api view, actualmente es la user_data()
         # token['name'] = user.name
         # token['last_name'] = user.last_name
         # token['email'] = user.email
-
-        return token
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -1787,10 +1793,11 @@ def register_teacher(request):
 def group_members(request):
     student_code = request.query_params.get("student_code")
     course_code = request.query_params.get("course_code")
+    evaluation_id = request.query_params.get("evaluation_id")
 
-    if not student_code or not course_code:
+    if not student_code or not course_code or not evaluation_id:
         return Response(
-            {"error": "Falta student_code o course_code"},
+            {"error": "Falta student_code, course_code o evaluation_id"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -1822,12 +1829,22 @@ def group_members(request):
     # Obtener los integrantes del grupo
     group_members = group.students.all()
 
-    # Filtrar los miembros del grupo que aún no han sido evaluados por el estudiante y que no son el estudiante que hace la solicitud
-    group_members = [member for member in group_members if member != student and not EvaluationCompleted.objects.filter(evaluated=member, evaluator=student, evaluation__course=course, completed=True).exists()]
+    # Filtrar los miembros del grupo que aún no han sido evaluados en la evaluación específica
+    group_members = [
+        member
+        for member in group_members
+        if member != student
+        and not EvaluationCompleted.objects.filter(
+            evaluated=member,
+            evaluator=student,
+            evaluation__course=course,
+            evaluation_id=evaluation_id,  # Filtra por la evaluación específica
+            completed=True,
+        ).exists()
+    ]
 
     serializer = StudentSerializer(group_members, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 # obtener estudiantes del grupo
 @api_view(["GET"])
@@ -1966,6 +1983,64 @@ def create_group(request, course_code):
 
 
 # evalua a un estudiante
+#@api_view(["POST"])
+#@permission_classes([IsAuthenticated])
+#def evaluate_student(request):
+#    data = request.data
+#    try:
+#        evaluation = Evaluation.objects.get(id=data.get("id_evaluation"))
+#    except Evaluation.DoesNotExist:
+#        return Response(
+#            {"error": "No se encontró una evaluación pendiente."},
+#            status=status.HTTP_404_NOT_FOUND,
+#        )
+#
+#    standards = evaluation.rubric.standards.all()
+#
+#    evaluation_completed = EvaluationCompleted(
+#        evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
+#        evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
+#        evaluation=evaluation,
+#    )
+
+#    evaluation_completed.save()
+
+#    for standard in standards:
+#        score = request.data.get(str(standard.id))  # Buscar la calificación en el objeto principal
+#        if score is not None:
+#            rating_data = {
+#                "standard": standard.id,
+#                "evaluationCompleted": evaluation_completed.id,
+#                "qualification": int(score),
+#            }
+#            rating_serializer = RatingSerializer(data=rating_data)
+#            if rating_serializer.is_valid():
+#                rating_serializer.save()
+#            else:
+#                return Response(
+#                    rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+#                )
+
+#    comment = request.data.get("comment")
+#    if comment:
+#        evaluation_completed.comment = comment
+
+#    evaluation_completed.completed = True
+
+#    evaluation_completed.evaluated = get_object_or_404(
+#        Student, user__code=data.get("evaluated")
+#    )
+
+#    evaluation_completed.evaluator = get_object_or_404(
+#        Student, user__code=data.get("evaluator")
+#    )
+
+#    evaluation_completed.save()
+
+#    return Response(
+#        {"message": "Evaluación completada con éxito."}, status=status.HTTP_200_OK
+#    )
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def evaluate_student(request):
@@ -1978,18 +2053,16 @@ def evaluate_student(request):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    standards = evaluation.rubric.standards.all()
-
+    standards = list(evaluation.rubric.standards.all())
     evaluation_completed = EvaluationCompleted(
         evaluated=get_object_or_404(Student, user__code=data.get("evaluated")),
         evaluator=get_object_or_404(Student, user__code=data.get("evaluator")),
         evaluation=evaluation,
     )
-
     evaluation_completed.save()
 
-    for standard in standards:
-        score = request.data.get(str(standard.id))  # Buscar la calificación en el objeto principal
+    for index, standard in enumerate(standards, start=1):
+        score = data.get(str(index))  # Buscar la calificación por posición
         if score is not None:
             rating_data = {
                 "standard": standard.id,
@@ -2004,20 +2077,11 @@ def evaluate_student(request):
                     rating_serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )
 
-    comment = request.data.get("comment")
+    comment = data.get("comment")
     if comment:
         evaluation_completed.comment = comment
 
     evaluation_completed.completed = True
-
-    evaluation_completed.evaluated = get_object_or_404(
-        Student, user__code=data.get("evaluated")
-    )
-
-    evaluation_completed.evaluator = get_object_or_404(
-        Student, user__code=data.get("evaluator")
-    )
-
     evaluation_completed.save()
 
     return Response(
@@ -2026,6 +2090,79 @@ def evaluate_student(request):
 
 
 # obtiene la nota definitiva de un estudiante en especifico y sus compañeros estan en anonimo
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def evaluation_results(request):
+#     student_code = request.GET.get("student_code")
+#     evaluation_id = request.GET.get("evaluation_id")
+
+#     try:
+#         student = Student.objects.get(user__code=student_code)
+#         evaluation = Evaluation.objects.get(id=evaluation_id)
+#     except (Student.DoesNotExist, Evaluation.DoesNotExist):
+#         return Response(
+#             {"error": "Estudiante o evaluación no encontrado."},
+#             status=status.HTTP_404_NOT_FOUND,
+#         )
+
+#     evaluation_completed_list = EvaluationCompleted.objects.filter(
+#         evaluated=student, evaluation=evaluation
+#     )
+
+#     if not evaluation_completed_list.exists():
+#         return Response(
+#             {"error": "No hay evaluaciones completadas para este estudiante."},
+#             status=status.HTTP_404_NOT_FOUND,
+#         )
+
+#     results = []
+#     total_score = 0
+#     total_standards = 0
+#     all_comments = []
+#     group_students = evaluation.course.user_students.exclude(user__code=student_code)
+#     num_group_students = group_students.count()
+
+#     for standard in evaluation.rubric.standards.all():
+#         ratings = Rating.objects.filter(
+#             evaluationCompleted__in=evaluation_completed_list, standard=standard
+#         )
+#         num_ratings = ratings.count()
+#         sum_ratings = sum(rating.qualification for rating in ratings)
+#         average_rating = sum_ratings / num_ratings if num_ratings > 0 else 0
+#         total_score += average_rating
+#         total_standards += 1
+
+#         individual_ratings = [rating.qualification for rating in ratings]
+#         # Agregar ceros para los estudiantes que no calificaron
+#         individual_ratings += [0] * (num_group_students - num_ratings)
+
+#         results.append(
+#             {
+#                 "standard_description": standard.description,
+#                 "average_rating": average_rating,
+#                 "individual_ratings": individual_ratings,
+#             }
+#         )
+
+#     final_score = total_score / total_standards if total_standards > 0 else 0
+
+#     # Concatenar comentarios
+#     for ec in evaluation_completed_list:
+#         if ec.comment:
+#             all_comments.append(ec.comment)
+
+#     comments = "\n".join(all_comments)
+
+#     return Response(
+#         {
+#             "final_score": final_score,
+#             "standards": results,
+#             "comments": comments,
+#             "total_count": total_standards,
+#             "total_ratings_count": num_group_students,
+#         }
+#     )
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def evaluation_results(request):
@@ -2035,6 +2172,7 @@ def evaluation_results(request):
     try:
         student = Student.objects.get(user__code=student_code)
         evaluation = Evaluation.objects.get(id=evaluation_id)
+        course = evaluation.course
     except (Student.DoesNotExist, Evaluation.DoesNotExist):
         return Response(
             {"error": "Estudiante o evaluación no encontrado."},
@@ -2055,8 +2193,15 @@ def evaluation_results(request):
     total_score = 0
     total_standards = 0
     all_comments = []
-    group_students = evaluation.course.user_students.exclude(user__code=student_code)
-    num_group_students = group_students.count()
+
+    # Obtener el grupo al que pertenece el estudiante
+    student_group = course.groups.filter(students=student).first()
+
+    if student_group:
+        group_students = student_group.students.exclude(user__code=student_code)
+        num_group_students = group_students.count()
+    else:
+        num_group_students = 0
 
     for standard in evaluation.rubric.standards.all():
         ratings = Rating.objects.filter(
@@ -2095,7 +2240,7 @@ def evaluation_results(request):
             "standards": results,
             "comments": comments,
             "total_count": total_standards,
-            "total_ratings_count": num_group_students,
+            "partners": num_group_students,
         }
     )
 
@@ -2651,17 +2796,24 @@ def enable_user(request):
         )
 
 
-# @permission_classes([IsAuthenticated])
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def restore_password(request):
-    q = request.data.get("mail", "")
+    
+    q = request.data.get("user_email", "")
     subject = "Restablecer contraseña"
 
     longitud_codigo = 6  # Puedes cambiar la longitud del código aquí
     codigo_aleatorio = generar_codigo_alfanumerico(longitud_codigo)
     print("Código alfanumérico aleatorio:", codigo_aleatorio)
 
-    usuario = models.User.objects.get(email=q)
+    try:
+        usuario = models.User.objects.get(email=q)
+    except User.DoesNotExist:
+        return Response(
+            {"error": "No existe un usuario con esta direccion de correo electronico"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     usuario.set_password(codigo_aleatorio)
 

@@ -42,9 +42,9 @@ import Grades from "./pages/student/Grades";
 
 import Result from "./pages/student/Result";
 import Feedback from "./pages/student/Feedback";
-// import ViewCursoStudent from "./pages/student/evaluation/ViewCursoStudent";
+import ViewEvaluations from "./pages/student/evaluation/ViewEvaluations";
 import ViewRubric from "./pages/student/evaluation/ViewRubric";
-import RubricResult from "./pages/student/RubricResult";
+import ViewResults from "./pages/student/ViewResults";
 import ViewFeedback from "./pages/student/ViewFeedback";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import CodePassword from "./components/CodePassword";
@@ -72,7 +72,7 @@ const USER_ROLES = {
 function App() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("primary");
   const [evaluationData, setEvaluationData] = useState([]);
 
   const handleResponseEvent = (event) => {
@@ -139,7 +139,7 @@ function App() {
             index
             element={<Grades setEvaluationData={setEvaluationData} />}
           />
-          {/* <Route path="evaluar/:curso" element={<ViewCursoStudent />} /> */}
+          {/* <Route path="evaluar/:curso" element={<ViewEvaluations />} /> */}
           <Route
             path="evaluar/:curso"
             element={<Evaluate evaluationData={evaluationData} />}
@@ -147,8 +147,11 @@ function App() {
           <Route path="./rubrica" element={<ViewRubric />} />
 
           <Route path="resultados" element={<Result />} />
-          <Route path="resultados/:calificación" element={<RubricResult />} />
-
+          <Route path="resultados/:courseId" element={<ViewEvaluations />} />
+          <Route
+            path="resultados/:courseId/:evalId"
+            element={<ViewResults />}
+          />
           <Route path="retroalimentacion" element={<Feedback />} />
           <Route path="retroalimentacion/feedback" element={<ViewFeedback />} />
         </Route>

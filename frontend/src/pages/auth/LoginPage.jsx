@@ -24,6 +24,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import IconButton from "@mui/joy/IconButton";
 
 import TopNavbar from "../../components/TopNavbar";
+import eventDispatcher from "../../utils/eventDispacher";
 
 function interpretNumbers(nums) {
   let element;
@@ -94,18 +95,7 @@ export default function LoginPage() {
         navigate("/login");
       }
     } catch (error) {
-      window.dispatchEvent(
-        new CustomEvent("responseEvent", {
-          detail: {
-            message: `${
-              error.response.status === 401
-                ? "Código o contraseña incorrectos"
-                : "Error al iniciar sesión. Verifique su código y contraseña e intente nuevamente."
-            }`,
-            severity: "danger",
-          },
-        })
-      );
+      eventDispatcher("responseEvent", error, "danger");
     } finally {
       setLoading(false);
     }
