@@ -294,6 +294,16 @@ export default function CourseDetailed() {
                     </Stack>
                   </Stack>
                 </TabPanel>
+                <TabPanel
+                  value={4}
+                  sx={{
+                    padding: 0,
+                    height: "50dvh",
+                    overflow: "auto",
+                  }}
+                >
+                  <EvaluationList courseId={courseId} reportMode />
+                </TabPanel>
               </Tabs>
             </Stack>
           </Fragment>

@@ -11,6 +11,7 @@ from django.core.validators import RegexValidator
 from rest_framework import serializers
 from django.core.validators import validate_email
 from rest_framework.exceptions import AuthenticationFailed
+from django.db.models import Prefetch
 
 
 # from django.contrib.auth.models import User
@@ -2926,12 +2927,13 @@ def main_report(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def report_detailed(request):
+def report_detailed(request, evaluation_id):
 
-    data = request.data
+    # data = request.data
 
     evaluations = EvaluationCompleted.objects.filter(
-        evaluation__id=data.get("id_evaluation")
+        # evaluation__id=data.get("id_evaluation")
+        evaluation__id=evaluation_id
     )
 
     report_data = []
@@ -2952,6 +2954,7 @@ def report_detailed(request):
 
     return Response(report_data)
 
+    return Response(report_data)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

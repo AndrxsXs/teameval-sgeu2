@@ -1,27 +1,14 @@
-import { Box, Typography, Table } from "@mui/joy";
+import { Fragment } from "react";
+import { useParams } from "react-router-dom";
 
-import SearchField from "../../components/admin/SearchField";
-import React, { Fragment } from 'react';
-import { Outlet, useLocation } from "react-router-dom";
-import { useState } from "react";
-import ReportDetailed from "../../components/teacher/ReportDetailed";
-import { useParams } from 'react-router-dom';
+import EvaluationList from "../../components/teacher/EvaluationList";
 
+import Box from "@mui/joy/Box";
+import Typography from "@mui/joy/Typography";
 
 export default function Report() {
-
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-  };
-  const location = useLocation();
-  const isCoursePage =
-    location.pathname === ("/admin/manage/courses" || "/admin/manage/courses/");
-
-    const { courseId } = useParams();
+  const { courseId } = useParams();
   return (
-
     <Fragment>
       <Box
         component="header"
@@ -40,15 +27,15 @@ export default function Report() {
         <Typography level="h2" component="h1">
           Informes
         </Typography>
+      </Box>
+      <Typography level="body-sm">
+        Seleccione una evaluación para ver su informe detallado.
+      </Typography>
 
-        </Box>
-      
-        <Fragment>
-          <SearchField course onSearchChange={handleSearchChange} />
-          <ReportDetailed course={courseId} />
-        </Fragment>
-      
+      <EvaluationList courseId={courseId} reportMode />
+
+      {/* <SearchField course onSearchChange={handleSearchChange} /> */}
+      {/* <ViewReportDetailedModal course={courseId} /> */}
     </Fragment>
-
   );
 }
