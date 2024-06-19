@@ -52,7 +52,7 @@ export default function Evaluate({ evaluationData }) {
   // console.log(selectedCriteria);
 
   const navigate = useNavigate();
-  // console.log(data);
+  // console.log(evaluationData);
 
   const fetchPartners = useCallback(async () => {
     await api
@@ -60,6 +60,7 @@ export default function Evaluate({ evaluationData }) {
         params: {
           student_code: userData.code,
           course_code: curso,
+          evaluation_id: evalData.id,
         },
       })
       .then((response) => {
