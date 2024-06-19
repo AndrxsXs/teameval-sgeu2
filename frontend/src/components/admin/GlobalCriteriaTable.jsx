@@ -39,6 +39,7 @@ export default function GlobalCriteriaTable(props) {
     return () => {
       window.removeEventListener("load", fetchGlobalRubric);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
