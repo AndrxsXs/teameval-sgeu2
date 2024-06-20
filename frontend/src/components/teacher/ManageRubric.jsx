@@ -217,7 +217,7 @@ export default function ManageRubric(props) {
     // console.log(rubric);
     api
       .put(
-        `api/${!editMode ? "edit_rubric" : "update_global_rubric"}/${
+        `api/${!adminMode ? "edit_rubric" : "update_global_rubric"}/${
           rubric.id
         }`,
         rubric
