@@ -2425,6 +2425,7 @@ def login_view(request):
     code = request.data.get("code")
     password = request.data.get("password")
     user = authenticate(request, code=code, password=password)
+    print(user)
     if user:
         login(request, user)
         return Response(
