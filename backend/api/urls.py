@@ -132,5 +132,7 @@ urlpatterns = [
     path('rubric_evaluate', views.rubric_evaluate, name='rubric_evaluate'),
     #muestra los cursos con evaluaciones finalizadas
     path('courses_evaluations_completed', views.courses_evaluations_completed, name='courses_evaluations_completed'),
+    #profesores para el curso incluyendo admins
+    path('teachers_for_course/', views.teachers_for_course, name='teachers_for_course'),
     
 ]
