@@ -24,6 +24,7 @@ import { userStatus } from "../../../utils/userStatus";
 import SearchField from "../../admin/SearchField";
 import EditUser from "../../EditUser";
 import DisableUser from "../../DisableUser";
+import eventDispatcher from "../../../utils/eventDispacher";
 
 function RowMenu(props) {
   const { user } = props;
@@ -94,7 +95,7 @@ export default function UserGroupTable(props) {
           setRows(sortedRows);
         })
         .catch((error) => {
-          console.log(error);
+          eventDispatcher("responseEvent", error, "danger");
         })
         .finally(() => {
           setLoading(false);
@@ -168,7 +169,7 @@ export default function UserGroupTable(props) {
           setRows(sortedRows);
         })
         .catch((error) => {
-          console.log(error);
+          eventDispatcher("responseEvent", error, "danger");
         })
         .finally(() => {
           setLoading(false);

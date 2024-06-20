@@ -128,7 +128,6 @@ export default function Evaluate({ evaluationData }) {
     setLoading(true);
     e.preventDefault();
     const data = { ...formData, ...selectedCriteria };
-    console.log(data);
     await api
       .post(`api/evaluate_student/`, {
         ...data,
