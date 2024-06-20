@@ -2942,15 +2942,13 @@ def report_detailed(request, evaluation_id):
 
         report_data.append(
             {
-                "evaluated": rating.evaluationCompleted.evaluated.user.name,
-                "evaluator": rating.evaluationCompleted.evaluator.user.name,
+                "evaluated": rating.evaluationCompleted.evaluated.user.name + " " + rating.evaluationCompleted.evaluated.user.last_name,
+                "evaluator": rating.evaluationCompleted.evaluator.user.name + " " + rating.evaluationCompleted.evaluated.user.last_name,
                 "standard": rating.standard.description,
                 "qualification": rating.qualification,
             }
             for rating in ratings
         )
-
-    return Response(report_data)
 
     return Response(report_data)
 
