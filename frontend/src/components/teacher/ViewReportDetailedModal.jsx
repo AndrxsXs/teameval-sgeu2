@@ -59,7 +59,6 @@ export default function ViewReportDetailedModal({ data, open, setOpen }) {
       await api
         .get(`api/report_datailed/${inputData.id_rubric}`)
         .then((response) => {
-          console.log(response.data);
           setEvaluationData(response.data);
         })
         .catch((error) => {
@@ -78,6 +77,7 @@ export default function ViewReportDetailedModal({ data, open, setOpen }) {
     return () => {
       window.removeEventListener("load", fetchReportData);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputData]);
 
   return (
