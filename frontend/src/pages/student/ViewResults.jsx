@@ -20,7 +20,7 @@ export default function ViewResults() {
   const [fetching, setFetching] = useState(true);
   const [rows, setRows] = useState([]);
   const [scale, setScale] = useState([]);
-  const [comments, setComments] = useState();
+  const [comments, setComments] = useState([]);
   const [finalScore, setFinalScore] = useState(0);
   const navigate = useNavigate();
 
@@ -48,7 +48,7 @@ export default function ViewResults() {
           setRows(rows);
           setScale(scale);
           setFetching(false);
-          setComments(comments);
+          setComments((prevComments) => [...prevComments, comments]);
           setFinalScore(final_score);
         })
         .catch((error) => {
@@ -135,7 +135,7 @@ export default function ViewResults() {
                 paddingX: "16px",
                 textAlign: "center",
               },
-              "& thead th:nth-of-type(1)": { width: "65%" },
+              "& thead th:nth-of-type(1)": { width: "60%" },
 
               "--TableRow-stripeBackground": "rgba(0 0 0 / 0.04)",
               "& td:first-of-type, th:first-of-type": {
@@ -168,7 +168,7 @@ export default function ViewResults() {
                         variant="outlined"
                         placement="top-start"
                         key={index}
-                        title={`Compañero ${index + 1}`}
+                        title={`Compañero anónimo`}
                       >
                         <th>
                           <Stack
@@ -186,9 +186,9 @@ export default function ViewResults() {
                               className="compa"
                               size="sm"
                               variant="outlined"
-                              alt={`Compañero ${index + 1}`}
+                              alt={`Compañero anónimo`}
                             >
-                              C{index + 1}
+                              C
                             </Avatar>
                           </Stack>
                         </th>

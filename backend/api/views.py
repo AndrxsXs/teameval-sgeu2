@@ -1782,32 +1782,11 @@ def register_teacher(request):
         data.get("name"), data.get("code"), data.get("last_name")
     )
 
-    # Validaciones
     name = data.get("name")
     last_name = data.get("last_name")
     code = data.get("code")
     email = data.get("email")
     phone = data.get("phone")
-
-    # Validar que el nombre y apellido sean solo letras
-    if not name.isalpha():
-        return Response({"message": "El nombre debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
-    if not last_name.isalpha():
-        return Response({"message": "El apellido debe ser solo letras"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que el código sean solo números mayores a cero
-    if not code.isdigit() or int(code) <= 0:
-        return Response({"message": "El código debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que el email siga el formato correcto
-    try:
-        serializers.EmailField().run_validation(email)
-    except serializers.ValidationError:
-        return Response({"message": "El email debe seguir el formato correcto (@email.co)"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que el teléfono sean solo números mayores a cero
-    # if not phone.isdigit() or int(phone) <= 0:
-    #     return Response({"message": "El teléfono debe ser solo números mayores a cero"}, status=status.HTTP_400_BAD_REQUEST)
 
     teacher_data = {
         "name": name,
@@ -2476,6 +2455,25 @@ def user_list(request):
     user_data = [
         {
             "role": user.role,
+            "code": user.code,
+            "name": user.name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "status": user.status,
+        }
+        for user in users
+    ]
+
+    return Response(user_data)
+
+#profesores para el curso incluyendo admins
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def teachers_for_course(request):
+    users = User.objects.filter(role__in=[User.ADMIN, User.TEACHER])
+
+    user_data = [
+        {
             "code": user.code,
             "name": user.name,
             "last_name": user.last_name,

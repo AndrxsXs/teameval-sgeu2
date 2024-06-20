@@ -16,6 +16,7 @@ import Typography from "@mui/joy/Typography";
 import Box from "@mui/joy/Box";
 import CircularProgress from "@mui/joy/CircularProgress";
 import Checkbox from "@mui/joy/Checkbox";
+import eventDispatcher from "../../../utils/eventDispacher";
 
 const headCells = [
   {
@@ -149,7 +150,7 @@ export default function UngroupedStudentsTable({
           setRows(users);
         })
         .catch((error) => {
-          console.log(error);
+          eventDispatcher("responseEvent", error, "danger");
         })
         .finally(() => {
           setLoading(false);
