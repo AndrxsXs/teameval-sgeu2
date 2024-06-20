@@ -48,6 +48,7 @@ export default function ManageScales() {
       //   "No se ha encontrado la rúbrica",
       //   "danger"
       // );
+      setLoading(false);
     }
   }, [rubricInfo]);
 
@@ -151,14 +152,18 @@ export default function ManageScales() {
         </FormHelperText>
       </FormControl> */}
       <Stack component="section">
-        {!loading && rubricInfo.id ? (
-          <>
-            <Typography level="title-md">Nombre: {rubricInfo.name}</Typography>
-            <Typography level="body-sm">
-              escala: {rubricInfo.scale.Lower_limit} -{" "}
-              {rubricInfo.scale.Upper_limit}
-            </Typography>
-          </>
+        {!loading ? (
+          rubricInfo.id && (
+            <>
+              <Typography level="title-md">
+                Nombre: {rubricInfo.name}
+              </Typography>
+              <Typography level="body-sm">
+                escala: {rubricInfo.scale.Lower_limit} -{" "}
+                {rubricInfo.scale.Upper_limit}
+              </Typography>
+            </>
+          )
         ) : (
           <>
             <Skeleton
