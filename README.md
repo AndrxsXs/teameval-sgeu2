@@ -107,7 +107,15 @@ python manage.py runserver [puerto específico (opcional)]
 
 Ejemplo:
 
-`python manage.py runserver 8000`
+```sh
+python manage.py runserver 8000
+```
+
+Cree el primer superusuario:
+
+```sh
+python manage.py create_superuser
+```
 
 #### Frontend (en `/teameval-sgeu2/frontend`)
 
