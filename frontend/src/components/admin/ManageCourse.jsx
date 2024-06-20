@@ -58,20 +58,12 @@ export default function ManageCourse(props) {
   const navigate = useNavigate();
 
   const fetchTeachers = async () => {
-    const token = localStorage.getItem("ACCESS_TOKEN");
     try {
-      const response = await api.get("api/user_list/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          role: 2,
-        },
-      });
+      const response = await api.get("api/teachers_for_course/");
       setTeachers(response.data.filter((teacher) => teacher.status === true));
       // console.log("Docentes:", response.data);
     } catch (error) {
-      console.error("Error obteniendo datos de docentes:", error);
+      eventDispatcher("responseEvent", error, "danger");
     }
   };
 
