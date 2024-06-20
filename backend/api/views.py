@@ -2952,8 +2952,6 @@ def report_detailed(request, evaluation_id):
 
     return Response(report_data)
 
-    return Response(report_data)
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def report_general(request):
